@@ -1,9 +1,12 @@
 from bert_train import *
 import pickle
 import json, sys
+import os
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 import torch
+from util import *
+import matplotlib.pyplot as plt
 
 
 def create_label_index_maps(labels):
@@ -75,6 +78,8 @@ if __name__ == "__main__":
     base_path = "./data/"
     dataset = "nyt"
     data_path = base_path + dataset + "/"
+    plot_dump_dir = data_path + "plots/"
+    os.makedirs(plot_dump_dir, exist_ok=True)
     thresh = 0.8
     use_gpu = int(sys.argv[1])
     gpu_id = int(sys.argv[2])
@@ -97,15 +102,27 @@ if __name__ == "__main__":
 
     X_train, y_train, X_test, y_test = train_test_split(X_all, y_all_inds, test_size=0.6, random_state=42)
 
-    correct_bootstrap = {"text": X_train, "true": y_train, "pred": y_train}
-    wrong_bootstrap = {"text": [], "true": [], "pred": []}
-
     for it in range(5):
         print("Iteration:", it)
-        print("Correct Samples:", len(correct_bootstrap["text"]))
-        print("Wrong Samples:", len(wrong_bootstrap["text"]))
 
-        model = train_bert()
+        if it == 0:
+            model, _, _ = train_bert(X_train, y_train, device, None, None, label_dyn=False)
+        else:
+            print("Correct Samples:", len(correct_bootstrap["text"]))
+            print("Wrong Samples:", len(wrong_bootstrap["text"]))
+            model, correct_bootstrap, wrong_bootstrap = train_bert(X_train, y_train, device, correct_bootstrap,
+                                                                   wrong_bootstrap, label_dyn=True)
+            plt.figure()
+            plt.hist(correct_bootstrap["match"], color='blue', edgecolor='black', bins=4)
+            plt.savefig(plot_dump_dir + "correct_it_" + str(it) + ".png")
+
+            plt.figure()
+            plt.hist(wrong_bootstrap["match"], color='blue', edgecolor='black', bins=4)
+            plt.savefig(plot_dump_dir + "wrong_it_" + str(it) + ".png")
+
+        correct_bootstrap = {"text": [], "true": [], "pred": [], "match": []}
+        wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": []}
+
         predictions = test(model, X_test, y_test, device)
         for i, p in enumerate(predictions):
             if i == 0:
@@ -129,10 +146,12 @@ if __name__ == "__main__":
                     correct_bootstrap["text"].append(sample)
                     correct_bootstrap["true"].append(true_lbl)
                     correct_bootstrap["pred"].append(lbl)
+                    correct_bootstrap["match"].append(0)
                 else:
                     wrong_bootstrap["text"].append(sample)
                     wrong_bootstrap["true"].append(true_lbl)
                     wrong_bootstrap["pred"].append(lbl)
+                    wrong_bootstrap["match"].append(0)
 
         removed_inds.sort(reverse=True)
         for i in removed_inds:
@@ -141,14 +160,9 @@ if __name__ == "__main__":
 
         print("****************** CLASSIFICATION REPORT FOR All DOCUMENTS ********************")
         predictions = test(model, X_all, y_all_inds, device)
-        for i, p in enumerate(predictions):
-            if i == 0:
-                pred = p
-            else:
-                pred = np.concatenate((pred, p))
-
+        pred_inds = get_labelinds_from_probs(predictions)
         pred_labels = []
-        for p in pred:
-            pred_labels.append(index_to_label[p.argmax(axis=-1)])
+        for p in pred_inds:
+            pred_labels.append(index_to_label[p])
         print(classification_report(y_all, pred_labels))
         print("*" * 80)

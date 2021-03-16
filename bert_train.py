@@ -3,10 +3,10 @@ from transformers import BertForSequenceClassification, BertTokenizer, AdamW, Be
 from torch.utils.data import TensorDataset, random_split
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 import torch
-import numpy as np
 import time
 import random
 import datetime
+from util import *
 
 
 def format_time(elapsed):
@@ -324,11 +324,30 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
             }
         )
 
+        if not label_dyn:
+            continue
+
+        corr_bs_predictions = test(model, correct["text"], correct["pred"], device)
+        wrong_bs_predictions = test(model, wrong["text"], wrong["pred"], device)
+
+        cor_bs_label_inds = get_labelinds_from_probs(corr_bs_predictions)
+        wrong_bs_label_inds = get_labelinds_from_probs(wrong_bs_predictions)
+
+        for index, pred_ind in enumerate(cor_bs_label_inds):
+            if pred_ind == correct["pred"][index]:
+                correct["match"][index] += 1
+
+        for index, pred_ind in enumerate(wrong_bs_label_inds):
+            if pred_ind == wrong["pred"][index]:
+                wrong["match"][index] += 1
+
+    correct["match"] = list(np.array(correct["match"]) / epochs)
+    wrong["match"] = list(np.array(wrong["match"]) / epochs)
     print("")
     print("Training complete!")
 
     print("Total training took {:} (h:mm:ss)".format(format_time(time.time() - total_t0)))
-    return model
+    return model, correct, wrong
 
 
 def evaluate(model, prediction_dataloader, device):
@@ -378,7 +397,7 @@ def test(model, X_test, y_test, device):
     return predictions
 
 
-def train_bert(X, y, device):
+def train_bert(X, y, device, correct, wrong, label_dyn=False):
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
     input_ids, attention_masks, labels = bert_tokenize(tokenizer, X, y)
 
@@ -390,5 +409,11 @@ def train_bert(X, y, device):
 
     # Tell pytorch to run this model on the GPU.
 
-    model = train(train_dataloader, validation_dataloader, device, num_labels=len(set(y)))
-    return model
+    model, correct, wrong = train(train_dataloader,
+                                  validation_dataloader,
+                                  device,
+                                  len(set(y)),
+                                  correct,
+                                  wrong,
+                                  label_dyn)
+    return model, correct, wrong
