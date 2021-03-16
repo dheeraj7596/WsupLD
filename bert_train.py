@@ -330,19 +330,19 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
         if not label_dyn:
             continue
 
-        corr_bs_predictions = test(model, correct["text"], correct["pred"], device)
-        wrong_bs_predictions = test(model, wrong["text"], wrong["pred"], device)
+        if len(correct["text"]) > 0:
+            corr_bs_predictions = test(model, correct["text"], correct["pred"], device)
+            cor_bs_label_inds = get_labelinds_from_probs(corr_bs_predictions)
+            for index, pred_ind in enumerate(cor_bs_label_inds):
+                if pred_ind == correct["pred"][index]:
+                    correct["match"][index] += 1
 
-        cor_bs_label_inds = get_labelinds_from_probs(corr_bs_predictions)
-        wrong_bs_label_inds = get_labelinds_from_probs(wrong_bs_predictions)
-
-        for index, pred_ind in enumerate(cor_bs_label_inds):
-            if pred_ind == correct["pred"][index]:
-                correct["match"][index] += 1
-
-        for index, pred_ind in enumerate(wrong_bs_label_inds):
-            if pred_ind == wrong["pred"][index]:
-                wrong["match"][index] += 1
+        if len(wrong["text"]) > 0:
+            wrong_bs_predictions = test(model, wrong["text"], wrong["pred"], device)
+            wrong_bs_label_inds = get_labelinds_from_probs(wrong_bs_predictions)
+            for index, pred_ind in enumerate(wrong_bs_label_inds):
+                if pred_ind == wrong["pred"][index]:
+                    wrong["match"][index] += 1
 
     if label_dyn:
         correct["match"] = list(np.array(correct["match"]) / epochs)
