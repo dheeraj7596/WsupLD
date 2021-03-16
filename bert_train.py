@@ -344,8 +344,9 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
             if pred_ind == wrong["pred"][index]:
                 wrong["match"][index] += 1
 
-    correct["match"] = list(np.array(correct["match"]) / epochs)
-    wrong["match"] = list(np.array(wrong["match"]) / epochs)
+    if label_dyn:
+        correct["match"] = list(np.array(correct["match"]) / epochs)
+        wrong["match"] = list(np.array(wrong["match"]) / epochs)
     print("")
     print("Training complete!")
 
