@@ -84,6 +84,7 @@ if __name__ == "__main__":
     thresh = 0.8
     use_gpu = int(sys.argv[1])
     gpu_id = int(sys.argv[2])
+    # use_gpu = 0
 
     if use_gpu:
         device = torch.device('cuda:' + str(gpu_id))
@@ -101,7 +102,7 @@ if __name__ == "__main__":
     y_all = df["label"]
     y_all_inds = [label_to_index[l] for l in y_all]
 
-    X_train, y_train, X_test, y_test = train_test_split(X_all, y_all_inds, test_size=0.6, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X_all, y_all_inds, test_size=0.6, random_state=42)
 
     for it in range(5):
         print("Iteration:", it)
