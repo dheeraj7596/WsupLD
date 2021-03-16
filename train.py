@@ -98,8 +98,8 @@ if __name__ == "__main__":
     labels = list(set(df["label"]))
     label_to_index, index_to_label = create_label_index_maps(labels)
 
-    X_all = df["text"]
-    y_all = df["label"]
+    X_all = list(df["text"])
+    y_all = list(df["label"])
     y_all_inds = [label_to_index[l] for l in y_all]
 
     X_train, X_test, y_train, y_test = train_test_split(X_all, y_all_inds, test_size=0.6, random_state=42)
