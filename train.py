@@ -95,6 +95,8 @@ if __name__ == "__main__":
     # with open(data_path + "seedwords.json") as fp:
     #     label_term_dict = json.load(fp)
 
+    df = df.sample(n=1000).reset_index(drop=True)
+
     labels = list(set(df["label"]))
     label_to_index, index_to_label = create_label_index_maps(labels)
 
