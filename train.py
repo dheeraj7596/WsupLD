@@ -81,9 +81,10 @@ if __name__ == "__main__":
     data_path = base_path + dataset + "/"
     plot_dump_dir = data_path + "plots/"
     os.makedirs(plot_dump_dir, exist_ok=True)
-    thresh = 0.8
+    thresh = 0.6
     use_gpu = int(sys.argv[1])
     gpu_id = int(sys.argv[2])
+    bins = [0, 0.25, 0.5, 0.75, 1]
     # use_gpu = 0
 
     if use_gpu:
@@ -95,8 +96,6 @@ if __name__ == "__main__":
     # with open(data_path + "seedwords.json") as fp:
     #     label_term_dict = json.load(fp)
 
-    df = df.sample(n=1000).reset_index(drop=True)
-
     labels = list(set(df["label"]))
     label_to_index, index_to_label = create_label_index_maps(labels)
 
@@ -104,7 +103,8 @@ if __name__ == "__main__":
     y_all = list(df["label"])
     y_all_inds = [label_to_index[l] for l in y_all]
 
-    X_train, X_test, y_train, y_test = train_test_split(X_all, y_all_inds, test_size=0.6, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X_all, y_all_inds, test_size=0.7, random_state=42,
+                                                        stratify=y_all)
 
     for it in range(5):
         print("Iteration:", it)
@@ -116,13 +116,14 @@ if __name__ == "__main__":
             print("Wrong Samples:", len(wrong_bootstrap["text"]))
             model, correct_bootstrap, wrong_bootstrap = train_bert(X_train, y_train, device, correct_bootstrap,
                                                                    wrong_bootstrap, label_dyn=True)
-            print(correct_bootstrap["match"])
             plt.figure()
-            plt.hist(correct_bootstrap["match"], color='blue', edgecolor='black', bins=4)
+            plt.hist(correct_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
+            plt.xticks(bins)
             plt.savefig(plot_dump_dir + "correct_it_" + str(it) + ".png")
 
             plt.figure()
-            plt.hist(wrong_bootstrap["match"], color='blue', edgecolor='black', bins=4)
+            plt.hist(wrong_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
+            plt.xticks(bins)
             plt.savefig(plot_dump_dir + "wrong_it_" + str(it) + ".png")
 
         correct_bootstrap = {"text": [], "true": [], "pred": [], "match": []}
