@@ -201,10 +201,12 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
             # arge given and what flags are set. For our useage here, it returns
             # the loss (because we provided labels) and the "logits"--the model
             # outputs prior to activation.
-            loss, logits = model(b_input_ids,
-                                 token_type_ids=None,
-                                 attention_mask=b_input_mask,
-                                 labels=b_labels)
+            outputs = model(b_input_ids,
+                            token_type_ids=None,
+                            attention_mask=b_input_mask,
+                            labels=b_labels)
+            loss = outputs.loss
+            logits = outputs.logits
 
             # Accumulate the training loss over all of the batches so that we can
             # calculate the average loss at the end. `loss` is a Tensor containing a
@@ -282,10 +284,12 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
                 # https://huggingface.co/transformers/v2.2.0/model_doc/bert.html#transformers.BertForSequenceClassification
                 # Get the "logits" output by the model. The "logits" are the output
                 # values prior to applying an activation function like the softmax.
-                (loss, logits) = model(b_input_ids,
-                                       token_type_ids=None,
-                                       attention_mask=b_input_mask,
-                                       labels=b_labels)
+                outputs = model(b_input_ids,
+                                token_type_ids=None,
+                                attention_mask=b_input_mask,
+                                labels=b_labels)
+                loss = outputs.loss
+                logits = outputs.logits
 
             # Accumulate the validation loss.
             total_eval_loss += loss.item()
@@ -371,7 +375,7 @@ def evaluate(model, prediction_dataloader, device):
             outputs = model(b_input_ids, token_type_ids=None,
                             attention_mask=b_input_mask)
 
-        logits = outputs[0]
+        logits = outputs.logits
 
         # Move logits and labels to CPU
         logits = torch.softmax(logits, dim=-1).detach().cpu().numpy()
