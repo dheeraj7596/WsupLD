@@ -58,8 +58,8 @@ def bert_tokenize(tokenizer, sentences, labels):
     attention_masks = torch.cat(attention_masks, dim=0)
     labels = torch.tensor(labels)
     # Print sentence 0, now as a list of IDs.
-    print('Original: ', sentences[0])
-    print('Token IDs:', input_ids[0])
+    # print('Original: ', sentences[0])
+    # print('Token IDs:', input_ids[0])
     return input_ids, attention_masks, labels
 
 

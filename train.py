@@ -116,6 +116,7 @@ if __name__ == "__main__":
             print("Wrong Samples:", len(wrong_bootstrap["text"]))
             model, correct_bootstrap, wrong_bootstrap = train_bert(X_train, y_train, device, correct_bootstrap,
                                                                    wrong_bootstrap, label_dyn=True)
+            print(correct_bootstrap["match"])
             plt.figure()
             plt.hist(correct_bootstrap["match"], color='blue', edgecolor='black', bins=4)
             plt.savefig(plot_dump_dir + "correct_it_" + str(it) + ".png")
