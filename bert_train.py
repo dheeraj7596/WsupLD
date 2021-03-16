@@ -99,8 +99,7 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
         output_attentions=False,  # Whether the model returns attentions weights.
         output_hidden_states=False,  # Whether the model returns all hidden-states.
     )
-    if device == torch.device("cuda"):
-        model.cuda()
+    model = model.to(device)
 
     # Note: AdamW is a class from the huggingface library (as opposed to pytorch)
     # I believe the 'W' stands for 'Weight Decay fix"
@@ -130,7 +129,7 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
     random.seed(seed_val)
     np.random.seed(seed_val)
     torch.manual_seed(seed_val)
-    if device == torch.device("cuda"):
+    if device.type == "cuda":
         torch.cuda.manual_seed_all(seed_val)
 
     # We'll store a number of quantities such as training and validation loss,
