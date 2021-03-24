@@ -103,7 +103,7 @@ if __name__ == "__main__":
     y_all = list(df["label"])
     y_all_inds = [label_to_index[l] for l in y_all]
 
-    X_train, X_test, y_train, y_test = train_test_split(X_all, y_all_inds, test_size=0.7, random_state=42,
+    X_train, X_test, y_train, y_test = train_test_split(X_all, y_all_inds, test_size=0.9, random_state=42,
                                                         stratify=y_all)
 
     for it in range(5):
@@ -126,8 +126,18 @@ if __name__ == "__main__":
             plt.xticks(bins)
             plt.savefig(plot_dump_dir + "wrong_it_" + str(it) + ".png")
 
-        correct_bootstrap = {"text": [], "true": [], "pred": [], "match": []}
-        wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": []}
+            plt.figure()
+            plt.hist(correct_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins)
+            plt.xticks(bins)
+            plt.savefig(plot_dump_dir + "correct_it_first_ep_" + str(it) + ".png")
+
+            plt.figure()
+            plt.hist(wrong_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins)
+            plt.xticks(bins)
+            plt.savefig(plot_dump_dir + "wrong_it_first_ep_" + str(it) + ".png")
+
+        correct_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
+        wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
 
         predictions = test(model, X_test, y_test, device)
         for i, p in enumerate(predictions):
@@ -153,11 +163,13 @@ if __name__ == "__main__":
                     correct_bootstrap["true"].append(true_lbl)
                     correct_bootstrap["pred"].append(lbl)
                     correct_bootstrap["match"].append(0)
+                    correct_bootstrap["first_ep"].append(0)
                 else:
                     wrong_bootstrap["text"].append(sample)
                     wrong_bootstrap["true"].append(true_lbl)
                     wrong_bootstrap["pred"].append(lbl)
                     wrong_bootstrap["match"].append(0)
+                    wrong_bootstrap["first_ep"].append(0)
 
         removed_inds.sort(reverse=True)
         for i in removed_inds:

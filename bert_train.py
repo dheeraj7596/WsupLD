@@ -336,6 +336,8 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
             for index, pred_ind in enumerate(cor_bs_label_inds):
                 if pred_ind == correct["pred"][index]:
                     correct["match"][index] += 1
+                    if correct["first_ep"][index] == 0:
+                        correct["first_ep"][index] = epoch_i + 1
 
         if len(wrong["text"]) > 0:
             wrong_bs_predictions = test(model, wrong["text"], wrong["pred"], device)
@@ -343,6 +345,8 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
             for index, pred_ind in enumerate(wrong_bs_label_inds):
                 if pred_ind == wrong["pred"][index]:
                     wrong["match"][index] += 1
+                    if wrong["first_ep"][index] == 0:
+                        wrong["first_ep"][index] = epoch_i + 1
 
     if label_dyn:
         correct["match"] = list(np.array(correct["match"]) / epochs)
