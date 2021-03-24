@@ -2,11 +2,13 @@ from bert_train import *
 import pickle
 import json, sys
 import os
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 import torch
 from util import *
 import matplotlib.pyplot as plt
+from nltk.corpus import stopwords
+import string
+import copy
 
 
 def create_label_index_maps(labels):
@@ -16,6 +18,25 @@ def create_label_index_maps(labels):
         label_to_index[label] = i
         index_to_label[i] = label
     return label_to_index, index_to_label
+
+
+def preprocess(df):
+    print("Preprocessing data..")
+    stop_words = set(stopwords.words('english'))
+    stop_words.add('would')
+    for index, row in df.iterrows():
+        if index % 100 == 0:
+            print("Finished rows: " + str(index) + " out of " + str(len(df)))
+        line = row["text"]
+        words = line.strip().split()
+        new_words = []
+        for word in words:
+            word_clean = word.translate(str.maketrans('', '', string.punctuation))
+            if len(word_clean) == 0 or word_clean in stop_words:
+                continue
+            new_words.append(word_clean)
+        df["text"][index] = " ".join(new_words)
+    return df
 
 
 def generate_pseudo_labels(df, labels, label_term_dict, tokenizer):
@@ -38,7 +59,7 @@ def generate_pseudo_labels(df, labels, label_term_dict, tokenizer):
     for w in tokenizer.word_index:
         index_word[tokenizer.word_index[w]] = w
     for index, row in df.iterrows():
-        line = row["sentence"]
+        line = row["text"]
         label = row["label"]
         tokens = tokenizer.texts_to_sequences([line])[0]
         words = []
@@ -69,7 +90,7 @@ def generate_pseudo_labels(df, labels, label_term_dict, tokenizer):
             if not lbl:
                 continue
             y.append(lbl)
-            X.append(line)
+            X.append(index)
             y_true.append(label)
     return X, y, y_true
 
@@ -85,6 +106,7 @@ if __name__ == "__main__":
     use_gpu = int(sys.argv[1])
     gpu_id = int(sys.argv[2])
     bins = [0, 0.25, 0.5, 0.75, 1]
+    bins_five = [0, 1, 2, 3, 4, 5]
     # use_gpu = 0
 
     if use_gpu:
@@ -93,48 +115,77 @@ if __name__ == "__main__":
         device = torch.device("cpu")
 
     df = pickle.load(open(data_path + "df_coarse.pkl", "rb"))
-    # with open(data_path + "seedwords.json") as fp:
-    #     label_term_dict = json.load(fp)
+    with open(data_path + "seedwords.json") as fp:
+        label_term_dict = json.load(fp)
 
     labels = list(set(df["label"]))
     label_to_index, index_to_label = create_label_index_maps(labels)
+
+    df_copy = copy.deepcopy(df)
+    df_copy = preprocess(df_copy)
+    tokenizer = fit_get_tokenizer(df_copy.text, max_words=150000)
 
     X_all = list(df["text"])
     y_all = list(df["label"])
     y_all_inds = [label_to_index[l] for l in y_all]
 
-    X_train, X_test, y_train, y_test = train_test_split(X_all, y_all_inds, test_size=0.9, random_state=42,
-                                                        stratify=y_all)
+    X_train_inds, y_train, y_true = generate_pseudo_labels(df_copy, labels, label_term_dict, tokenizer)
+    X_test_inds = list(set(range(len(df))) - set(X_train_inds))
+
+    X_train = list(df.iloc[X_train_inds]["text"])
+    y_train = [label_to_index[l] for l in y_train]
+    y_true = [label_to_index[l] for l in y_true]
+
+    X_test = list(df.iloc[X_test_inds]["text"])
+    y_test = list(df.iloc[X_test_inds]["label"])
+    y_test = [label_to_index[l] for l in y_test]
+
+    # X_train, X_test, y_train, y_test = train_test_split(X_all, y_all_inds, test_size=0.9, random_state=42,
+    #                                                     stratify=y_all_inds)
+
+    correct_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
+    wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
+
+    for i, sent in enumerate(X_train):
+        if y_train[i] == y_true[i]:
+            correct_bootstrap["text"].append(sent)
+            correct_bootstrap["true"].append(y_true[i])
+            correct_bootstrap["pred"].append(y_train[i])
+            correct_bootstrap["match"].append(0)
+            correct_bootstrap["first_ep"].append(0)
+        else:
+            wrong_bootstrap["text"].append(sent)
+            wrong_bootstrap["true"].append(y_true[i])
+            wrong_bootstrap["pred"].append(y_train[i])
+            wrong_bootstrap["match"].append(0)
+            wrong_bootstrap["first_ep"].append(0)
 
     for it in range(5):
         print("Iteration:", it)
 
-        if it == 0:
-            model, _, _ = train_bert(X_train, y_train, device, None, None, label_dyn=False)
-        else:
-            print("Correct Samples:", len(correct_bootstrap["text"]))
-            print("Wrong Samples:", len(wrong_bootstrap["text"]))
-            model, correct_bootstrap, wrong_bootstrap = train_bert(X_train, y_train, device, correct_bootstrap,
-                                                                   wrong_bootstrap, label_dyn=True)
-            plt.figure()
-            plt.hist(correct_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
-            plt.xticks(bins)
-            plt.savefig(plot_dump_dir + "correct_it_" + str(it) + ".png")
+        print("Correct Samples:", len(correct_bootstrap["text"]))
+        print("Wrong Samples:", len(wrong_bootstrap["text"]))
+        model, correct_bootstrap, wrong_bootstrap = train_bert(X_train, y_train, device, correct_bootstrap,
+                                                               wrong_bootstrap, label_dyn=True)
+        plt.figure()
+        plt.hist(correct_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
+        plt.xticks(bins)
+        plt.savefig(plot_dump_dir + "correct_it_" + str(it) + ".png")
 
-            plt.figure()
-            plt.hist(wrong_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
-            plt.xticks(bins)
-            plt.savefig(plot_dump_dir + "wrong_it_" + str(it) + ".png")
+        plt.figure()
+        plt.hist(wrong_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
+        plt.xticks(bins)
+        plt.savefig(plot_dump_dir + "wrong_it_" + str(it) + ".png")
 
-            plt.figure()
-            plt.hist(correct_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins)
-            plt.xticks(bins)
-            plt.savefig(plot_dump_dir + "correct_it_first_ep_" + str(it) + ".png")
+        plt.figure()
+        plt.hist(correct_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_five)
+        plt.xticks(bins_five)
+        plt.savefig(plot_dump_dir + "correct_it_first_ep_" + str(it) + ".png")
 
-            plt.figure()
-            plt.hist(wrong_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins)
-            plt.xticks(bins)
-            plt.savefig(plot_dump_dir + "wrong_it_first_ep_" + str(it) + ".png")
+        plt.figure()
+        plt.hist(wrong_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_five)
+        plt.xticks(bins_five)
+        plt.savefig(plot_dump_dir + "wrong_it_first_ep_" + str(it) + ".png")
 
         correct_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
         wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
