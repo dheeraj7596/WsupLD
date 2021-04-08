@@ -107,6 +107,7 @@ if __name__ == "__main__":
     gpu_id = int(sys.argv[2])
     bins = [0, 0.25, 0.5, 0.75, 1]
     bins_five = [0, 1, 2, 3, 4, 5]
+    num_its = 1
     # use_gpu = 0
 
     if use_gpu:
@@ -140,92 +141,93 @@ if __name__ == "__main__":
     y_test = list(df.iloc[X_test_inds]["label"])
     y_test = [label_to_index[l] for l in y_test]
 
-    # X_train, X_test, y_train, y_test = train_test_split(X_all, y_all_inds, test_size=0.9, random_state=42,
-    #                                                     stratify=y_all_inds)
+    # correct_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
+    # wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
+    #
+    # for i, sent in enumerate(X_train):
+    #     if y_train[i] == y_true[i]:
+    #         correct_bootstrap["text"].append(sent)
+    #         correct_bootstrap["true"].append(y_true[i])
+    #         correct_bootstrap["pred"].append(y_train[i])
+    #         correct_bootstrap["match"].append(0)
+    #         correct_bootstrap["first_ep"].append(0)
+    #     else:
+    #         wrong_bootstrap["text"].append(sent)
+    #         wrong_bootstrap["true"].append(y_true[i])
+    #         wrong_bootstrap["pred"].append(y_train[i])
+    #         wrong_bootstrap["match"].append(0)
+    #         wrong_bootstrap["first_ep"].append(0)
 
-    correct_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
-    wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
-
-    for i, sent in enumerate(X_train):
-        if y_train[i] == y_true[i]:
-            correct_bootstrap["text"].append(sent)
-            correct_bootstrap["true"].append(y_true[i])
-            correct_bootstrap["pred"].append(y_train[i])
-            correct_bootstrap["match"].append(0)
-            correct_bootstrap["first_ep"].append(0)
-        else:
-            wrong_bootstrap["text"].append(sent)
-            wrong_bootstrap["true"].append(y_true[i])
-            wrong_bootstrap["pred"].append(y_train[i])
-            wrong_bootstrap["match"].append(0)
-            wrong_bootstrap["first_ep"].append(0)
-
-    for it in range(5):
+    for it in range(num_its):
         print("Iteration:", it)
 
         print("Correct Samples:", len(correct_bootstrap["text"]))
         print("Wrong Samples:", len(wrong_bootstrap["text"]))
+
+        X_train, y_train, y_true_train, non_train_data, non_train_labels, true_non_train_labels = filter(
+            X_train, y_train, y_true, device)
+
         model, correct_bootstrap, wrong_bootstrap = train_bert(X_train, y_train, device, correct_bootstrap,
-                                                               wrong_bootstrap, label_dyn=True)
-        plt.figure()
-        plt.hist(correct_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
-        plt.xticks(bins)
-        plt.savefig(plot_dump_dir + "correct_it_" + str(it) + ".png")
+                                                               wrong_bootstrap, label_dyn=False)
+        # plt.figure()
+        # plt.hist(correct_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
+        # plt.xticks(bins)
+        # plt.savefig(plot_dump_dir + "correct_it_" + str(it) + ".png")
+        #
+        # plt.figure()
+        # plt.hist(wrong_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
+        # plt.xticks(bins)
+        # plt.savefig(plot_dump_dir + "wrong_it_" + str(it) + ".png")
+        #
+        # plt.figure()
+        # plt.hist(correct_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_five)
+        # plt.xticks(bins_five)
+        # plt.savefig(plot_dump_dir + "correct_it_first_ep_" + str(it) + ".png")
+        #
+        # plt.figure()
+        # plt.hist(wrong_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_five)
+        # plt.xticks(bins_five)
+        # plt.savefig(plot_dump_dir + "wrong_it_first_ep_" + str(it) + ".png")
 
-        plt.figure()
-        plt.hist(wrong_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
-        plt.xticks(bins)
-        plt.savefig(plot_dump_dir + "wrong_it_" + str(it) + ".png")
-
-        plt.figure()
-        plt.hist(correct_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_five)
-        plt.xticks(bins_five)
-        plt.savefig(plot_dump_dir + "correct_it_first_ep_" + str(it) + ".png")
-
-        plt.figure()
-        plt.hist(wrong_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_five)
-        plt.xticks(bins_five)
-        plt.savefig(plot_dump_dir + "wrong_it_first_ep_" + str(it) + ".png")
-
-        correct_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
-        wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
-
-        predictions = test(model, X_test, y_test, device)
-        for i, p in enumerate(predictions):
-            if i == 0:
-                pred = p
-            else:
-                pred = np.concatenate((pred, p))
-
-        pred_labels = []
-        removed_inds = []
-        for i, p in enumerate(pred):
-            sample = X_test[i]
-            true_lbl = y_test[i]
-            max_prob = p.max(axis=-1)
-            lbl = p.argmax(axis=-1)
-            pred_labels.append(index_to_label[lbl])
-            if max_prob >= thresh:
-                X_train.append(sample)
-                y_train.append(lbl)
-                removed_inds.append(i)
-                if true_lbl == lbl:
-                    correct_bootstrap["text"].append(sample)
-                    correct_bootstrap["true"].append(true_lbl)
-                    correct_bootstrap["pred"].append(lbl)
-                    correct_bootstrap["match"].append(0)
-                    correct_bootstrap["first_ep"].append(0)
-                else:
-                    wrong_bootstrap["text"].append(sample)
-                    wrong_bootstrap["true"].append(true_lbl)
-                    wrong_bootstrap["pred"].append(lbl)
-                    wrong_bootstrap["match"].append(0)
-                    wrong_bootstrap["first_ep"].append(0)
-
-        removed_inds.sort(reverse=True)
-        for i in removed_inds:
-            del X_test[i]
-            del y_test[i]
+        # correct_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
+        # wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
+        #
+        # predictions = test(model, X_test, y_test, device)
+        # for i, p in enumerate(predictions):
+        #     if i == 0:
+        #         pred = p
+        #     else:
+        #         pred = np.concatenate((pred, p))
+        #
+        # pred_labels = []
+        # removed_inds = []
+        # for i, p in enumerate(pred):
+        #     sample = X_test[i]
+        #     true_lbl = y_test[i]
+        #     max_prob = p.max(axis=-1)
+        #     lbl = p.argmax(axis=-1)
+        #     pred_labels.append(index_to_label[lbl])
+        #     if max_prob >= thresh:
+        #         X_train.append(sample)
+        #         y_train.append(lbl)
+        #         removed_inds.append(i)
+        #         if true_lbl == lbl:
+        #             correct_bootstrap["text"].append(sample)
+        #             correct_bootstrap["true"].append(true_lbl)
+        #             correct_bootstrap["pred"].append(lbl)
+        #             correct_bootstrap["match"].append(0)
+        #             correct_bootstrap["first_ep"].append(0)
+        #         else:
+        #             wrong_bootstrap["text"].append(sample)
+        #             wrong_bootstrap["true"].append(true_lbl)
+        #             wrong_bootstrap["pred"].append(lbl)
+        #             wrong_bootstrap["match"].append(0)
+        #             wrong_bootstrap["first_ep"].append(0)
+        #
+        # removed_inds.sort(reverse=True)
+        # for i in removed_inds:
+        #     del X_test[i]
+        #     del y_test[i]
 
         print("****************** CLASSIFICATION REPORT FOR All DOCUMENTS ********************")
         predictions = test(model, X_all, y_all_inds, device)
@@ -234,4 +236,49 @@ if __name__ == "__main__":
         for p in pred_inds:
             pred_labels.append(index_to_label[p])
         print(classification_report(y_all, pred_labels))
+        print("*" * 80)
+
+        print("****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT PSEUDO ********************")
+        predictions = test(model, X_train, y_train, device)
+        pred_inds = get_labelinds_from_probs(predictions)
+        pred_labels = []
+        for p in pred_inds:
+            pred_labels.append(index_to_label[p])
+        print(classification_report(y_train, pred_labels))
+        print("*" * 80)
+
+        print("****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT GT ********************")
+        predictions = test(model, X_train, y_true_train, device)
+        pred_inds = get_labelinds_from_probs(predictions)
+        pred_labels = []
+        for p in pred_inds:
+            pred_labels.append(index_to_label[p])
+        print(classification_report(y_true_train, pred_labels))
+        print("*" * 80)
+
+        print("****************** CLASSIFICATION REPORT FOR FIRST EP WRONG DOCUMENTS WRT PSEUDO ********************")
+        predictions = test(model, non_train_data, non_train_labels, device)
+        pred_inds = get_labelinds_from_probs(predictions)
+        pred_labels = []
+        for p in pred_inds:
+            pred_labels.append(index_to_label[p])
+        print(classification_report(non_train_labels, pred_labels))
+        print("*" * 80)
+
+        print("****************** CLASSIFICATION REPORT FOR FIRST EP WRONG DOCUMENTS WRT GT ********************")
+        predictions = test(model, non_train_data, true_non_train_labels, device)
+        pred_inds = get_labelinds_from_probs(predictions)
+        pred_labels = []
+        for p in pred_inds:
+            pred_labels.append(index_to_label[p])
+        print(classification_report(true_non_train_labels, pred_labels))
+        print("*" * 80)
+
+        print("****************** CLASSIFICATION REPORT FOR REST DOCUMENTS WRT GT ********************")
+        predictions = test(model, X_test, y_test, device)
+        pred_inds = get_labelinds_from_probs(predictions)
+        pred_labels = []
+        for p in pred_inds:
+            pred_labels.append(index_to_label[p])
+        print(classification_report(y_test, pred_labels))
         print("*" * 80)
