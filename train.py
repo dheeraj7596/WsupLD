@@ -21,12 +21,12 @@ def create_label_index_maps(labels):
 
 
 def preprocess(df):
-    print("Preprocessing data..")
+    print("Preprocessing data..", flush=True)
     stop_words = set(stopwords.words('english'))
     stop_words.add('would')
     for index, row in df.iterrows():
         if index % 100 == 0:
-            print("Finished rows: " + str(index) + " out of " + str(len(df)))
+            print("Finished rows: " + str(index) + " out of " + str(len(df)), flush=True)
         line = row["text"]
         words = line.strip().split()
         new_words = []
@@ -130,6 +130,7 @@ if __name__ == "__main__":
     y_all = list(df["label"])
     y_all_inds = [label_to_index[l] for l in y_all]
 
+    print("Generating pseudo labels..", flush=True)
     X_train_inds, y_train, y_true = generate_pseudo_labels(df_copy, labels, label_term_dict, tokenizer)
     X_test_inds = list(set(range(len(df))) - set(X_train_inds))
 
@@ -141,9 +142,9 @@ if __name__ == "__main__":
     y_test = list(df.iloc[X_test_inds]["label"])
     y_test = [label_to_index[l] for l in y_test]
 
-    # correct_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
-    # wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
-    #
+    correct_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
+    wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
+
     # for i, sent in enumerate(X_train):
     #     if y_train[i] == y_true[i]:
     #         correct_bootstrap["text"].append(sent)
@@ -159,14 +160,16 @@ if __name__ == "__main__":
     #         wrong_bootstrap["first_ep"].append(0)
 
     for it in range(num_its):
-        print("Iteration:", it)
+        print("Iteration:", it, flush=True)
 
-        print("Correct Samples:", len(correct_bootstrap["text"]))
-        print("Wrong Samples:", len(wrong_bootstrap["text"]))
+        # print("Correct Samples:", len(correct_bootstrap["text"]))
+        # print("Wrong Samples:", len(wrong_bootstrap["text"]))
 
+        print("Filtering..", flush=True)
         X_train, y_train, y_true_train, non_train_data, non_train_labels, true_non_train_labels = filter(
             X_train, y_train, y_true, device)
 
+        print("Training model..", flush=True)
         model, correct_bootstrap, wrong_bootstrap = train_bert(X_train, y_train, device, correct_bootstrap,
                                                                wrong_bootstrap, label_dyn=False)
         # plt.figure()
@@ -229,56 +232,56 @@ if __name__ == "__main__":
         #     del X_test[i]
         #     del y_test[i]
 
-        print("****************** CLASSIFICATION REPORT FOR All DOCUMENTS ********************")
+        print("****************** CLASSIFICATION REPORT FOR All DOCUMENTS ********************", flush=True)
         predictions = test(model, X_all, y_all_inds, device)
         pred_inds = get_labelinds_from_probs(predictions)
         pred_labels = []
         for p in pred_inds:
             pred_labels.append(index_to_label[p])
-        print(classification_report(y_all, pred_labels))
-        print("*" * 80)
+        print(classification_report(y_all, pred_labels), flush=True)
+        print("*" * 80, flush=True)
 
-        print("****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT PSEUDO ********************")
+        print("****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT PSEUDO ********************", flush=True)
         predictions = test(model, X_train, y_train, device)
         pred_inds = get_labelinds_from_probs(predictions)
         pred_labels = []
         for p in pred_inds:
             pred_labels.append(index_to_label[p])
-        print(classification_report(y_train, pred_labels))
-        print("*" * 80)
+        print(classification_report(y_train, pred_labels), flush=True)
+        print("*" * 80, flush=True)
 
-        print("****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT GT ********************")
+        print("****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT GT ********************", flush=True)
         predictions = test(model, X_train, y_true_train, device)
         pred_inds = get_labelinds_from_probs(predictions)
         pred_labels = []
         for p in pred_inds:
             pred_labels.append(index_to_label[p])
-        print(classification_report(y_true_train, pred_labels))
-        print("*" * 80)
+        print(classification_report(y_true_train, pred_labels), flush=True)
+        print("*" * 80, flush=True)
 
-        print("****************** CLASSIFICATION REPORT FOR FIRST EP WRONG DOCUMENTS WRT PSEUDO ********************")
+        print("****************** CLASSIFICATION REPORT FOR FIRST EP WRONG DOCUMENTS WRT PSEUDO ********************", flush=True)
         predictions = test(model, non_train_data, non_train_labels, device)
         pred_inds = get_labelinds_from_probs(predictions)
         pred_labels = []
         for p in pred_inds:
             pred_labels.append(index_to_label[p])
-        print(classification_report(non_train_labels, pred_labels))
-        print("*" * 80)
+        print(classification_report(non_train_labels, pred_labels), flush=True)
+        print("*" * 80, flush=True)
 
-        print("****************** CLASSIFICATION REPORT FOR FIRST EP WRONG DOCUMENTS WRT GT ********************")
+        print("****************** CLASSIFICATION REPORT FOR FIRST EP WRONG DOCUMENTS WRT GT ********************", flush=True)
         predictions = test(model, non_train_data, true_non_train_labels, device)
         pred_inds = get_labelinds_from_probs(predictions)
         pred_labels = []
         for p in pred_inds:
             pred_labels.append(index_to_label[p])
-        print(classification_report(true_non_train_labels, pred_labels))
-        print("*" * 80)
+        print(classification_report(true_non_train_labels, pred_labels), flush=True)
+        print("*" * 80, flush=True)
 
-        print("****************** CLASSIFICATION REPORT FOR REST DOCUMENTS WRT GT ********************")
+        print("****************** CLASSIFICATION REPORT FOR REST DOCUMENTS WRT GT ********************", flush=True)
         predictions = test(model, X_test, y_test, device)
         pred_inds = get_labelinds_from_probs(predictions)
         pred_labels = []
         for p in pred_inds:
             pred_labels.append(index_to_label[p])
-        print(classification_report(y_test, pred_labels))
-        print("*" * 80)
+        print(classification_report(y_test, pred_labels), flush=True)
+        print("*" * 80, flush=True)
