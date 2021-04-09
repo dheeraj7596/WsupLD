@@ -617,7 +617,7 @@ def filter(X, y_pseudo, y_true, device):
             true_train_labels.append(y_true[loop_ind])
         else:
             non_train_data.append(X[loop_ind])
-            train_labels.append(y_pseudo[loop_ind])
+            non_train_labels.append(y_pseudo[loop_ind])
             true_non_train_labels.append(y_true[loop_ind])
 
     return train_data, train_labels, true_train_labels, non_train_data, non_train_labels, true_non_train_labels
