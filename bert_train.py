@@ -611,7 +611,7 @@ def filter(X, y_pseudo, y_true, device):
     true_non_train_labels = []
 
     for loop_ind in range(len(first_ep_pred_inds)):
-        if first_ep_pred_inds[loop_ind] == first_ep_true_labels[loop_ind]:
+        if first_ep_pred_inds[loop_ind] == y_pseudo[loop_ind]:
             train_data.append(X[loop_ind])
             train_labels.append(y_pseudo[loop_ind])
             true_train_labels.append(y_true[loop_ind])
