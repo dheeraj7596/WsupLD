@@ -222,12 +222,14 @@ if __name__ == "__main__":
 
         pred_labels = []
         removed_inds = []
+        y_test_strs = []
         for i, p in enumerate(pred):
             sample = X_test[i]
             true_lbl = y_test[i]
             max_prob = p.max(axis=-1)
             lbl = p.argmax(axis=-1)
             pred_labels.append(index_to_label[lbl])
+            y_test_strs.append(index_to_label[true_lbl])
             if max_prob >= thresh:
                 X_train.append(sample)
                 y_train.append(lbl)
@@ -251,11 +253,6 @@ if __name__ == "__main__":
             del y_test[i]
 
         print("****************** CLASSIFICATION REPORT FOR REST DOCUMENTS WRT GT ********************", flush=True)
-        pred_inds = get_labelinds_from_probs(predictions)
-        pred_labels = []
-        for p in pred_inds:
-            pred_labels.append(index_to_label[p])
-        y_test_strs = [index_to_label[lbl] for lbl in y_test]
         print(classification_report(y_test_strs, pred_labels), flush=True)
         print("*" * 80, flush=True)
 
