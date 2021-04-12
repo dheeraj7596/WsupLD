@@ -166,22 +166,22 @@ if __name__ == "__main__":
         print("Wrong Samples:", len(wrong_bootstrap["text"]), flush=True)
 
         print("Filtering started..", flush=True)
-        X_train, y_train, y_true_train, non_train_data, non_train_labels, true_non_train_labels = filter(
+        X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = filter(
             X_train, y_train, y_true, device)
 
         correct_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
         wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
 
         for i, sent in enumerate(X_train):
-            if y_train[i] == y_true_train[i]:
+            if y_train[i] == y_true[i]:
                 correct_bootstrap["text"].append(sent)
-                correct_bootstrap["true"].append(y_true_train[i])
+                correct_bootstrap["true"].append(y_true[i])
                 correct_bootstrap["pred"].append(y_train[i])
                 correct_bootstrap["match"].append(0)
                 correct_bootstrap["first_ep"].append(0)
             else:
                 wrong_bootstrap["text"].append(sent)
-                wrong_bootstrap["true"].append(y_true_train[i])
+                wrong_bootstrap["true"].append(y_true[i])
                 wrong_bootstrap["pred"].append(y_train[i])
                 wrong_bootstrap["match"].append(0)
                 wrong_bootstrap["first_ep"].append(0)
@@ -235,12 +235,12 @@ if __name__ == "__main__":
 
         print("****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT GT ********************",
               flush=True)
-        predictions = test(model, X_train, y_true_train, device)
+        predictions = test(model, X_train, y_true, device)
         pred_inds = get_labelinds_from_probs(predictions)
         pred_labels = []
         for p in pred_inds:
             pred_labels.append(index_to_label[p])
-        y_true_train_strs = [index_to_label[lbl] for lbl in y_true_train]
+        y_true_train_strs = [index_to_label[lbl] for lbl in y_true]
         print(classification_report(y_true_train_strs, pred_labels), flush=True)
         print("*" * 80, flush=True)
 
