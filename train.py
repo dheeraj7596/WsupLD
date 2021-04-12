@@ -213,49 +213,6 @@ if __name__ == "__main__":
         # plt.xticks(bins_five)
         # plt.savefig(plot_dump_dir + "wrong_it_first_ep_" + str(it) + ".png")
 
-        predictions = test(model, X_test, y_test, device)
-        for i, p in enumerate(predictions):
-            if i == 0:
-                pred = p
-            else:
-                pred = np.concatenate((pred, p))
-
-        pred_labels = []
-        removed_inds = []
-        y_test_strs = []
-        for i, p in enumerate(pred):
-            sample = X_test[i]
-            true_lbl = y_test[i]
-            max_prob = p.max(axis=-1)
-            lbl = p.argmax(axis=-1)
-            pred_labels.append(index_to_label[lbl])
-            y_test_strs.append(index_to_label[true_lbl])
-            if max_prob >= thresh:
-                X_train.append(sample)
-                y_train.append(lbl)
-                removed_inds.append(i)
-                if true_lbl == lbl:
-                    correct_bootstrap["text"].append(sample)
-                    correct_bootstrap["true"].append(true_lbl)
-                    correct_bootstrap["pred"].append(lbl)
-                    correct_bootstrap["match"].append(0)
-                    correct_bootstrap["first_ep"].append(0)
-                else:
-                    wrong_bootstrap["text"].append(sample)
-                    wrong_bootstrap["true"].append(true_lbl)
-                    wrong_bootstrap["pred"].append(lbl)
-                    wrong_bootstrap["match"].append(0)
-                    wrong_bootstrap["first_ep"].append(0)
-
-        removed_inds.sort(reverse=True)
-        for i in removed_inds:
-            del X_test[i]
-            del y_test[i]
-
-        print("****************** CLASSIFICATION REPORT FOR REST DOCUMENTS WRT GT ********************", flush=True)
-        print(classification_report(y_test_strs, pred_labels), flush=True)
-        print("*" * 80, flush=True)
-
         print("****************** CLASSIFICATION REPORT FOR All DOCUMENTS ********************", flush=True)
         predictions = test(model, X_all, y_all_inds, device)
         pred_inds = get_labelinds_from_probs(predictions)
@@ -308,3 +265,50 @@ if __name__ == "__main__":
         true_non_train_labels_strs = [index_to_label[lbl] for lbl in true_non_train_labels]
         print(classification_report(true_non_train_labels_strs, pred_labels), flush=True)
         print("*" * 80, flush=True)
+
+        print("****************** CLASSIFICATION REPORT FOR REST DOCUMENTS WRT GT ********************", flush=True)
+        predictions = test(model, X_test, y_test, device)
+        pred_inds = get_labelinds_from_probs(predictions)
+        pred_labels = []
+        for p in pred_inds:
+            pred_labels.append(index_to_label[p])
+        y_test_strs = [index_to_label[lbl] for lbl in y_test]
+        print(classification_report(y_test_strs, pred_labels), flush=True)
+        print("*" * 80, flush=True)
+
+        predictions = test(model, X_test, y_test, device)
+        for i, p in enumerate(predictions):
+            if i == 0:
+                pred = p
+            else:
+                pred = np.concatenate((pred, p))
+
+        pred_labels = []
+        removed_inds = []
+        for i, p in enumerate(pred):
+            sample = X_test[i]
+            true_lbl = y_test[i]
+            max_prob = p.max(axis=-1)
+            lbl = p.argmax(axis=-1)
+            pred_labels.append(index_to_label[lbl])
+            if max_prob >= thresh:
+                X_train.append(sample)
+                y_train.append(lbl)
+                removed_inds.append(i)
+                if true_lbl == lbl:
+                    correct_bootstrap["text"].append(sample)
+                    correct_bootstrap["true"].append(true_lbl)
+                    correct_bootstrap["pred"].append(lbl)
+                    correct_bootstrap["match"].append(0)
+                    correct_bootstrap["first_ep"].append(0)
+                else:
+                    wrong_bootstrap["text"].append(sample)
+                    wrong_bootstrap["true"].append(true_lbl)
+                    wrong_bootstrap["pred"].append(lbl)
+                    wrong_bootstrap["match"].append(0)
+                    wrong_bootstrap["first_ep"].append(0)
+
+        removed_inds.sort(reverse=True)
+        for i in removed_inds:
+            del X_test[i]
+            del y_test[i]
