@@ -294,6 +294,7 @@ if __name__ == "__main__":
             if max_prob >= thresh:
                 X_train.append(sample)
                 y_train.append(lbl)
+                y_true.append(true_lbl)
                 removed_inds.append(i)
                 if true_lbl == lbl:
                     correct_bootstrap["text"].append(sample)
