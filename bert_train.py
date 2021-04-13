@@ -399,10 +399,13 @@ def evaluate(model, prediction_dataloader, device):
 
 
 def test(model, X_test, y_test, device):
+    start = time.time()
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
     input_ids, attention_masks, labels = bert_tokenize(tokenizer, X_test, y_test)
+    print("Tokenizing text time:", time.time() - start, flush=True)
     batch_size = 32
     # Create the DataLoader.
+    start = time.time()
     prediction_data = TensorDataset(input_ids, attention_masks, labels)
     prediction_sampler = SequentialSampler(prediction_data)
     prediction_dataloader = DataLoader(prediction_data,
@@ -411,7 +414,10 @@ def test(model, X_test, y_test, device):
                                        num_workers=16,
                                        pin_memory=True
                                        )
+    print("Dataloader creation time:", time.time() - start, flush=True)
+    start = time.time()
     predictions, true_labels = evaluate(model, prediction_dataloader, device)
+    print("Evaluation time:", time.time() - start, flush=True)
     return predictions
 
 
@@ -439,7 +445,9 @@ def train_bert(X, y, device, correct, wrong, label_dyn=False):
 
 def filter(X, y_pseudo, y_true, device):
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+    start = time.time()
     input_ids, attention_masks, labels = bert_tokenize(tokenizer, X, y_pseudo)
+    print("Time taken in tokenizing:", time.time() - start)
 
     # Combine the training inputs into a TensorDataset.
     dataset = TensorDataset(input_ids, attention_masks, labels)
@@ -447,6 +455,7 @@ def filter(X, y_pseudo, y_true, device):
     batch_size = 32
     # Create the DataLoaders for our training and validation sets.
     # We'll take training samples in random order.
+    start = time.time()
     train_dataloader = DataLoader(
         dataset,  # The training samples.
         sampler=RandomSampler(dataset),  # Select batches randomly
@@ -454,6 +463,7 @@ def filter(X, y_pseudo, y_true, device):
         pin_memory=True,
         num_workers=16
     )
+    print("Time taken in initializing dataloader:", time.time() - start)
 
     num_labels = len(set(y_pseudo))
     # Tell pytorch to run this model on the GPU.
