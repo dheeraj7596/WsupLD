@@ -181,6 +181,10 @@ if __name__ == "__main__":
         pickle.dump(non_train_labels, open(data_path + "non_train_labels_" + str(it) + ".pkl", "wb"))
         pickle.dump(true_non_train_labels, open(data_path + "true_non_train_labels_" + str(it) + ".pkl", "wb"))
 
+        for i in range(len(non_train_data)):
+            X_test.append(non_train_data[i])
+            y_test.append(true_non_train_labels[i])
+
         correct_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
         wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
 
