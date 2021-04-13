@@ -533,10 +533,12 @@ def filter(X, y_pseudo, y_true, device):
         # `dropout` and `batchnorm` layers behave differently during training
         # vs. test (source: https://stackoverflow.com/questions/51433378/what-does-model-train-do-in-pytorch)
         model.train()
-
+        data_time = AverageMeter('Data loading time', ':6.3f')
+        batch_time = AverageMeter('Batch processing time', ':6.3f')
         # For each batch of training data...
+        end = time.time()
         for step, batch in enumerate(train_dataloader):
-
+            data_time.update(time.time() - end)
             # Progress update every 40 batches.
             if step % 40 == 0 and not step == 0:
                 # Calculate elapsed time in minutes.
@@ -599,7 +601,11 @@ def filter(X, y_pseudo, y_true, device):
 
             # Update the learning rate.
             scheduler.step()
+            batch_time.update(time.time() - end)
+            end = time.time()
 
+        print(str(data_time), flush=True)
+        print(str(batch_time), flush=True)
         # Calculate the average loss over all of the batches.
         avg_train_loss = total_train_loss / len(train_dataloader)
 
