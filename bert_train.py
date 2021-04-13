@@ -148,9 +148,9 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
 
         # Perform one full pass over the training set.
 
-        print("")
-        print('======== Epoch {:} / {:} ========'.format(epoch_i + 1, epochs))
-        print('Training...')
+        print("", flush=True)
+        print('======== Epoch {:} / {:} ========'.format(epoch_i + 1, epochs), flush=True)
+        print('Training...', flush=True)
 
         # Measure how long the training epoch takes.
         t0 = time.time()
@@ -173,7 +173,8 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
                 elapsed = format_time(time.time() - t0)
 
                 # Report progress.
-                print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(train_dataloader), elapsed))
+                print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(train_dataloader), elapsed),
+                      flush=True)
 
             # Unpack this training batch from our dataloader.
             #
@@ -235,9 +236,9 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
         # Measure how long this epoch took.
         training_time = format_time(time.time() - t0)
 
-        print("")
-        print("  Average training loss: {0:.2f}".format(avg_train_loss))
-        print("  Training epoch took: {:}".format(training_time))
+        print("", flush=True)
+        print("  Average training loss: {0:.2f}".format(avg_train_loss), flush=True)
+        print("  Training epoch took: {:}".format(training_time), flush=True)
 
         # ========================================
         #               Validation
@@ -245,8 +246,8 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
         # After the completion of each training epoch, measure our performance on
         # our validation set.
 
-        print("")
-        print("Running Validation...")
+        print("", flush=True)
+        print("Running Validation...", flush=True)
 
         t0 = time.time()
 
@@ -304,7 +305,7 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
 
         # Report the final accuracy for this validation run.
         avg_val_accuracy = total_eval_accuracy / len(validation_dataloader)
-        print("  Accuracy: {0:.2f}".format(avg_val_accuracy))
+        print("  Accuracy: {0:.2f}".format(avg_val_accuracy), flush=True)
 
         # Calculate the average loss over all of the batches.
         avg_val_loss = total_eval_loss / len(validation_dataloader)
@@ -312,8 +313,8 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
         # Measure how long the validation run took.
         validation_time = format_time(time.time() - t0)
 
-        print("  Validation Loss: {0:.2f}".format(avg_val_loss))
-        print("  Validation took: {:}".format(validation_time))
+        print("  Validation Loss: {0:.2f}".format(avg_val_loss), flush=True)
+        print("  Validation took: {:}".format(validation_time), flush=True)
 
         # Record all statistics from this epoch.
         training_stats.append(
@@ -351,10 +352,10 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
     if label_dyn:
         correct["match"] = list(np.array(correct["match"]) / epochs)
         wrong["match"] = list(np.array(wrong["match"]) / epochs)
-    print("")
-    print("Training complete!")
+    print("", flush=True)
+    print("Training complete!", flush=True)
 
-    print("Total training took {:} (h:mm:ss)".format(format_time(time.time() - total_t0)))
+    print("Total training took {:} (h:mm:ss)".format(format_time(time.time() - total_t0)), flush=True)
     return model, correct, wrong
 
 
@@ -497,7 +498,7 @@ def filter(X, y_pseudo, y_true, device):
 
     # For each epoch...
 
-    print("Getting data that can be trained in 1 epoch..")
+    print("Getting data that can be trained in 1 epoch..", flush=True)
     for epoch_i in range(epochs):
 
         # ========================================
@@ -506,9 +507,9 @@ def filter(X, y_pseudo, y_true, device):
 
         # Perform one full pass over the training set.
 
-        print("")
-        print('======== Epoch {:} / {:} ========'.format(epoch_i + 1, epochs))
-        print('Training...')
+        print("", flush=True)
+        print('======== Epoch {:} / {:} ========'.format(epoch_i + 1, epochs), flush=True)
+        print('Training...', flush=True)
 
         # Measure how long the training epoch takes.
         t0 = time.time()
@@ -531,7 +532,8 @@ def filter(X, y_pseudo, y_true, device):
                 elapsed = format_time(time.time() - t0)
 
                 # Report progress.
-                print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(train_dataloader), elapsed))
+                print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(train_dataloader), elapsed),
+                      flush=True)
 
             # Unpack this training batch from our dataloader.
             #
@@ -593,9 +595,9 @@ def filter(X, y_pseudo, y_true, device):
         # Measure how long this epoch took.
         training_time = format_time(time.time() - t0)
 
-        print("")
-        print("  Average training loss: {0:.2f}".format(avg_train_loss))
-        print("  Training epoch took: {:}".format(training_time))
+        print("", flush=True)
+        print("  Average training loss: {0:.2f}".format(avg_train_loss), flush=True)
+        print("  Training epoch took: {:}".format(training_time), flush=True)
 
     prediction_sampler = SequentialSampler(dataset)
     prediction_dataloader = DataLoader(dataset, sampler=prediction_sampler, batch_size=batch_size)
