@@ -78,13 +78,17 @@ def create_data_loaders(dataset):
     train_dataloader = DataLoader(
         train_dataset,  # The training samples.
         sampler=RandomSampler(train_dataset),  # Select batches randomly
-        batch_size=batch_size  # Trains with this batch size.
+        batch_size=batch_size,  # Trains with this batch size.
+        pin_memory=True,
+        num_workers=16
     )
     # For validation the order doesn't matter, so we'll just read them sequentially.
     validation_dataloader = DataLoader(
         val_dataset,  # The validation samples.
         sampler=SequentialSampler(val_dataset),  # Pull out batches sequentially.
-        batch_size=batch_size  # Evaluate with this batch size.
+        batch_size=batch_size,  # Evaluate with this batch size.
+        pin_memory=True,
+        num_workers=16
     )
     return train_dataloader, validation_dataloader
 
@@ -401,7 +405,12 @@ def test(model, X_test, y_test, device):
     # Create the DataLoader.
     prediction_data = TensorDataset(input_ids, attention_masks, labels)
     prediction_sampler = SequentialSampler(prediction_data)
-    prediction_dataloader = DataLoader(prediction_data, sampler=prediction_sampler, batch_size=batch_size)
+    prediction_dataloader = DataLoader(prediction_data,
+                                       sampler=prediction_sampler,
+                                       batch_size=batch_size,
+                                       num_workers=16,
+                                       pin_memory=True
+                                       )
     predictions, true_labels = evaluate(model, prediction_dataloader, device)
     return predictions
 
@@ -441,7 +450,9 @@ def filter(X, y_pseudo, y_true, device):
     train_dataloader = DataLoader(
         dataset,  # The training samples.
         sampler=RandomSampler(dataset),  # Select batches randomly
-        batch_size=batch_size  # Trains with this batch size.
+        batch_size=batch_size,  # Trains with this batch size.
+        pin_memory=True,
+        num_workers=16
     )
 
     num_labels = len(set(y_pseudo))
@@ -600,7 +611,12 @@ def filter(X, y_pseudo, y_true, device):
         print("  Training epoch took: {:}".format(training_time), flush=True)
 
     prediction_sampler = SequentialSampler(dataset)
-    prediction_dataloader = DataLoader(dataset, sampler=prediction_sampler, batch_size=batch_size)
+    prediction_dataloader = DataLoader(dataset,
+                                       sampler=prediction_sampler,
+                                       batch_size=batch_size,
+                                       num_workers=16,
+                                       pin_memory=True
+                                       )
 
     first_ep_preds, first_ep_true_labels = evaluate(model, prediction_dataloader, device)
     first_ep_pred_inds = get_labelinds_from_probs(first_ep_preds)
