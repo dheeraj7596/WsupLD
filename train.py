@@ -98,7 +98,7 @@ def generate_pseudo_labels(df, labels, label_term_dict, tokenizer):
 if __name__ == "__main__":
     # base_path = "./data/"
     base_path = "/data/dheeraj/WsupLD/data/"
-    dataset = "nyt"
+    dataset = "nyt-fine"
     data_path = base_path + dataset + "/"
     plot_dump_dir = data_path + "plots/filter_firstep_test_add/"
     os.makedirs(plot_dump_dir, exist_ok=True)
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     else:
         device = torch.device("cpu")
 
-    df = pickle.load(open(data_path + "df_coarse.pkl", "rb"))
+    df = pickle.load(open(data_path + "df.pkl", "rb"))
     with open(data_path + "seedwords.json") as fp:
         label_term_dict = json.load(fp)
 
