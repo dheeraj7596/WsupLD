@@ -173,7 +173,7 @@ if __name__ == "__main__":
             pickle.dump(y_true, open(data_path + "y_true_" + str(it) + ".pkl", "wb"))
 
         print("Filtering started..", flush=True)
-        X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = prob_filter(
+        X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = filter(
             X_train, y_train, y_true, device, it)
 
         if dump_flag:
