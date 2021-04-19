@@ -105,6 +105,8 @@ if __name__ == "__main__":
     thresh = 0.6
     use_gpu = int(sys.argv[1])
     gpu_id = int(sys.argv[2])
+    dump_flag = False
+    plt_flag = False
     bins = [0, 0.25, 0.5, 0.75, 1]
     bins_five = [0, 1, 2, 3, 4, 5]
     num_its = 5
@@ -165,21 +167,23 @@ if __name__ == "__main__":
         print("Correct Samples:", len(correct_bootstrap["text"]), flush=True)
         print("Wrong Samples:", len(wrong_bootstrap["text"]), flush=True)
 
-        pickle.dump(X_train, open(data_path + "X_train_" + str(it) + ".pkl", "wb"))
-        pickle.dump(y_train, open(data_path + "y_train_" + str(it) + ".pkl", "wb"))
-        pickle.dump(y_true, open(data_path + "y_true_" + str(it) + ".pkl", "wb"))
+        if dump_flag:
+            pickle.dump(X_train, open(data_path + "X_train_" + str(it) + ".pkl", "wb"))
+            pickle.dump(y_train, open(data_path + "y_train_" + str(it) + ".pkl", "wb"))
+            pickle.dump(y_true, open(data_path + "y_true_" + str(it) + ".pkl", "wb"))
 
         print("Filtering started..", flush=True)
-        X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = filter(
-            X_train, y_train, y_true, device)
+        X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = prob_filter(
+            X_train, y_train, y_true, device, it)
 
-        pickle.dump(X_train, open(data_path + "X_train_filtered_" + str(it) + ".pkl", "wb"))
-        pickle.dump(y_train, open(data_path + "y_train_filtered_" + str(it) + ".pkl", "wb"))
-        pickle.dump(y_true, open(data_path + "y_true_filtered_" + str(it) + ".pkl", "wb"))
+        if dump_flag:
+            pickle.dump(X_train, open(data_path + "X_train_filtered_" + str(it) + ".pkl", "wb"))
+            pickle.dump(y_train, open(data_path + "y_train_filtered_" + str(it) + ".pkl", "wb"))
+            pickle.dump(y_true, open(data_path + "y_true_filtered_" + str(it) + ".pkl", "wb"))
 
-        pickle.dump(non_train_data, open(data_path + "non_train_data_" + str(it) + ".pkl", "wb"))
-        pickle.dump(non_train_labels, open(data_path + "non_train_labels_" + str(it) + ".pkl", "wb"))
-        pickle.dump(true_non_train_labels, open(data_path + "true_non_train_labels_" + str(it) + ".pkl", "wb"))
+            pickle.dump(non_train_data, open(data_path + "non_train_data_" + str(it) + ".pkl", "wb"))
+            pickle.dump(non_train_labels, open(data_path + "non_train_labels_" + str(it) + ".pkl", "wb"))
+            pickle.dump(true_non_train_labels, open(data_path + "true_non_train_labels_" + str(it) + ".pkl", "wb"))
 
         for i in range(len(non_train_data)):
             X_test.append(non_train_data[i])
@@ -209,25 +213,26 @@ if __name__ == "__main__":
         print("Training model..", flush=True)
         model, correct_bootstrap, wrong_bootstrap = train_bert(X_train, y_train, device, correct_bootstrap,
                                                                wrong_bootstrap, label_dyn=True)
-        plt.figure()
-        plt.hist(correct_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
-        plt.xticks(bins)
-        plt.savefig(plot_dump_dir + "correct_it_" + str(it) + ".png")
+        if plt_flag:
+            plt.figure()
+            plt.hist(correct_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
+            plt.xticks(bins)
+            plt.savefig(plot_dump_dir + "correct_it_" + str(it) + ".png")
 
-        plt.figure()
-        plt.hist(wrong_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
-        plt.xticks(bins)
-        plt.savefig(plot_dump_dir + "wrong_it_" + str(it) + ".png")
+            plt.figure()
+            plt.hist(wrong_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
+            plt.xticks(bins)
+            plt.savefig(plot_dump_dir + "wrong_it_" + str(it) + ".png")
 
-        plt.figure()
-        plt.hist(correct_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_five)
-        plt.xticks(bins_five)
-        plt.savefig(plot_dump_dir + "correct_it_first_ep_" + str(it) + ".png")
+            plt.figure()
+            plt.hist(correct_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_five)
+            plt.xticks(bins_five)
+            plt.savefig(plot_dump_dir + "correct_it_first_ep_" + str(it) + ".png")
 
-        plt.figure()
-        plt.hist(wrong_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_five)
-        plt.xticks(bins_five)
-        plt.savefig(plot_dump_dir + "wrong_it_first_ep_" + str(it) + ".png")
+            plt.figure()
+            plt.hist(wrong_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_five)
+            plt.xticks(bins_five)
+            plt.savefig(plot_dump_dir + "wrong_it_first_ep_" + str(it) + ".png")
 
         print("****************** CLASSIFICATION REPORT FOR All DOCUMENTS ********************", flush=True)
         predictions = test(model, X_all, y_all_inds, device)
