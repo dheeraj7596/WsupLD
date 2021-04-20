@@ -176,6 +176,11 @@ if __name__ == "__main__":
         X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = filter(
             X_train, y_train, y_true, device, it)
 
+        if len(set(y_train)) < len(label_to_index):
+            print("Number of labels in training set after filtering:", len(set(y_train)))
+            raise Exception(
+                "Number of labels expected " + str(len(label_to_index)) + " but found " + str(len(set(y_train))))
+
         if dump_flag:
             pickle.dump(X_train, open(data_path + "X_train_filtered_" + str(it) + ".pkl", "wb"))
             pickle.dump(y_train, open(data_path + "y_train_filtered_" + str(it) + ".pkl", "wb"))
