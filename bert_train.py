@@ -865,15 +865,20 @@ def prob_filter(X, y_pseudo, y_true, device, iteration):
     probs = get_true_label_probs(first_ep_preds, y_pseudo)
     inds = list(np.argsort(probs)[::-1])
     if iteration == 0:
-        train_data_inds = inds[:8740]
+        # train_data_inds = inds[:8740]
+        train_data_inds = inds[:8163]
     elif iteration == 1:
-        train_data_inds = inds[:12885]
+        # train_data_inds = inds[:12885]
+        train_data_inds = inds[:17829]
     elif iteration == 2:
-        train_data_inds = inds[:12959]
+        # train_data_inds = inds[:12959]
+        train_data_inds = inds[:18385]
     elif iteration == 3:
-        train_data_inds = inds[:12999]
+        # train_data_inds = inds[:12999]
+        train_data_inds = inds[:18500]
     elif iteration == 4:
-        train_data_inds = inds[:13007]
+        # train_data_inds = inds[:13007]
+        train_data_inds = inds[:18822]
     else:
         raise Exception("Iteration out of bounds")
 
