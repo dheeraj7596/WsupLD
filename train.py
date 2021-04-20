@@ -107,7 +107,7 @@ if __name__ == "__main__":
     gpu_id = int(sys.argv[2])
     dump_flag = False
     plt_flag = False
-    filter_flag = False
+    filter_flag = int(sys.argv[4])
     bins = [0, 0.25, 0.5, 0.75, 1]
     bins_five = [0, 1, 2, 3, 4, 5]
     num_its = 5
@@ -177,9 +177,13 @@ if __name__ == "__main__":
         non_train_labels = []
         true_non_train_labels = []
 
-        if filter_flag:
+        if filter_flag == 1:
             print("Filtering started..", flush=True)
             X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = filter(
+                X_train, y_train, y_true, device, it)
+        elif filter_flag == 2:
+            print("Filtering started..", flush=True)
+            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = prob_filter(
                 X_train, y_train, y_true, device, it)
 
         if len(set(y_train)) < len(label_to_index):
