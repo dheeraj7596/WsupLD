@@ -100,7 +100,7 @@ if __name__ == "__main__":
     base_path = "/data/dheeraj/WsupLD/data/"
     dataset = sys.argv[3]
     data_path = base_path + dataset + "/"
-    plot_dump_dir = data_path + "plots/filter_firstep_test_add/"
+    plot_dump_dir = data_path + "plots/no_filter/"
     os.makedirs(plot_dump_dir, exist_ok=True)
     thresh = 0.6
     use_gpu = int(sys.argv[1])
