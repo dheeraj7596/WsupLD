@@ -98,7 +98,7 @@ def generate_pseudo_labels(df, labels, label_term_dict, tokenizer):
 if __name__ == "__main__":
     # base_path = "./data/"
     base_path = "/data/dheeraj/WsupLD/data/"
-    dataset = "nyt-fine"
+    dataset = sys.argv[3]
     data_path = base_path + dataset + "/"
     plot_dump_dir = data_path + "plots/filter_firstep_test_add/"
     os.makedirs(plot_dump_dir, exist_ok=True)
