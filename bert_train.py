@@ -866,19 +866,29 @@ def prob_filter(X, y_pseudo, y_true, device, iteration):
     inds = list(np.argsort(probs)[::-1])
     if iteration == 0:
         # train_data_inds = inds[:8740]
+        # cutoff_prob = probs[inds[8739]]
         train_data_inds = inds[:8163]
+        cutoff_prob = probs[inds[8162]]
     elif iteration == 1:
         # train_data_inds = inds[:12885]
+        # cutoff_prob = probs[inds[12884]]
         train_data_inds = inds[:17829]
+        cutoff_prob = probs[inds[17829]]
     elif iteration == 2:
         # train_data_inds = inds[:12959]
+        # cutoff_prob = probs[inds[12958]]
         train_data_inds = inds[:18385]
+        cutoff_prob = probs[inds[18384]]
     elif iteration == 3:
         # train_data_inds = inds[:12999]
+        # cutoff_prob = probs[inds[12998]]
         train_data_inds = inds[:18500]
+        cutoff_prob = probs[inds[18499]]
     elif iteration == 4:
         # train_data_inds = inds[:13007]
+        # cutoff_prob = probs[inds[13006]]
         train_data_inds = inds[:18822]
+        cutoff_prob = probs[inds[18821]]
     else:
         raise Exception("Iteration out of bounds")
 
@@ -900,4 +910,4 @@ def prob_filter(X, y_pseudo, y_true, device, iteration):
         non_train_labels.append(y_pseudo[loop_ind])
         true_non_train_labels.append(y_true[loop_ind])
 
-    return train_data, train_labels, true_train_labels, non_train_data, non_train_labels, true_non_train_labels
+    return train_data, train_labels, true_train_labels, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob

@@ -43,7 +43,8 @@ def generate_pseudo_labels(df, labels, label_term_dict, tokenizer):
     def argmax_label(count_dict):
         maxi = 0
         max_label = None
-        for l in count_dict:
+        keys = sorted(count_dict.keys())
+        for l in keys:
             count = 0
             for t in count_dict[l]:
                 count += count_dict[l][t]
@@ -112,6 +113,14 @@ if __name__ == "__main__":
     bins_five = [0, 1, 2, 3, 4, 5]
     num_its = 5
     # use_gpu = 0
+
+    seed_val = 42
+    random.seed(seed_val)
+    np.random.seed(seed_val)
+    torch.manual_seed(seed_val)
+    torch.cuda.manual_seed_all(seed_val)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
     if use_gpu:
         device = torch.device('cuda:' + str(gpu_id))
@@ -183,8 +192,13 @@ if __name__ == "__main__":
                 X_train, y_train, y_true, device, it)
         elif filter_flag == 2:
             print("Filtering started..", flush=True)
-            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = prob_filter(
+            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob = prob_filter(
                 X_train, y_train, y_true, device, it)
+            probs = np.sort(probs)[::-1]
+            plt.figure()
+            plt.plot(probs)
+            plt.axhline(cutoff_prob, color='r')
+            plt.savefig(plot_dump_dir + "prob_filter_cutoff_prob_" + str(it) + ".png")
 
         if len(set(y_train)) < len(label_to_index):
             print("Number of labels in training set after filtering:", len(set(y_train)))
