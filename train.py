@@ -199,6 +199,7 @@ if __name__ == "__main__":
             plt.plot(probs)
             plt.axhline(cutoff_prob, color='r')
             plt.savefig(plot_dump_dir + "prob_filter_cutoff_prob_" + str(it) + ".png")
+            pickle.dump(X_train, open(data_path + "X_train_prob_" + str(it) + ".pkl", "wb"))
 
         if len(set(y_train)) < len(label_to_index):
             print("Number of labels in training set after filtering:", len(set(y_train)))
