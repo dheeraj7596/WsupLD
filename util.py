@@ -20,6 +20,15 @@ def fit_get_tokenizer(data, max_words):
     return tokenizer
 
 
+def create_label_index_maps(labels):
+    label_to_index = {}
+    index_to_label = {}
+    for i, label in enumerate(labels):
+        label_to_index[label] = i
+        index_to_label[i] = label
+    return label_to_index, index_to_label
+
+
 class AverageMeter(object):
     """Computes and stores the average and current value"""
 

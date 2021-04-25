@@ -7,6 +7,10 @@ import time
 import random
 import datetime
 from util import *
+import sys
+import pickle
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
 
 
 def format_time(elapsed):
@@ -911,3 +915,49 @@ def prob_filter(X, y_pseudo, y_true, device, iteration):
         true_non_train_labels.append(y_true[loop_ind])
 
     return train_data, train_labels, true_train_labels, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob
+
+
+if __name__ == "__main__":
+    # base_path = "./data/"
+    base_path = "/data/dheeraj/WsupLD/data/"
+    dataset = sys.argv[3]
+    data_path = base_path + dataset + "/"
+    use_gpu = int(sys.argv[1])
+    gpu_id = int(sys.argv[2])
+    # use_gpu = False
+
+    # Tell pytorch to run this model on the GPU.
+    if use_gpu:
+        device = torch.device('cuda:' + str(gpu_id))
+    else:
+        device = torch.device("cpu")
+
+    seed_val = 42
+    random.seed(seed_val)
+    np.random.seed(seed_val)
+    torch.manual_seed(seed_val)
+    torch.cuda.manual_seed_all(seed_val)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+    df = pickle.load(open(data_path + "df.pkl", "rb"))
+
+    labels = list(set(df["label"]))
+    label_to_index, index_to_label = create_label_index_maps(labels)
+
+    X_all = list(df["text"])
+    y_all = list(df["label"])
+    y_all_inds = [label_to_index[l] for l in y_all]
+
+    X_train, X_test, y_train, y_test, y_train_inds, y_test_inds = train_test_split(X_all, y_all, y_all_inds,
+                                                                                   stratify=y_all, test_size=0.1)
+    # Tokenize all of the sentences and map the tokens to their word IDs.
+    model, _, _ = train_bert(X_train, y_train_inds, device, None, None, label_dyn=False)
+
+    predictions = test(model, X_test, y_test_inds, device)
+    pred_inds = get_labelinds_from_probs(predictions)
+    pred_labels = []
+    for p in pred_inds:
+        pred_labels.append(index_to_label[p])
+    print(classification_report(y_test, pred_labels), flush=True)
+    print("*" * 80, flush=True)

@@ -11,15 +11,6 @@ import string
 import copy
 
 
-def create_label_index_maps(labels):
-    label_to_index = {}
-    index_to_label = {}
-    for i, label in enumerate(labels):
-        label_to_index[label] = i
-        index_to_label[i] = label
-    return label_to_index, index_to_label
-
-
 def preprocess(df):
     print("Preprocessing data..", flush=True)
     stop_words = set(stopwords.words('english'))
