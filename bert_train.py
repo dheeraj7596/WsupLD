@@ -882,8 +882,11 @@ def prob_filter(X, y_pseudo, y_true, device, iteration):
         # cutoff_prob = probs[inds[32287]]
 
         # 20news-coarse-nomisc
-        train_data_inds = inds[:7286]
-        cutoff_prob = probs[inds[7285]]
+        # train_data_inds = inds[:7286]
+        # cutoff_prob = probs[inds[7285]]
+
+        train_data_inds = inds[:int(len(inds) / 2)]
+        cutoff_prob = probs[inds[int(len(inds) / 2) - 1]]
     elif iteration == 1:
         # nyt-coarse
         # train_data_inds = inds[:12885]
@@ -898,8 +901,11 @@ def prob_filter(X, y_pseudo, y_true, device, iteration):
         # cutoff_prob = probs[inds[114113]]
 
         # 20news-coarse-nomisc
-        train_data_inds = inds[:17232]
-        cutoff_prob = probs[inds[17231]]
+        # train_data_inds = inds[:17232]
+        # cutoff_prob = probs[inds[17231]]
+
+        train_data_inds = inds[:int(len(inds) / 2)]
+        cutoff_prob = probs[inds[int(len(inds) / 2) - 1]]
     elif iteration == 2:
         # nyt-coarse
         # train_data_inds = inds[:12959]
@@ -914,8 +920,11 @@ def prob_filter(X, y_pseudo, y_true, device, iteration):
         # cutoff_prob = probs[inds[118355]]
 
         # 20news-coarse-nomisc
-        train_data_inds = inds[:17542]
-        cutoff_prob = probs[inds[17541]]
+        # train_data_inds = inds[:17542]
+        # cutoff_prob = probs[inds[17541]]
+
+        train_data_inds = inds[:int(len(inds) / 2)]
+        cutoff_prob = probs[inds[int(len(inds) / 2) - 1]]
     elif iteration == 3:
         # nyt-coarse
         # train_data_inds = inds[:12999]
@@ -930,8 +939,11 @@ def prob_filter(X, y_pseudo, y_true, device, iteration):
         # cutoff_prob = probs[inds[118732]]
 
         # 20news-coarse-nomisc
-        train_data_inds = inds[:17622]
-        cutoff_prob = probs[inds[17621]]
+        # train_data_inds = inds[:17622]
+        # cutoff_prob = probs[inds[17621]]
+
+        train_data_inds = inds[:int(len(inds) / 2)]
+        cutoff_prob = probs[inds[int(len(inds) / 2) - 1]]
     elif iteration == 4:
         # nyt-coarse
         # train_data_inds = inds[:13007]
@@ -946,8 +958,11 @@ def prob_filter(X, y_pseudo, y_true, device, iteration):
         # cutoff_prob = probs[inds[118773]]
 
         # 20news-coarse-nomisc
-        train_data_inds = inds[:17668]
-        cutoff_prob = probs[inds[17667]]
+        # train_data_inds = inds[:17668]
+        # cutoff_prob = probs[inds[17667]]
+
+        train_data_inds = inds[:int(len(inds) / 2)]
+        cutoff_prob = probs[inds[int(len(inds) / 2) - 1]]
     else:
         raise Exception("Iteration out of bounds")
 
