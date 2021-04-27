@@ -185,12 +185,12 @@ if __name__ == "__main__":
             print("Filtering started..", flush=True)
             X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob = prob_filter(
                 X_train, y_train, y_true, device, it)
-            probs = np.sort(probs)[::-1]
-            plt.figure()
-            plt.plot(probs)
-            plt.axhline(cutoff_prob, color='r')
-            plt.savefig(plot_dump_dir + "prob_filter_cutoff_prob_" + str(it) + ".png")
-            pickle.dump(X_train, open(data_path + "X_train_prob_" + str(it) + ".pkl", "wb"))
+            # probs = np.sort(probs)[::-1]
+            # plt.figure()
+            # plt.plot(probs)
+            # plt.axhline(cutoff_prob, color='r')
+            # plt.savefig(plot_dump_dir + "prob_filter_cutoff_prob_" + str(it) + ".png")
+            # pickle.dump(X_train, open(data_path + "X_train_prob_" + str(it) + ".pkl", "wb"))
 
         if len(set(y_train)) < len(label_to_index):
             print("Number of labels in training set after filtering:", len(set(y_train)))
