@@ -194,8 +194,8 @@ if __name__ == "__main__":
 
         if len(set(y_train)) < len(label_to_index):
             print("Number of labels in training set after filtering:", len(set(y_train)))
-            raise Exception(
-                "Number of labels expected " + str(len(label_to_index)) + " but found " + str(len(set(y_train))))
+            # raise Exception(
+            #     "Number of labels expected " + str(len(label_to_index)) + " but found " + str(len(set(y_train))))
 
         if dump_flag:
             pickle.dump(X_train, open(data_path + "X_train_filtered_" + str(it) + ".pkl", "wb"))
