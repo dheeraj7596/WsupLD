@@ -81,7 +81,7 @@ def create_data_loaders(dataset):
     # We'll take training samples in random order.
     train_dataloader = DataLoader(
         dataset,  # The training samples.
-        sampler=RandomSampler(train_dataset),  # Select batches randomly
+        sampler=RandomSampler(dataset),  # Select batches randomly
         batch_size=batch_size,  # Trains with this batch size.
         pin_memory=True,
         num_workers=16
