@@ -80,7 +80,7 @@ def create_data_loaders(dataset):
     # Create the DataLoaders for our training and validation sets.
     # We'll take training samples in random order.
     train_dataloader = DataLoader(
-        train_dataset,  # The training samples.
+        dataset,  # The training samples.
         sampler=RandomSampler(train_dataset),  # Select batches randomly
         batch_size=batch_size,  # Trains with this batch size.
         pin_memory=True,
