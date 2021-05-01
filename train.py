@@ -163,6 +163,9 @@ if __name__ == "__main__":
             wrong_bootstrap["first_ep"].append(0)
 
     for it in range(num_its):
+        temp_label_to_index = {}
+        temp_index_to_label = {}
+
         print("Iteration:", it, flush=True)
 
         print("Correct Samples:", len(correct_bootstrap["text"]), flush=True)
@@ -177,14 +180,24 @@ if __name__ == "__main__":
         non_train_labels = []
         true_non_train_labels = []
 
+        if filter_flag:
+            for i, y in enumerate(sorted(list(set(y_train)))):
+                temp_label_to_index[y] = i
+                temp_index_to_label[i] = y
+            y_train = [temp_label_to_index[y] for y in y_train]
+
         if filter_flag == 1:
             print("Filtering started..", flush=True)
             X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = filter(
                 X_train, y_train, y_true, device, it)
+            y_train = [temp_index_to_label[y] for y in y_train]
+            non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
         elif filter_flag == 2:
             print("Filtering started..", flush=True)
             X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob = prob_filter(
                 X_train, y_train, y_true, device, it)
+            y_train = [temp_index_to_label[y] for y in y_train]
+            non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
             # probs = np.sort(probs)[::-1]
             # plt.figure()
             # plt.plot(probs)
@@ -231,6 +244,11 @@ if __name__ == "__main__":
         print("Correct Samples in New training data:", len(correct_bootstrap["text"]), flush=True)
         print("Wrong Samples in New training data:", len(wrong_bootstrap["text"]), flush=True)
 
+        for i, y in enumerate(sorted(list(set(y_train)))):
+            temp_label_to_index[y] = i
+            temp_index_to_label[i] = y
+        y_train = [temp_label_to_index[y] for y in y_train]
+
         print("Training model..", flush=True)
         model, correct_bootstrap, wrong_bootstrap = train_bert(X_train, y_train, device, correct_bootstrap,
                                                                wrong_bootstrap, label_dyn=True)
@@ -260,7 +278,7 @@ if __name__ == "__main__":
         pred_inds = get_labelinds_from_probs(predictions)
         pred_labels = []
         for p in pred_inds:
-            pred_labels.append(index_to_label[p])
+            pred_labels.append(index_to_label[temp_index_to_label[p]])
         print(classification_report(y_all, pred_labels), flush=True)
         print("*" * 80, flush=True)
 
@@ -272,8 +290,8 @@ if __name__ == "__main__":
             pred_inds = get_labelinds_from_probs(predictions)
             pred_labels = []
             for p in pred_inds:
-                pred_labels.append(index_to_label[p])
-            y_train_strs = [index_to_label[lbl] for lbl in y_train]
+                pred_labels.append(index_to_label[temp_index_to_label[p]])
+            y_train_strs = [index_to_label[temp_index_to_label[lbl]] for lbl in y_train]
             print(classification_report(y_train_strs, pred_labels), flush=True)
             print("*" * 80, flush=True)
 
@@ -283,7 +301,7 @@ if __name__ == "__main__":
             pred_inds = get_labelinds_from_probs(predictions)
             pred_labels = []
             for p in pred_inds:
-                pred_labels.append(index_to_label[p])
+                pred_labels.append(index_to_label[temp_index_to_label[p]])
             y_true_train_strs = [index_to_label[lbl] for lbl in y_true]
             print(classification_report(y_true_train_strs, pred_labels), flush=True)
             print("*" * 80, flush=True)
@@ -295,7 +313,7 @@ if __name__ == "__main__":
             pred_inds = get_labelinds_from_probs(predictions)
             pred_labels = []
             for p in pred_inds:
-                pred_labels.append(index_to_label[p])
+                pred_labels.append(index_to_label[temp_index_to_label[p]])
             non_train_labels_strs = [index_to_label[lbl] for lbl in non_train_labels]
             print(classification_report(non_train_labels_strs, pred_labels), flush=True)
             print("*" * 80, flush=True)
@@ -306,7 +324,7 @@ if __name__ == "__main__":
             pred_inds = get_labelinds_from_probs(predictions)
             pred_labels = []
             for p in pred_inds:
-                pred_labels.append(index_to_label[p])
+                pred_labels.append(index_to_label[temp_index_to_label[p]])
             true_non_train_labels_strs = [index_to_label[lbl] for lbl in true_non_train_labels]
             print(classification_report(true_non_train_labels_strs, pred_labels), flush=True)
             print("*" * 80, flush=True)
@@ -316,7 +334,7 @@ if __name__ == "__main__":
         pred_inds = get_labelinds_from_probs(predictions)
         pred_labels = []
         for p in pred_inds:
-            pred_labels.append(index_to_label[p])
+            pred_labels.append(index_to_label[temp_index_to_label[p]])
         y_test_strs = [index_to_label[lbl] for lbl in y_test]
         print(classification_report(y_test_strs, pred_labels), flush=True)
         print("*" * 80, flush=True)
@@ -334,7 +352,7 @@ if __name__ == "__main__":
             sample = X_test[i]
             true_lbl = y_test[i]
             max_prob = p.max(axis=-1)
-            lbl = p.argmax(axis=-1)
+            lbl = temp_index_to_label[p.argmax(axis=-1)]
             pred_labels.append(index_to_label[lbl])
             if max_prob >= thresh:
                 X_train.append(sample)
