@@ -800,7 +800,7 @@ def prob_filter(X, y_pseudo, y_true, device, iteration):
             #   [2]: labels
             b_input_ids = batch[0].to(device)
             b_input_mask = batch[1].to(device)
-            b_labels = batch[2].float().to(device)
+            b_labels = batch[2].to(device)
 
             # Always clear any previously calculated gradients before performing a
             # backward pass. PyTorch doesn't do this automatically because
