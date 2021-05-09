@@ -676,6 +676,9 @@ def filter(X, y_pseudo, y_true, device, iteration=None):
                 count += 1
 
         print("Number of labels reached 50 percent threshold", count)
+        for i in filter_flag_map:
+            if not filter_flag_map[i]:
+                print("For label ", i, " Number expected ", thresh_map[i], " Found ", len(train_inds_map[i]))
 
         temp_flg = True
         for i in filter_flag_map:
