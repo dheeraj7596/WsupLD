@@ -14,6 +14,17 @@ def get_labelinds_from_probs(predictions):
     return pred_inds
 
 
+def compute_train_non_train_inds(pred_inds, true_inds, inds_map, lbl):
+    train_inds = []
+    non_train_inds = []
+    for ind in inds_map[lbl]:
+        if pred_inds[ind] == true_inds[ind]:
+            train_inds.append(ind)
+        else:
+            non_train_inds.append(ind)
+    return train_inds, non_train_inds
+
+
 def fit_get_tokenizer(data, max_words):
     tokenizer = Tokenizer(num_words=max_words, filters='!"#%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n')
     tokenizer.fit_on_texts(data)

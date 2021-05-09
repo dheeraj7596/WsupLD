@@ -11,6 +11,7 @@ import sys
 import pickle
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
+from collections import Counter
 
 
 def format_time(elapsed):
@@ -470,6 +471,26 @@ def filter(X, y_pseudo, y_true, device, iteration=None):
     print("Time taken in initializing dataloader:", time.time() - start)
 
     num_labels = len(set(y_pseudo))
+
+    stop_flag = False
+    inds_map = {}
+    for i, j in enumerate(y_pseudo):
+        try:
+            inds_map[j].append(i)
+        except:
+            inds_map[j] = [i]
+
+    thresh_map = dict(Counter(y_pseudo))
+    for i in thresh_map:
+        thresh_map[i] = int(thresh_map[i] / 2)
+
+    filter_flag_map = {}
+    train_inds_map = {}
+    non_train_inds_map = {}
+    for i in thresh_map:
+        filter_flag_map[i] = False
+        train_inds_map[i] = []
+        non_train_inds_map[i] = []
     # Tell pytorch to run this model on the GPU.
 
     # Load BertForSequenceClassification, the pretrained BERT model with a single
@@ -492,7 +513,7 @@ def filter(X, y_pseudo, y_true, device, iteration=None):
     # Number of training epochs. The BERT authors recommend between 2 and 4.
     # We chose to run for 4, but we'll see later that this may be over-fitting the
     # training data.
-    epochs = 1
+    epochs = 4
 
     # Total number of training steps is [number of batches] x [number of epochs].
     # (Note that this is not the same as the number of training samples).
@@ -524,7 +545,8 @@ def filter(X, y_pseudo, y_true, device, iteration=None):
     # For each epoch...
 
     print("Getting data that can be trained in 1 epoch..", flush=True)
-    for epoch_i in range(epochs):
+    epoch_i = 0
+    while not stop_flag and epoch_i < epochs:
 
         # ========================================
         #               Training
@@ -630,16 +652,33 @@ def filter(X, y_pseudo, y_true, device, iteration=None):
         print("  Average training loss: {0:.2f}".format(avg_train_loss), flush=True)
         print("  Training epoch took: {:}".format(training_time), flush=True)
 
-    prediction_sampler = SequentialSampler(dataset)
-    prediction_dataloader = DataLoader(dataset,
-                                       sampler=prediction_sampler,
-                                       batch_size=batch_size,
-                                       num_workers=16,
-                                       pin_memory=True
-                                       )
+        prediction_sampler = SequentialSampler(dataset)
+        prediction_dataloader = DataLoader(dataset,
+                                           sampler=prediction_sampler,
+                                           batch_size=batch_size,
+                                           num_workers=16,
+                                           pin_memory=True
+                                           )
 
-    first_ep_preds, first_ep_true_labels = evaluate(model, prediction_dataloader, device)
-    first_ep_pred_inds = get_labelinds_from_probs(first_ep_preds)
+        first_ep_preds, first_ep_true_labels = evaluate(model, prediction_dataloader, device)
+        first_ep_pred_inds = get_labelinds_from_probs(first_ep_preds)
+
+        for i in filter_flag_map:
+            if not filter_flag_map[i]:
+                train_inds, non_train_inds = compute_train_non_train_inds(first_ep_pred_inds, y_pseudo, inds_map, i)
+                train_inds_map[i] = train_inds
+                non_train_inds_map[i] = non_train_inds
+                if len(train_inds) >= thresh_map[i]:
+                    filter_flag_map[i] = True
+
+        temp_flg = True
+        for i in filter_flag_map:
+            temp_flg = temp_flg and filter_flag_map[i]
+        stop_flag = temp_flg
+        epoch_i += 1
+
+    if not stop_flag:
+        print("MAX EPOCHS REACHED!!!!!!", flush=True)
 
     train_data = []
     train_labels = []
@@ -648,12 +687,14 @@ def filter(X, y_pseudo, y_true, device, iteration=None):
     non_train_labels = []
     true_non_train_labels = []
 
-    for loop_ind in range(len(first_ep_pred_inds)):
-        if first_ep_pred_inds[loop_ind] == y_pseudo[loop_ind]:
+    for lbl in train_inds_map:
+        for loop_ind in train_inds_map[lbl]:
             train_data.append(X[loop_ind])
             train_labels.append(y_pseudo[loop_ind])
             true_train_labels.append(y_true[loop_ind])
-        else:
+
+    for lbl in non_train_inds_map:
+        for loop_ind in non_train_inds_map[lbl]:
             non_train_data.append(X[loop_ind])
             non_train_labels.append(y_pseudo[loop_ind])
             true_non_train_labels.append(y_true[loop_ind])
