@@ -679,6 +679,9 @@ def filter(X, y_pseudo, y_true, device, iteration=None):
 
     if not stop_flag:
         print("MAX EPOCHS REACHED!!!!!!", flush=True)
+        for i in filter_flag_map:
+            if not filter_flag_map[i]:
+                print("For label ", i, " Number expected ", thresh_map[i], " Found ", len(train_inds_map[i]))
 
     train_data = []
     train_labels = []
