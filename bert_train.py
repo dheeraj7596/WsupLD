@@ -663,6 +663,7 @@ def filter(X, y_pseudo, y_true, device, iteration=None):
         first_ep_preds, first_ep_true_labels = evaluate(model, prediction_dataloader, device)
         first_ep_pred_inds = get_labelinds_from_probs(first_ep_preds)
 
+        count = 0
         for i in filter_flag_map:
             if not filter_flag_map[i]:
                 train_inds, non_train_inds = compute_train_non_train_inds(first_ep_pred_inds, y_pseudo, inds_map, i)
@@ -670,6 +671,11 @@ def filter(X, y_pseudo, y_true, device, iteration=None):
                 non_train_inds_map[i] = non_train_inds
                 if len(train_inds) >= thresh_map[i]:
                     filter_flag_map[i] = True
+                    count += 1
+            else:
+                count += 1
+
+        print("Number of labels reached 50 percent threshold", count)
 
         temp_flg = True
         for i in filter_flag_map:
