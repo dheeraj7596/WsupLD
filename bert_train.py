@@ -481,8 +481,11 @@ def filter(X, y_pseudo, y_true, device, iteration=None):
             inds_map[j] = [i]
 
     thresh_map = dict(Counter(y_pseudo))
+    print("Counts of pseudo-labels ", thresh_map, flush=True)
     for i in thresh_map:
         thresh_map[i] = int(thresh_map[i] / 2)
+
+    print("Threshold map ", thresh_map, flush=True)
 
     filter_flag_map = {}
     train_inds_map = {}
