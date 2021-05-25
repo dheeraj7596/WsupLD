@@ -6,10 +6,17 @@ from nltk import tokenize
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import pickle
 import sys
-from util import create_label_index_maps, get_labelinds_from_probs
+from util import create_label_index_maps
 from sklearn.metrics import classification_report
 from word2vec import train_word2vec, fit_get_tokenizer
 import os
+
+
+def get_labelinds_from_probs(predictions):
+    pred_inds = []
+    for p in predictions:
+        pred_inds.append(p.argmax(axis=-1))
+    return pred_inds
 
 
 def get_from_one_hot(pred, index_to_label):
@@ -97,7 +104,7 @@ def train_han(X, y, label_to_index, tokenizer, embedding_matrix):
     model.compile(loss="categorical_crossentropy", optimizer='adam', metrics=['acc'])
     print("model fitting - Hierachical attention network...")
     es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
-    model.fit(X_train, y_train, validation_data=(X_val, y_val), nb_epoch=100, batch_size=256, callbacks=[es])
+    model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=100, batch_size=256, callbacks=[es])
     return model
 
 
