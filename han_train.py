@@ -9,6 +9,7 @@ import sys
 from util import create_label_index_maps, get_labelinds_from_probs
 from sklearn.metrics import classification_report
 from word2vec import train_word2vec, fit_get_tokenizer
+import os
 
 
 def get_from_one_hot(pred, index_to_label):
@@ -110,6 +111,8 @@ if __name__ == "__main__":
     data_path = base_path + dataset + "/"
     use_gpu = int(sys.argv[1])
     gpu_id = int(sys.argv[2])
+
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
 
     df = pickle.load(open(data_path + "df.pkl", "rb"))
 
