@@ -1,5 +1,5 @@
 from gensim.models import word2vec
-from keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.text import Tokenizer
 import numpy as np
 import pickle
 

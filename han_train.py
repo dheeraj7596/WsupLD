@@ -1,9 +1,9 @@
 from keras_han.model import HAN
-from keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks import EarlyStopping
 import numpy as np
 from sklearn.model_selection import train_test_split
 from nltk import tokenize
-from keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 import pickle
 import sys
 from util import create_label_index_maps, get_labelinds_from_probs
@@ -128,7 +128,7 @@ if __name__ == "__main__":
 
     embedding_matrix = train_word2vec(X_all, data_path)
     tokenizer = fit_get_tokenizer(X_all, data_path, max_words=20000)
-    model = train_han(X_train, y_train_inds, label_to_index, tokenizer, embedding_matrix)
+    model = train_han(X_train, y_train, label_to_index, tokenizer, embedding_matrix)
 
     predictions = test(model, tokenizer, X_test)
     pred_inds = get_labelinds_from_probs(predictions)

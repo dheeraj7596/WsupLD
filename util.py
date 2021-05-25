@@ -1,5 +1,5 @@
 import numpy as np
-from keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.text import Tokenizer
 
 
 def get_labelinds_from_probs(predictions):

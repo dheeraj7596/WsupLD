@@ -1,9 +1,9 @@
-import keras
-from keras.layers import (
+import tensorflow.keras as keras
+from tensorflow.keras.layers import (
     Dense, GRU, TimeDistributed, Input,
     Embedding, Bidirectional, Lambda
 )
-from keras.models import Model
+from tensorflow.keras.models import Model
 from keras_han.layers import AttentionLayer
 
 
