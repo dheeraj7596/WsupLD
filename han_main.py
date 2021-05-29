@@ -117,8 +117,8 @@ if __name__ == "__main__":
     df_copy = copy.deepcopy(df)
     df_copy = preprocess(df_copy)
 
-    embedding_matrix = train_word2vec(X_all, data_path)
-    tokenizer = fit_get_tokenizer(X_all, data_path, max_words=20000)
+    embedding_matrix = train_word2vec(df_copy.text, data_path)
+    tokenizer = fit_get_tokenizer(df_copy.text, data_path, max_words=20000)
 
     X_all = list(df["text"])
     y_all = list(df["label"])
