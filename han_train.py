@@ -64,7 +64,7 @@ class FilterCallback(tensorflow.keras.callbacks.Callback):
             self.model.stop_training = temp_flg
 
 
-def filter(X, y_pseudo, y_true, label_to_index, tokenizer, embedding_matrix):
+def filter(X, y_pseudo, y_true, tokenizer, embedding_matrix):
     inds_map = {}
     for i, j in enumerate(y_pseudo):
         try:
@@ -84,7 +84,7 @@ def filter(X, y_pseudo, y_true, label_to_index, tokenizer, embedding_matrix):
     max_sentences = 15
     max_words = 20000
 
-    y_one_hot = make_one_hot(y_pseudo, label_to_index)
+    y_one_hot = make_one_hot(y_pseudo)
     print("Fitting tokenizer...")
     print("Splitting into train, dev...")
     X_train, y_train, X_val, y_val = create_train_dev(X, labels=y_one_hot, tokenizer=tokenizer,
@@ -101,8 +101,7 @@ def filter(X, y_pseudo, y_true, label_to_index, tokenizer, embedding_matrix):
     es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
     X_all = prep_data(texts=X, max_sentences=max_sentences, max_sentence_length=max_sentence_length,
                       tokenizer=tokenizer)
-    y_pseudo_inds = [label_to_index[l] for l in y_pseudo]
-    fc = FilterCallback(thresh_map=thresh_map, inds_map=inds_map, X_train=X_all, y_train=y_pseudo_inds)
+    fc = FilterCallback(thresh_map=thresh_map, inds_map=inds_map, X_train=X_all, y_train=y_pseudo)
     model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=100, batch_size=256, callbacks=[es, fc])
 
     train_data = []
@@ -148,14 +147,12 @@ def create_train_dev(texts, labels, tokenizer, max_sentences=15, max_sentence_le
     return X_train, y_train, X_test, y_test
 
 
-def make_one_hot(y, label_to_index):
-    labels = list(label_to_index.keys())
-    n_classes = len(labels)
+def make_one_hot(y):
+    n_classes = len(set(y))
     y_new = []
     for label in y:
         current = np.zeros(n_classes)
-        i = label_to_index[label]
-        current[i] = 1.0
+        current[label] = 1.0
         y_new.append(current)
     y_new = np.asarray(y_new)
     return y_new
@@ -198,13 +195,13 @@ def test(model, tokenizer, X_test):
     return pred
 
 
-def train_han(X, y, label_to_index, tokenizer, embedding_matrix):
+def train_han(X, y, tokenizer, embedding_matrix):
     print("Going to train classifier..")
     max_sentence_length = 100
     max_sentences = 15
     max_words = 20000
 
-    y_one_hot = make_one_hot(y, label_to_index)
+    y_one_hot = make_one_hot(y)
     print("Fitting tokenizer...")
     print("Splitting into train, dev...")
     X_train, y_train, X_val, y_val = create_train_dev(X, labels=y_one_hot, tokenizer=tokenizer,
@@ -251,13 +248,14 @@ if __name__ == "__main__":
     tokenizer = fit_get_tokenizer(X_all, data_path, max_words=20000)
 
     print("Before filtering ", len(X_train))
-    X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = filter(X_train, y_train,
-                                                                                               y_train, label_to_index,
-                                                                                               tokenizer,
-                                                                                               embedding_matrix)
+    X_train, y_train_inds, y_true_inds, non_train_data, non_train_labels, true_non_train_labels = filter(X_train,
+                                                                                                         y_train_inds,
+                                                                                                         y_train_inds,
+                                                                                                         tokenizer,
+                                                                                                         embedding_matrix)
     print("After filtering ", len(X_train))
 
-    model = train_han(X_train, y_train, label_to_index, tokenizer, embedding_matrix)
+    model = train_han(X_train, y_train_inds, tokenizer, embedding_matrix)
 
     predictions = test(model, tokenizer, X_test)
     pred_inds = get_labelinds_from_probs(predictions)
