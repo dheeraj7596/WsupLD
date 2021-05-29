@@ -53,6 +53,8 @@ class FilterCallback(tensorflow.keras.callbacks.Callback):
         for i in self.filter_flag_map:
             if not self.filter_flag_map[i]:
                 print("For label ", i, " Number expected ", self.thresh_map[i], " Found ", len(self.train_inds_map[i]))
+                self.train_inds_map[i] = self.inds_map[i]
+                self.non_train_inds_map[i] = []
 
         temp_flg = True
         for i in self.filter_flag_map:
