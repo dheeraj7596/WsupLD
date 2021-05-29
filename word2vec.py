@@ -39,9 +39,9 @@ def train_word2vec(texts, dataset_path):
         embedding_weights = np.zeros((len(vocabulary_inv) + 1, size_features))
         embedding_weights[0] = 0
         for i, word in vocabulary_inv.items():
-            if word in embedding_model:
+            try:
                 embedding_weights[i] = embedding_model[word]
-            else:
+            except:
                 embedding_weights[i] = np.random.uniform(-0.25, 0.25, embedding_model.vector_size)
 
         return embedding_weights
