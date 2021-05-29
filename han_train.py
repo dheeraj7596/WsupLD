@@ -99,7 +99,8 @@ def filter(X, y_pseudo, y_true, label_to_index, tokenizer, embedding_matrix):
     es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
     X_all = prep_data(texts=X, max_sentences=max_sentences, max_sentence_length=max_sentence_length,
                       tokenizer=tokenizer)
-    fc = FilterCallback(thresh_map=thresh_map, inds_map=inds_map, X_train=X_all, y_train=y_pseudo)
+    y_pseudo_inds = [label_to_index[l] for l in y_pseudo]
+    fc = FilterCallback(thresh_map=thresh_map, inds_map=inds_map, X_train=X_all, y_train=y_pseudo_inds)
     model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=100, batch_size=256, callbacks=[es, fc])
 
     train_data = []
