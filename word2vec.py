@@ -31,7 +31,7 @@ def train_word2vec(texts, dataset_path):
             print('Model: CBOW')
         embedding_model = word2vec.Word2Vec(sentences, workers=num_workers,
                                             sg=sg,
-                                            size=size_features,
+                                            vector_size=size_features,
                                             min_count=min_word_count,
                                             window=context,
                                             sample=downsampling)
