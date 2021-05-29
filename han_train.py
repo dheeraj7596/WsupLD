@@ -58,7 +58,8 @@ class FilterCallback(tensorflow.keras.callbacks.Callback):
         for i in self.filter_flag_map:
             temp_flg = temp_flg and self.filter_flag_map[i]
 
-        self.model.stop_training = temp_flg
+        if temp_flg:
+            self.model.stop_training = temp_flg
 
 
 def filter(X, y_pseudo, y_true, label_to_index, tokenizer, embedding_matrix):
