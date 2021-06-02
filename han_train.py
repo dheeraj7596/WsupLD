@@ -34,6 +34,9 @@ class FilterCallback(tensorflow.keras.callbacks.Callback):
         # predict on all training data
         # check if the threshold is hit for all labels
         # then stop
+        if epoch % 5 != 0:
+            return
+
         predictions = self.model.predict(self.X_train)
         pred_inds = get_labelinds_from_probs(predictions)
 
