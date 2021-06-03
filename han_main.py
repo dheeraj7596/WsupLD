@@ -97,7 +97,7 @@ if __name__ == "__main__":
     dump_flag = False
     filter_flag = int(sys.argv[4])
 
-    num_its = 5
+    num_its = 1
     # use_gpu = 0
 
     seed_val = 42

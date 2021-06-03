@@ -219,7 +219,8 @@ def train_han(X, y, tokenizer, embedding_matrix):
     model.compile(loss="categorical_crossentropy", optimizer='adam', metrics=['acc'])
     print("model fitting - Hierachical attention network...")
     es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
-    model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=100, batch_size=256, callbacks=[es])
+    # model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=100, batch_size=256, callbacks=[es])
+    model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=50, batch_size=256)
     return model
 
 
