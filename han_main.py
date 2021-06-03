@@ -265,12 +265,12 @@ if __name__ == "__main__":
 
             plt.figure()
             plt.hist(correct_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_fifty)
-            plt.xticks(bins_fifty)
+            plt.xticks(bins_fifty, fontsize=5)
             plt.savefig(plot_dump_dir + "correct_it_first_ep_" + str(it) + ".png")
 
             plt.figure()
             plt.hist(wrong_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_fifty)
-            plt.xticks(bins_fifty)
+            plt.xticks(bins_fifty, fontsize=5)
             plt.savefig(plot_dump_dir + "wrong_it_first_ep_" + str(it) + ".png")
 
         print("****************** CLASSIFICATION REPORT FOR All DOCUMENTS ********************", flush=True)

@@ -75,7 +75,7 @@ class PlotCallback(tensorflow.keras.callbacks.Callback):
 
     def on_epoch_end(self, epoch, logs=None):
         if len(self.correct["text"]) > 0:
-            corr_bs_predictions = self.model.predict(self.correct["text"])
+            corr_bs_predictions = self.model.predict(self.correct["text_np"])
             cor_bs_label_inds = get_labelinds_from_probs(corr_bs_predictions)
             for index, pred_ind in enumerate(cor_bs_label_inds):
                 if pred_ind == self.correct["pred"][index]:
@@ -84,7 +84,7 @@ class PlotCallback(tensorflow.keras.callbacks.Callback):
                         self.correct["first_ep"][index] = epoch + 1
 
         if len(self.wrong["text"]) > 0:
-            wrong_bs_predictions = self.model.predict(self.wrong["text"])
+            wrong_bs_predictions = self.model.predict(self.wrong["text_np"])
             wrong_bs_label_inds = get_labelinds_from_probs(wrong_bs_predictions)
             for index, pred_ind in enumerate(wrong_bs_label_inds):
                 if pred_ind == self.wrong["pred"][index]:
@@ -247,9 +247,9 @@ def train_han(X, y, tokenizer, embedding_matrix, correct, wrong, label_dyn=False
     es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
     # model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=100, batch_size=256, callbacks=[es])
     if label_dyn:
-        correct["text"] = prep_data(texts=correct["text"], max_sentences=max_sentences,
+        correct["text_np"] = prep_data(texts=correct["text"], max_sentences=max_sentences,
                                     max_sentence_length=max_sentence_length, tokenizer=tokenizer)
-        wrong["text"] = prep_data(texts=wrong["text"], max_sentences=max_sentences,
+        wrong["text_np"] = prep_data(texts=wrong["text"], max_sentences=max_sentences,
                                   max_sentence_length=max_sentence_length, tokenizer=tokenizer)
         plt_cb = PlotCallback(correct=correct, wrong=wrong)
         model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=50, batch_size=256, callbacks=[plt_cb])
