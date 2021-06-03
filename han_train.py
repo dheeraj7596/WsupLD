@@ -67,6 +67,32 @@ class FilterCallback(tensorflow.keras.callbacks.Callback):
             self.model.stop_training = temp_flg
 
 
+class PlotCallback(tensorflow.keras.callbacks.Callback):
+    def __init__(self, correct, wrong):
+        super().__init__()
+        self.correct = correct
+        self.wrong = wrong
+
+    def on_epoch_end(self, epoch, logs=None):
+        if len(self.correct["text"]) > 0:
+            corr_bs_predictions = self.model.predict(self.correct["text"])
+            cor_bs_label_inds = get_labelinds_from_probs(corr_bs_predictions)
+            for index, pred_ind in enumerate(cor_bs_label_inds):
+                if pred_ind == self.correct["pred"][index]:
+                    self.correct["match"][index] += 1
+                    if self.correct["first_ep"][index] == 0:
+                        self.correct["first_ep"][index] = epoch + 1
+
+        if len(self.wrong["text"]) > 0:
+            wrong_bs_predictions = self.model.predict(self.wrong["text"])
+            wrong_bs_label_inds = get_labelinds_from_probs(wrong_bs_predictions)
+            for index, pred_ind in enumerate(wrong_bs_label_inds):
+                if pred_ind == self.wrong["pred"][index]:
+                    self.wrong["match"][index] += 1
+                    if self.wrong["first_ep"][index] == 0:
+                        self.wrong["first_ep"][index] = epoch + 1
+
+
 def filter(X, y_pseudo, y_true, tokenizer, embedding_matrix):
     inds_map = {}
     for i, j in enumerate(y_pseudo):
@@ -198,7 +224,7 @@ def test(model, tokenizer, X_test):
     return pred
 
 
-def train_han(X, y, tokenizer, embedding_matrix):
+def train_han(X, y, tokenizer, embedding_matrix, correct, wrong, label_dyn=False):
     print("Going to train classifier..")
     max_sentence_length = 100
     max_sentences = 15
@@ -220,8 +246,20 @@ def train_han(X, y, tokenizer, embedding_matrix):
     print("model fitting - Hierachical attention network...")
     es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
     # model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=100, batch_size=256, callbacks=[es])
-    model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=50, batch_size=256)
-    return model
+    if label_dyn:
+        correct["text"] = prep_data(texts=correct["text"], max_sentences=max_sentences,
+                                    max_sentence_length=max_sentence_length, tokenizer=tokenizer)
+        wrong["text"] = prep_data(texts=wrong["text"], max_sentences=max_sentences,
+                                  max_sentence_length=max_sentence_length, tokenizer=tokenizer)
+        plt_cb = PlotCallback(correct=correct, wrong=wrong)
+        model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=50, batch_size=256, callbacks=[plt_cb])
+        correct = plt_cb.correct
+        wrong = plt_cb.wrong
+        correct["match"] = list(np.array(correct["match"]) / 50)
+        wrong["match"] = list(np.array(wrong["match"]) / 50)
+    else:
+        model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=50, batch_size=256)
+    return model, correct, wrong
 
 
 if __name__ == "__main__":
@@ -259,7 +297,7 @@ if __name__ == "__main__":
                                                                                                          embedding_matrix)
     print("After filtering ", len(X_train))
 
-    model = train_han(X_train, y_train_inds, tokenizer, embedding_matrix)
+    model = train_han(X_train, y_train_inds, tokenizer, embedding_matrix, None, None)
 
     predictions = test(model, tokenizer, X_test)
     pred_inds = get_labelinds_from_probs(predictions)

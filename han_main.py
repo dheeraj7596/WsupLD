@@ -8,6 +8,7 @@ from word2vec import train_word2vec, fit_get_tokenizer
 from nltk.corpus import stopwords
 import string
 import copy
+import matplotlib.pyplot as plt
 
 
 def preprocess(df):
@@ -91,12 +92,16 @@ if __name__ == "__main__":
     base_path = "/data/dheeraj/WsupLD/data/"
     dataset = sys.argv[3]
     data_path = base_path + dataset + "/"
+    plot_dump_dir = data_path + "plots/han_no_filter/"
+    os.makedirs(plot_dump_dir, exist_ok=True)
     thresh = 0.6
     use_gpu = int(sys.argv[1])
     gpu_id = int(sys.argv[2])
     dump_flag = False
     filter_flag = int(sys.argv[4])
-
+    plt_flag = int(sys.argv[5])
+    bins = [0, 0.25, 0.5, 0.75, 1]
+    bins_fifty = list(range(51))
     num_its = 1
     # use_gpu = 0
 
@@ -243,7 +248,30 @@ if __name__ == "__main__":
         y_train = [temp_label_to_index[y] for y in y_train]
 
         print("Training model..", flush=True)
-        model = train_han(X_train, y_train, tokenizer, embedding_matrix)
+        model, correct_bootstrap, wrong_bootstrap = train_han(X_train, y_train, tokenizer, embedding_matrix,
+                                                              correct_bootstrap, wrong_bootstrap,
+                                                              label_dyn=True)
+
+        if plt_flag:
+            plt.figure()
+            plt.hist(correct_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
+            plt.xticks(bins)
+            plt.savefig(plot_dump_dir + "correct_it_" + str(it) + ".png")
+
+            plt.figure()
+            plt.hist(wrong_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
+            plt.xticks(bins)
+            plt.savefig(plot_dump_dir + "wrong_it_" + str(it) + ".png")
+
+            plt.figure()
+            plt.hist(correct_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_fifty)
+            plt.xticks(bins_fifty)
+            plt.savefig(plot_dump_dir + "correct_it_first_ep_" + str(it) + ".png")
+
+            plt.figure()
+            plt.hist(wrong_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_fifty)
+            plt.xticks(bins_fifty)
+            plt.savefig(plot_dump_dir + "wrong_it_first_ep_" + str(it) + ".png")
 
         print("****************** CLASSIFICATION REPORT FOR All DOCUMENTS ********************", flush=True)
         predictions = test(model, tokenizer, X_all)
