@@ -162,7 +162,7 @@ def filter(X, y_pseudo, y_true, tokenizer, embedding_matrix):
     X_all = prep_data(texts=X, max_sentences=max_sentences, max_sentence_length=max_sentence_length,
                       tokenizer=tokenizer)
     # fc = Top50FilterCallback(thresh_map=thresh_map, inds_map=inds_map, X_train=X_all, y_train=y_pseudo)
-    fc = EpochFilterCallback(X_train=X_all, y_train=y_pseudo, stop_ep=4)
+    fc = EpochFilterCallback(X_train=X_all, y_train=y_pseudo, stop_ep=9)
     model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=100, batch_size=256, callbacks=[es, fc])
 
     train_data = []
