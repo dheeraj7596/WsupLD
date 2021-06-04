@@ -22,25 +22,27 @@ class EpochFilterCallback(tensorflow.keras.callbacks.Callback):
         self.X_train = X_train
         self.true_inds = y_train
         self.stop_ep = stop_ep
+        self.union_train_inds = set([])
 
         for i in list(set(y_train)):
-            self.train_inds_map[i] = []
-            self.non_train_inds_map[i] = []
+            self.train_inds_map[i] = set([])
+            self.non_train_inds_map[i] = set([])
 
     def on_epoch_end(self, epoch, logs=None):
-        if epoch != self.stop_ep:
-            return
-
         predictions = self.model.predict(self.X_train)
         pred_inds = get_labelinds_from_probs(predictions)
 
         for loop_ind in range(len(pred_inds)):
             if pred_inds[loop_ind] == self.true_inds[loop_ind]:
-                self.train_inds_map[self.true_inds[loop_ind]].append(loop_ind)
+                self.train_inds_map[self.true_inds[loop_ind]].add(loop_ind)
+                self.union_train_inds.add(loop_ind)
             else:
-                self.non_train_inds_map[self.true_inds[loop_ind]].append(loop_ind)
+                self.non_train_inds_map[self.true_inds[loop_ind]].add(loop_ind)
 
-        self.model.stop_training = True
+        if epoch == self.stop_ep:
+            self.model.stop_training = True
+            for i in list(set(self.true_inds)):
+                self.non_train_inds_map[i].remove(self.union_train_inds)
 
 
 class Top50FilterCallback(tensorflow.keras.callbacks.Callback):
