@@ -23,7 +23,7 @@ class EpochFilterCallback(tensorflow.keras.callbacks.Callback):
         self.true_inds = y_train
         self.stop_ep = stop_ep
 
-        for i in self.thresh_map:
+        for i in list(set(y_train)):
             self.train_inds_map[i] = []
             self.non_train_inds_map[i] = []
 
@@ -36,15 +36,9 @@ class EpochFilterCallback(tensorflow.keras.callbacks.Callback):
 
         for loop_ind in range(len(pred_inds)):
             if pred_inds[loop_ind] == self.true_inds[loop_ind]:
-                try:
-                    self.train_inds_map[self.true_inds[loop_ind]].append(loop_ind)
-                except:
-                    self.train_inds_map[self.true_inds[loop_ind]] = [loop_ind]
+                self.train_inds_map[self.true_inds[loop_ind]].append(loop_ind)
             else:
-                try:
-                    self.non_train_inds_map[self.true_inds[loop_ind]].append(loop_ind)
-                except:
-                    self.non_train_inds_map[self.true_inds[loop_ind]] = [loop_ind]
+                self.non_train_inds_map[self.true_inds[loop_ind]].append(loop_ind)
 
         self.model.stop_training = True
 
