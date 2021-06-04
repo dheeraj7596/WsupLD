@@ -42,7 +42,7 @@ class EpochFilterCallback(tensorflow.keras.callbacks.Callback):
         if epoch == self.stop_ep:
             self.model.stop_training = True
             for i in list(set(self.true_inds)):
-                self.non_train_inds_map[i].remove(self.union_train_inds)
+                self.non_train_inds_map[i] = self.non_train_inds_map[i] - self.union_train_inds
 
 
 class Top50FilterCallback(tensorflow.keras.callbacks.Callback):
