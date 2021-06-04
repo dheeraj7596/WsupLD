@@ -14,7 +14,42 @@ import os
 from collections import Counter
 
 
-class FilterCallback(tensorflow.keras.callbacks.Callback):
+class EpochFilterCallback(tensorflow.keras.callbacks.Callback):
+    def __init__(self, X_train, y_train, stop_ep):
+        super().__init__()
+        self.train_inds_map = {}
+        self.non_train_inds_map = {}
+        self.X_train = X_train
+        self.true_inds = y_train
+        self.stop_ep = stop_ep
+
+        for i in self.thresh_map:
+            self.train_inds_map[i] = []
+            self.non_train_inds_map[i] = []
+
+    def on_epoch_end(self, epoch, logs=None):
+        if epoch != self.stop_ep:
+            return
+
+        predictions = self.model.predict(self.X_train)
+        pred_inds = get_labelinds_from_probs(predictions)
+
+        for loop_ind in range(len(pred_inds)):
+            if pred_inds[loop_ind] == self.true_inds[loop_ind]:
+                try:
+                    self.train_inds_map[self.true_inds[loop_ind]].append(loop_ind)
+                except:
+                    self.train_inds_map[self.true_inds[loop_ind]] = [loop_ind]
+            else:
+                try:
+                    self.non_train_inds_map[self.true_inds[loop_ind]].append(loop_ind)
+                except:
+                    self.non_train_inds_map[self.true_inds[loop_ind]] = [loop_ind]
+
+        self.model.stop_training = True
+
+
+class Top50FilterCallback(tensorflow.keras.callbacks.Callback):
     def __init__(self, thresh_map, inds_map, X_train, y_train):
         super().__init__()
         self.thresh_map = thresh_map
@@ -130,7 +165,8 @@ def filter(X, y_pseudo, y_true, tokenizer, embedding_matrix):
     es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
     X_all = prep_data(texts=X, max_sentences=max_sentences, max_sentence_length=max_sentence_length,
                       tokenizer=tokenizer)
-    fc = FilterCallback(thresh_map=thresh_map, inds_map=inds_map, X_train=X_all, y_train=y_pseudo)
+    # fc = Top50FilterCallback(thresh_map=thresh_map, inds_map=inds_map, X_train=X_all, y_train=y_pseudo)
+    fc = EpochFilterCallback(X_train=X_all, y_train=y_pseudo, stop_ep=0)
     model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=100, batch_size=256, callbacks=[es, fc])
 
     train_data = []
@@ -245,12 +281,11 @@ def train_han(X, y, tokenizer, embedding_matrix, correct, wrong, label_dyn=False
     model.compile(loss="categorical_crossentropy", optimizer='adam', metrics=['acc'])
     print("model fitting - Hierachical attention network...")
     es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
-    # model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=100, batch_size=256, callbacks=[es])
     if label_dyn:
         correct["text_np"] = prep_data(texts=correct["text"], max_sentences=max_sentences,
-                                    max_sentence_length=max_sentence_length, tokenizer=tokenizer)
+                                       max_sentence_length=max_sentence_length, tokenizer=tokenizer)
         wrong["text_np"] = prep_data(texts=wrong["text"], max_sentences=max_sentences,
-                                  max_sentence_length=max_sentence_length, tokenizer=tokenizer)
+                                     max_sentence_length=max_sentence_length, tokenizer=tokenizer)
         plt_cb = PlotCallback(correct=correct, wrong=wrong)
         model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=50, batch_size=256, callbacks=[plt_cb])
         correct = plt_cb.correct
@@ -258,7 +293,7 @@ def train_han(X, y, tokenizer, embedding_matrix, correct, wrong, label_dyn=False
         correct["match"] = list(np.array(correct["match"]) / 50)
         wrong["match"] = list(np.array(wrong["match"]) / 50)
     else:
-        model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=50, batch_size=256)
+        model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=100, batch_size=256, callbacks=[es])
     return model, correct, wrong
 
 

@@ -250,7 +250,7 @@ if __name__ == "__main__":
         print("Training model..", flush=True)
         model, correct_bootstrap, wrong_bootstrap = train_han(X_train, y_train, tokenizer, embedding_matrix,
                                                               correct_bootstrap, wrong_bootstrap,
-                                                              label_dyn=True)
+                                                              label_dyn=False)
 
         if plt_flag:
             plt.figure()
