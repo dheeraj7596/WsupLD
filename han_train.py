@@ -45,6 +45,69 @@ class EpochFilterCallback(tensorflow.keras.callbacks.Callback):
                 self.non_train_inds_map[i] = self.non_train_inds_map[i] - self.union_train_inds
 
 
+class Top50UnionFilterCallback(tensorflow.keras.callbacks.Callback):
+    def __init__(self, thresh_map, inds_map, X_train, y_train):
+        super().__init__()
+        self.thresh_map = thresh_map
+        self.inds_map = inds_map
+        self.filter_flag_map = {}
+        self.train_inds_map = {}
+        self.non_train_inds_map = {}
+        self.X_train = X_train
+        self.true_inds = y_train
+
+        for i in self.thresh_map:
+            self.filter_flag_map[i] = False
+            self.train_inds_map[i] = set([])
+            self.non_train_inds_map[i] = set([])
+
+    def on_epoch_end(self, epoch, logs=None):
+        # predict on all training data
+        # check if the threshold is hit for all labels
+        # then stop
+        predictions = self.model.predict(self.X_train)
+        pred_inds = get_labelinds_from_probs(predictions)
+
+        count = 0
+        for lbl in self.filter_flag_map:
+            if not self.filter_flag_map[lbl]:
+                train_inds, non_train_inds = compute_train_non_train_inds(pred_inds, self.true_inds, self.inds_map, lbl)
+                self.train_inds_map[lbl].update(set(train_inds))
+                self.non_train_inds_map[lbl].update(set(non_train_inds))
+
+                if len(self.train_inds_map[lbl]) >= self.thresh_map[lbl]:
+                    self.filter_flag_map[lbl] = True
+                    count += 1
+            else:
+                count += 1
+
+        print("Number of labels reached 50 percent threshold", count)
+        for i in self.filter_flag_map:
+            if not self.filter_flag_map[i]:
+                print("For label ", i, " Number expected ", self.thresh_map[i], " Found ", len(self.train_inds_map[i]))
+
+        temp_flg = True
+        for i in self.filter_flag_map:
+            temp_flg = temp_flg and self.filter_flag_map[i]
+
+        if temp_flg:
+            self.model.stop_training = temp_flg
+
+    def on_train_end(self, logs=None):
+        print("Executing on_train_end in filter", flush=True)
+        for i in self.filter_flag_map:
+            if not self.filter_flag_map[i]:
+                self.train_inds_map[i] = self.inds_map[i]
+                self.non_train_inds_map[i] = []
+
+        union_train_inds = set([])
+        for i in self.train_inds_map:
+            union_train_inds.update(self.train_inds_map[i])
+
+        for i in self.non_train_inds_map:
+            self.non_train_inds_map[i] = self.non_train_inds_map[i] - union_train_inds
+
+
 class Top50FilterCallback(tensorflow.keras.callbacks.Callback):
     def __init__(self, thresh_map, inds_map, X_train, y_train):
         super().__init__()
@@ -65,9 +128,6 @@ class Top50FilterCallback(tensorflow.keras.callbacks.Callback):
         # predict on all training data
         # check if the threshold is hit for all labels
         # then stop
-        if epoch % 10 != 0:
-            return
-
         predictions = self.model.predict(self.X_train)
         pred_inds = get_labelinds_from_probs(predictions)
 
@@ -161,8 +221,8 @@ def filter(X, y_pseudo, y_true, tokenizer, embedding_matrix):
     es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
     X_all = prep_data(texts=X, max_sentences=max_sentences, max_sentence_length=max_sentence_length,
                       tokenizer=tokenizer)
-    # fc = Top50FilterCallback(thresh_map=thresh_map, inds_map=inds_map, X_train=X_all, y_train=y_pseudo)
-    fc = EpochFilterCallback(X_train=X_all, y_train=y_pseudo, stop_ep=9)
+    fc = Top50UnionFilterCallback(thresh_map=thresh_map, inds_map=inds_map, X_train=X_all, y_train=y_pseudo)
+    # fc = EpochFilterCallback(X_train=X_all, y_train=y_pseudo, stop_ep=9)
     model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=100, batch_size=256, callbacks=[es, fc])
 
     train_data = []
