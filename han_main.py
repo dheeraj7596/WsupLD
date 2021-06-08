@@ -102,7 +102,7 @@ if __name__ == "__main__":
     plt_flag = int(sys.argv[5])
     bins = [0, 0.25, 0.5, 0.75, 1]
     bins_fifty = list(range(51))
-    num_its = 1
+    num_its = 5
     # use_gpu = 0
 
     seed_val = 42
