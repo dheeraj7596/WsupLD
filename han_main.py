@@ -288,6 +288,33 @@ if __name__ == "__main__":
             plt.xticks(bins, fontsize=4)
             plt.savefig(plot_dump_dir + "wrong_it_stability_scores_" + str(it) + ".png")
 
+            plt.figure()
+            plt.scatter(correct_bootstrap["first_ep"], correct_stability_scores, marker='o')
+            plt.xticks(bins_fifty, fontsize=5)
+            plt.yticks(bins, fontsize=4)
+            plt.xlabel("First epoch learned")
+            plt.ylabel("Stability scores")
+            plt.savefig(plot_dump_dir + "scatter_plt_correct_" + str(it) + ".png")
+
+            plt.figure()
+            plt.scatter(wrong_bootstrap["first_ep"], wrong_stability_scores, marker='o')
+            plt.xticks(bins_fifty, fontsize=5)
+            plt.yticks(bins, fontsize=4)
+            plt.xlabel("First epoch learned")
+            plt.ylabel("Stability scores")
+            plt.savefig(plot_dump_dir + "scatter_plt_wrong_" + str(it) + ".png")
+
+            colors = [0] * len(correct_stability_scores) + [1] * len(wrong_stability_scores)
+            x_vals = correct_bootstrap["first_ep"] + wrong_bootstrap["first_ep"]
+            y_vals = correct_stability_scores + wrong_stability_scores
+            plt.figure()
+            plt.scatter(x_vals, y_vals, marker='o', c=colors)
+            plt.xticks(bins_fifty, fontsize=5)
+            plt.yticks(bins, fontsize=4)
+            plt.xlabel("First epoch learned")
+            plt.ylabel("Stability scores")
+            plt.savefig(plot_dump_dir + "scatter_plt_all_" + str(it) + ".png")
+
         print("****************** CLASSIFICATION REPORT FOR All DOCUMENTS ********************", flush=True)
         predictions = test(model, tokenizer, X_all)
         pred_inds = get_labelinds_from_probs(predictions)
