@@ -170,18 +170,24 @@ class PlotCallback(tensorflow.keras.callbacks.Callback):
             cor_bs_label_inds = get_labelinds_from_probs(corr_bs_predictions)
             for index, pred_ind in enumerate(cor_bs_label_inds):
                 if pred_ind == self.correct["pred"][index]:
+                    self.correct["stability"][index].append(1)
                     self.correct["match"][index] += 1
                     if self.correct["first_ep"][index] == 0:
                         self.correct["first_ep"][index] = epoch + 1
+                else:
+                    self.correct["stability"][index].append(0)
 
         if len(self.wrong["text"]) > 0:
             wrong_bs_predictions = self.model.predict(self.wrong["text_np"])
             wrong_bs_label_inds = get_labelinds_from_probs(wrong_bs_predictions)
             for index, pred_ind in enumerate(wrong_bs_label_inds):
                 if pred_ind == self.wrong["pred"][index]:
+                    self.wrong["stability"][index].append(1)
                     self.wrong["match"][index] += 1
                     if self.wrong["first_ep"][index] == 0:
                         self.wrong["first_ep"][index] = epoch + 1
+                else:
+                    self.wrong["stability"][index].append(0)
 
 
 def filter(X, y_pseudo, y_true, tokenizer, embedding_matrix):

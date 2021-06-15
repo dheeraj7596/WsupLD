@@ -40,6 +40,26 @@ def create_label_index_maps(labels):
     return label_to_index, index_to_label
 
 
+def compute_stability_scores(stability_list):
+    stability_scores = []
+    for lst in stability_list:
+        den = 0
+        num = 0
+        for i, ent in enumerate(lst):
+            if ent == 1:
+                den += 1
+                num += 1
+            elif ent == 0 and den != 0:
+                den += 1
+
+        if den == 0:
+            temp = 0
+        else:
+            temp = num / den
+        stability_scores.append(temp)
+    return stability_scores
+
+
 class AverageMeter(object):
     """Computes and stores the average and current value"""
 

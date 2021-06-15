@@ -9,6 +9,7 @@ from nltk.corpus import stopwords
 import string
 import copy
 import matplotlib.pyplot as plt
+from util import compute_stability_scores
 
 
 def preprocess(df):
@@ -100,7 +101,7 @@ if __name__ == "__main__":
     dump_flag = False
     filter_flag = int(sys.argv[4])
     plt_flag = int(sys.argv[5])
-    bins = [0, 0.25, 0.5, 0.75, 1]
+    bins = [x / 50 for x in list(range(51))]
     bins_fifty = list(range(51))
     num_its = 5
     # use_gpu = 0
@@ -221,8 +222,8 @@ if __name__ == "__main__":
             X_test.append(non_train_data[i])
             y_test.append(true_non_train_labels[i])
 
-        correct_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
-        wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
+        correct_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": [], "stability": []}
+        wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": [], "stability": []}
 
         for i, sent in enumerate(X_train):
             if y_train[i] == y_true[i]:
@@ -231,12 +232,14 @@ if __name__ == "__main__":
                 correct_bootstrap["pred"].append(y_train[i])
                 correct_bootstrap["match"].append(0)
                 correct_bootstrap["first_ep"].append(0)
+                correct_bootstrap["stability"].append([])
             else:
                 wrong_bootstrap["text"].append(sent)
                 wrong_bootstrap["true"].append(y_true[i])
                 wrong_bootstrap["pred"].append(y_train[i])
                 wrong_bootstrap["match"].append(0)
                 wrong_bootstrap["first_ep"].append(0)
+                wrong_bootstrap["stability"].append([])
 
         print("Filtering completed..", flush=True)
         print("Correct Samples in New training data:", len(correct_bootstrap["text"]), flush=True)
@@ -250,7 +253,7 @@ if __name__ == "__main__":
         print("Training model..", flush=True)
         model, correct_bootstrap, wrong_bootstrap = train_han(X_train, y_train, tokenizer, embedding_matrix,
                                                               correct_bootstrap, wrong_bootstrap,
-                                                              label_dyn=False)
+                                                              label_dyn=True)
 
         if plt_flag:
             plt.figure()
@@ -272,6 +275,18 @@ if __name__ == "__main__":
             plt.hist(wrong_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_fifty)
             plt.xticks(bins_fifty, fontsize=5)
             plt.savefig(plot_dump_dir + "wrong_it_first_ep_" + str(it) + ".png")
+
+            correct_stability_scores = compute_stability_scores(correct_bootstrap["stability"])
+            plt.figure()
+            plt.hist(correct_stability_scores, color='blue', edgecolor='black', bins=bins)
+            plt.xticks(bins_fifty, fontsize=5)
+            plt.savefig(plot_dump_dir + "correct_it_stability_scores" + str(it) + ".png")
+
+            wrong_stability_scores = compute_stability_scores(wrong_bootstrap["stability"])
+            plt.figure()
+            plt.hist(wrong_stability_scores, color='blue', edgecolor='black', bins=bins)
+            plt.xticks(bins_fifty, fontsize=5)
+            plt.savefig(plot_dump_dir + "wrong_it_stability_scores" + str(it) + ".png")
 
         print("****************** CLASSIFICATION REPORT FOR All DOCUMENTS ********************", flush=True)
         predictions = test(model, tokenizer, X_all)
