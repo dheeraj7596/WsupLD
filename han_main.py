@@ -10,6 +10,7 @@ import string
 import copy
 import matplotlib.pyplot as plt
 from util import compute_stability_scores
+from plot_utils import side_corr_plot
 
 
 def preprocess(df):
@@ -288,33 +289,51 @@ if __name__ == "__main__":
             plt.xticks(bins, fontsize=4)
             plt.savefig(plot_dump_dir + "wrong_it_stability_scores_" + str(it) + ".png")
 
-            plt.figure()
-            plt.scatter(correct_bootstrap["first_ep"], correct_stability_scores, marker='o')
-            plt.xticks(bins_fifty, fontsize=5)
-            plt.yticks(bins, fontsize=4)
-            plt.xlabel("First epoch learned")
-            plt.ylabel("Stability scores")
-            plt.savefig(plot_dump_dir + "scatter_plt_correct_" + str(it) + ".png")
+            # plt.figure()
+            # plt.scatter(correct_bootstrap["first_ep"], correct_stability_scores, marker='o')
+            # plt.xticks(bins_fifty, fontsize=5)
+            # plt.yticks(bins, fontsize=4)
+            # plt.xlabel("First epoch learned")
+            # plt.ylabel("Stability scores")
+            # plt.savefig(plot_dump_dir + "scatter_plt_correct_" + str(it) + ".png")
+            #
+            # plt.figure()
+            # plt.scatter(wrong_bootstrap["first_ep"], wrong_stability_scores, marker='o')
+            # plt.xticks(bins_fifty, fontsize=5)
+            # plt.yticks(bins, fontsize=4)
+            # plt.xlabel("First epoch learned")
+            # plt.ylabel("Stability scores")
+            # plt.savefig(plot_dump_dir + "scatter_plt_wrong_" + str(it) + ".png")
 
-            plt.figure()
-            plt.scatter(wrong_bootstrap["first_ep"], wrong_stability_scores, marker='o')
-            plt.xticks(bins_fifty, fontsize=5)
-            plt.yticks(bins, fontsize=4)
-            plt.xlabel("First epoch learned")
-            plt.ylabel("Stability scores")
-            plt.savefig(plot_dump_dir + "scatter_plt_wrong_" + str(it) + ".png")
+            side_corr_plot(correct_bootstrap["first_ep"],
+                           correct_stability_scores,
+                           xlim=[0, 50],
+                           ylim=[0, 1],
+                           xlabel="First epoch learned",
+                           ylabel="Stability scores",
+                           save=plot_dump_dir + "scatter_plt_correct_" + str(it) + ".png"
+                           )
 
-            plt.figure()
-            plt.scatter(correct_bootstrap["first_ep"], correct_stability_scores, alpha=0.3, marker='o', c="green",
-                        label="correct")
-            plt.scatter(wrong_bootstrap["first_ep"], wrong_stability_scores, alpha=0.3, marker='o', c="red",
-                        label="wrong")
-            plt.xticks(bins_fifty, fontsize=5)
-            plt.yticks(bins, fontsize=4)
-            plt.xlabel("First epoch learned")
-            plt.ylabel("Stability scores")
-            plt.legend()
-            plt.savefig(plot_dump_dir + "scatter_plt_all_" + str(it) + ".png")
+            side_corr_plot(wrong_bootstrap["first_ep"],
+                           wrong_stability_scores,
+                           xlim=[0, 50],
+                           ylim=[0, 1],
+                           xlabel="First epoch learned",
+                           ylabel="Stability scores",
+                           save=plot_dump_dir + "scatter_plt_wrong_" + str(it) + ".png"
+                           )
+
+            # plt.figure()
+            # plt.scatter(correct_bootstrap["first_ep"], correct_stability_scores, alpha=0.3, marker='o', c="green",
+            #             label="correct")
+            # plt.scatter(wrong_bootstrap["first_ep"], wrong_stability_scores, alpha=0.3, marker='o', c="red",
+            #             label="wrong")
+            # plt.xticks(bins_fifty, fontsize=5)
+            # plt.yticks(bins, fontsize=4)
+            # plt.xlabel("First epoch learned")
+            # plt.ylabel("Stability scores")
+            # plt.legend()
+            # plt.savefig(plot_dump_dir + "scatter_plt_all_" + str(it) + ".png")
 
         print("****************** CLASSIFICATION REPORT FOR All DOCUMENTS ********************", flush=True)
         predictions = test(model, tokenizer, X_all)
