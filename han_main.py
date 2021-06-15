@@ -279,14 +279,14 @@ if __name__ == "__main__":
             correct_stability_scores = compute_stability_scores(correct_bootstrap["stability"])
             plt.figure()
             plt.hist(correct_stability_scores, color='blue', edgecolor='black', bins=bins)
-            plt.xticks(bins_fifty, fontsize=5)
-            plt.savefig(plot_dump_dir + "correct_it_stability_scores" + str(it) + ".png")
+            plt.xticks(bins, fontsize=4)
+            plt.savefig(plot_dump_dir + "correct_it_stability_scores_" + str(it) + ".png")
 
             wrong_stability_scores = compute_stability_scores(wrong_bootstrap["stability"])
             plt.figure()
             plt.hist(wrong_stability_scores, color='blue', edgecolor='black', bins=bins)
-            plt.xticks(bins_fifty, fontsize=5)
-            plt.savefig(plot_dump_dir + "wrong_it_stability_scores" + str(it) + ".png")
+            plt.xticks(bins, fontsize=4)
+            plt.savefig(plot_dump_dir + "wrong_it_stability_scores_" + str(it) + ".png")
 
         print("****************** CLASSIFICATION REPORT FOR All DOCUMENTS ********************", flush=True)
         predictions = test(model, tokenizer, X_all)
