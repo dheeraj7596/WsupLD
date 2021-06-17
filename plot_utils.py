@@ -8,6 +8,93 @@ def get_custom_bar_width(hist_x):
     return np.hstack([heights[0], heights])
 
 
+def overlap_corr_plot(plot_x_correct, plot_y_correct, plot_x_wrong, plot_y_wrong, xlim=[0, 1], ylim=[0, 1], xlog=False,
+                      ylog=False, xlabel='x', ylabel='y', save=None):
+    fig, axes = plt.subplots(1, 5, figsize=(5, 5))
+    fontsize = 15
+    width = 0.7
+    side_width = 0.12
+    gap = 0.03
+    bins = 40
+    bar_width = 0.5
+    ax = axes[0]
+    ax.set_position([0, 0, width, width])
+    ax.scatter(plot_x_correct, plot_y_correct, s=0.1, rasterized=True, alpha=0.3, c="green", label="correct")
+    ax.scatter(plot_x_wrong, plot_y_wrong, s=0.1, rasterized=True, alpha=0.3, c="red", label="wrong")
+    ax.set_xlabel(xlabel, fontsize=fontsize)
+    ax.set_ylabel(ylabel, fontsize=fontsize)
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax.legend()
+    if xlog:
+        ax.set_xscale('log')
+    if ylog:
+        ax.set_yscale('log')
+
+    ax = axes[1]
+    ax.set_xlim(xlim)
+    ax.set_position([0, width + gap, width, side_width])
+    hist_x, hist_y = get_hist(plot_x_correct, frequency=True, bins=bins, logbin=xlog)
+    widths = get_custom_bar_width(hist_x)
+    ax.bar(hist_x, hist_y, width=widths)
+    ax.set_yscale('log')
+    if xlog:
+        ax.set_xscale('log')
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax.set_xticks([])
+    # ax.set_yticks([])
+
+    ax = axes[2]
+    ax.set_ylim(ylim)
+    ax.set_position([width + gap, 0, side_width, width])
+    hist_x, hist_y = get_hist(plot_y_correct, frequency=True, bins=bins, logbin=ylog)
+    heights = get_custom_bar_width(hist_x)
+    ax.barh(hist_x, hist_y, height=heights)
+    ax.set_xscale('log')
+    if ylog:
+        ax.set_yscale('log')
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    # ax.set_xticks([])
+    ax.set_yticks([])
+
+    ax = axes[3]
+    ax.set_xlim(xlim)
+    ax.set_position([0, -gap - side_width, width, side_width])
+    hist_x, hist_y = get_hist(plot_x_wrong, frequency=True, bins=bins, logbin=xlog)
+    widths = get_custom_bar_width(hist_x)
+    ax.bar(hist_x, hist_y, width=widths)
+    ax.set_yscale('log')
+    if xlog:
+        ax.set_xscale('log')
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax.set_xticks([])
+    # ax.set_yticks([])
+
+    ax = axes[4]
+    ax.set_ylim(ylim)
+    ax.set_position([-gap - side_width, 0, side_width, width])
+    hist_x, hist_y = get_hist(plot_y_wrong, frequency=True, bins=bins, logbin=ylog)
+    heights = get_custom_bar_width(hist_x)
+    ax.barh(hist_x, hist_y, height=heights)
+    ax.set_xscale('log')
+    if ylog:
+        ax.set_yscale('log')
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    # ax.set_xticks([])
+    ax.set_yticks([])
+
+    if save is not None:
+        fig.savefig(save, bbox_inches='tight', pad_inches=0)
+    else:
+        plt.show()
+
+
 def side_corr_plot(plot_x, plot_y, xlim=[0, 1], ylim=[0, 1], xlog=False, ylog=False,
                    xlabel='x', ylabel='y', save=None):
     fig, axes = plt.subplots(1, 3, figsize=(5, 5))
@@ -19,7 +106,7 @@ def side_corr_plot(plot_x, plot_y, xlim=[0, 1], ylim=[0, 1], xlog=False, ylog=Fa
     bar_width = 0.5
     ax = axes[0]
     ax.set_position([0, 0, width, width])
-    ax.scatter(plot_x, plot_y, s=1, rasterized=True)
+    ax.scatter(plot_x, plot_y, s=0.1, rasterized=True)
     ax.set_xlabel(xlabel, fontsize=fontsize)
     ax.set_ylabel(ylabel, fontsize=fontsize)
     ax.set_xlim(xlim)

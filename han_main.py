@@ -10,7 +10,7 @@ import string
 import copy
 import matplotlib.pyplot as plt
 from util import compute_stability_scores
-from plot_utils import side_corr_plot
+from plot_utils import side_corr_plot, overlap_corr_plot
 
 
 def preprocess(df):
@@ -322,6 +322,17 @@ if __name__ == "__main__":
                            ylabel="Stability scores",
                            save=plot_dump_dir + "scatter_plt_wrong_" + str(it) + ".png"
                            )
+
+            overlap_corr_plot(correct_bootstrap["first_ep"],
+                              correct_stability_scores,
+                              wrong_bootstrap["first_ep"],
+                              wrong_stability_scores,
+                              xlim=[0, 50],
+                              ylim=[0, 1],
+                              xlabel="First epoch learned",
+                              ylabel="Stability scores",
+                              save=plot_dump_dir + "scatter_plt_all_" + str(it) + ".png"
+                              )
 
             # plt.figure()
             # plt.scatter(correct_bootstrap["first_ep"], correct_stability_scores, alpha=0.3, marker='o', c="green",
