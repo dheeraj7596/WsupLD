@@ -158,6 +158,41 @@ class Top50FilterCallback(tensorflow.keras.callbacks.Callback):
             self.model.stop_training = temp_flg
 
 
+class ProblematicScoreCallback(tensorflow.keras.callbacks.Callback):
+    def __init__(self, thresh_map, inds_map, X_train, y_train):
+        super().__init__()
+        self.match = []
+        for i in X_train:
+            self.match.append(0)
+        self.X_train = X_train
+        self.y_train = y_train
+        self.thresh_map = thresh_map
+        self.inds_map = inds_map
+        self.train_inds_map = {}
+        self.non_train_inds_map = {}
+
+        for i in self.thresh_map:
+            self.train_inds_map[i] = []
+            self.non_train_inds_map[i] = []
+
+    def on_epoch_end(self, epoch, logs=None):
+        predictions = self.model.predict(self.X_train)
+        label_inds = get_labelinds_from_probs(predictions)
+        for index, pred_ind in enumerate(label_inds):
+            if pred_ind == self.y_train[index]:
+                self.match[index] += 1
+
+    def on_train_end(self, logs=None):
+        print("Executing on_train_end in filter", flush=True)
+        self.match = np.array(self.match)
+        for lbl in self.thresh_map:
+            inds = np.array(self.inds_map[lbl])
+            scores = self.match[inds]
+            high_scoring_inds = inds[np.argsort(scores)[::-1][:self.thresh_map[lbl]]]
+            self.train_inds_map[lbl] = list(high_scoring_inds)
+            self.non_train_inds_map[lbl] = list(set(inds) - set(high_scoring_inds))
+
+
 class PlotCallback(tensorflow.keras.callbacks.Callback):
     def __init__(self, correct, wrong):
         super().__init__()
@@ -227,8 +262,9 @@ def filter(X, y_pseudo, y_true, tokenizer, embedding_matrix):
     es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
     X_all = prep_data(texts=X, max_sentences=max_sentences, max_sentence_length=max_sentence_length,
                       tokenizer=tokenizer)
-    fc = Top50UnionFilterCallback(thresh_map=thresh_map, inds_map=inds_map, X_train=X_all, y_train=y_pseudo)
+    # fc = Top50UnionFilterCallback(thresh_map=thresh_map, inds_map=inds_map, X_train=X_all, y_train=y_pseudo)
     # fc = EpochFilterCallback(X_train=X_all, y_train=y_pseudo, stop_ep=9)
+    fc = ProblematicScoreCallback(thresh_map=thresh_map, inds_map=inds_map, X_train=X_all, y_train=y_pseudo)
     model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=100, batch_size=256, callbacks=[es, fc])
 
     train_data = []
