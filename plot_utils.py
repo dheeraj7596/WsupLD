@@ -13,8 +13,8 @@ def overlap_corr_plot(plot_x_correct, plot_y_correct, plot_x_wrong, plot_y_wrong
     fig, axes = plt.subplots(1, 5, figsize=(5, 5))
     fontsize = 15
     width = 0.7
-    side_width = 0.12
-    gap = 0.03
+    side_width = 0.32
+    gap = 0.15
     bins = 40
     bar_width = 0.5
     ax = axes[0]
