@@ -102,9 +102,10 @@ if __name__ == "__main__":
     dump_flag = False
     filter_flag = int(sys.argv[4])
     plt_flag = int(sys.argv[5])
+    percent_thresh = float(sys.argv[6])
     bins = [x / 50 for x in list(range(51))]
     bins_fifty = list(range(51))
-    num_its = 5
+    num_its = int(sys.argv[7])
     # use_gpu = 0
 
     seed_val = 42
@@ -193,7 +194,9 @@ if __name__ == "__main__":
                                                                                                        y_train,
                                                                                                        y_true,
                                                                                                        tokenizer,
-                                                                                                       embedding_matrix)
+                                                                                                       embedding_matrix,
+                                                                                                       percent_thresh,
+                                                                                                       iteration=it)
             y_train = [temp_index_to_label[y] for y in y_train]
             non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
         # elif filter_flag == 2:
@@ -245,6 +248,9 @@ if __name__ == "__main__":
         print("Filtering completed..", flush=True)
         print("Correct Samples in New training data:", len(correct_bootstrap["text"]), flush=True)
         print("Wrong Samples in New training data:", len(wrong_bootstrap["text"]), flush=True)
+        print("Noise ratio",
+              len(wrong_bootstrap["text"]) / (len(wrong_bootstrap["text"]) + len(correct_bootstrap["text"])))
+        print("Total samples", len(wrong_bootstrap["text"]) + len(correct_bootstrap["text"]))
 
         for i, y in enumerate(sorted(list(set(y_train)))):
             temp_label_to_index[y] = i
