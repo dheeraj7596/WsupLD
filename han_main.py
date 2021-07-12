@@ -89,6 +89,20 @@ def generate_pseudo_labels(df, labels, label_term_dict, tokenizer):
     return X, y, y_true
 
 
+def ground_truth_filter(X_train, y_train, y_true):
+    mod_X_train = []
+    mod_y_train = []
+    mod_y_true = []
+
+    for i in range(len(X_train)):
+        if y_train[i] == y_true[i]:
+            mod_X_train.append(X_train[i])
+            mod_y_train.append(y_train[i])
+            mod_y_true.append(y_true[i])
+
+    return mod_X_train, mod_y_train, mod_y_true
+
+
 if __name__ == "__main__":
     # base_path = "./data/"
     base_path = "/data/dheeraj/WsupLD/data/"
@@ -200,6 +214,11 @@ if __name__ == "__main__":
                                                                                                        dataset=dataset)
             y_train = [temp_index_to_label[y] for y in y_train]
             non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
+        elif filter_flag == 2:
+            print("Filtering based on ground truth..", flush=True)
+            X_train, y_train, y_true = ground_truth_filter(X_train, y_train, y_true)
+            y_train = [temp_index_to_label[y] for y in y_train]
+
         # elif filter_flag == 2:
         #     print("Filtering started..", flush=True)
         #     X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob = prob_filter(
