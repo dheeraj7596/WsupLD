@@ -362,52 +362,52 @@ if __name__ == "__main__":
         print(classification_report(y_all, pred_labels), flush=True)
         print("*" * 80, flush=True)
 
-        if filter_flag:
-            print(
-                "****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT PSEUDO ********************",
-                flush=True)
-            predictions = test(model, tokenizer, X_train)
-            pred_inds = get_labelinds_from_probs(predictions)
-            pred_labels = []
-            for p in pred_inds:
-                pred_labels.append(index_to_label[temp_index_to_label[p]])
-            y_train_strs = [index_to_label[temp_index_to_label[lbl]] for lbl in y_train]
-            print(classification_report(y_train_strs, pred_labels), flush=True)
-            print("*" * 80, flush=True)
-
-            print("****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT GT ********************",
-                  flush=True)
-            predictions = test(model, tokenizer, X_train)
-            pred_inds = get_labelinds_from_probs(predictions)
-            pred_labels = []
-            for p in pred_inds:
-                pred_labels.append(index_to_label[temp_index_to_label[p]])
-            y_true_train_strs = [index_to_label[lbl] for lbl in y_true]
-            print(classification_report(y_true_train_strs, pred_labels), flush=True)
-            print("*" * 80, flush=True)
-
-            print(
-                "****************** CLASSIFICATION REPORT FOR FIRST EP WRONG DOCUMENTS WRT PSEUDO ********************",
-                flush=True)
-            predictions = test(model, tokenizer, non_train_data)
-            pred_inds = get_labelinds_from_probs(predictions)
-            pred_labels = []
-            for p in pred_inds:
-                pred_labels.append(index_to_label[temp_index_to_label[p]])
-            non_train_labels_strs = [index_to_label[lbl] for lbl in non_train_labels]
-            print(classification_report(non_train_labels_strs, pred_labels), flush=True)
-            print("*" * 80, flush=True)
-
-            print("****************** CLASSIFICATION REPORT FOR FIRST EP WRONG DOCUMENTS WRT GT ********************",
-                  flush=True)
-            predictions = test(model, tokenizer, non_train_data)
-            pred_inds = get_labelinds_from_probs(predictions)
-            pred_labels = []
-            for p in pred_inds:
-                pred_labels.append(index_to_label[temp_index_to_label[p]])
-            true_non_train_labels_strs = [index_to_label[lbl] for lbl in true_non_train_labels]
-            print(classification_report(true_non_train_labels_strs, pred_labels), flush=True)
-            print("*" * 80, flush=True)
+        # if filter_flag:
+        #     print(
+        #         "****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT PSEUDO ********************",
+        #         flush=True)
+        #     predictions = test(model, tokenizer, X_train)
+        #     pred_inds = get_labelinds_from_probs(predictions)
+        #     pred_labels = []
+        #     for p in pred_inds:
+        #         pred_labels.append(index_to_label[temp_index_to_label[p]])
+        #     y_train_strs = [index_to_label[temp_index_to_label[lbl]] for lbl in y_train]
+        #     print(classification_report(y_train_strs, pred_labels), flush=True)
+        #     print("*" * 80, flush=True)
+        #
+        #     print("****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT GT ********************",
+        #           flush=True)
+        #     predictions = test(model, tokenizer, X_train)
+        #     pred_inds = get_labelinds_from_probs(predictions)
+        #     pred_labels = []
+        #     for p in pred_inds:
+        #         pred_labels.append(index_to_label[temp_index_to_label[p]])
+        #     y_true_train_strs = [index_to_label[lbl] for lbl in y_true]
+        #     print(classification_report(y_true_train_strs, pred_labels), flush=True)
+        #     print("*" * 80, flush=True)
+        #
+        #     print(
+        #         "****************** CLASSIFICATION REPORT FOR FIRST EP WRONG DOCUMENTS WRT PSEUDO ********************",
+        #         flush=True)
+        #     predictions = test(model, tokenizer, non_train_data)
+        #     pred_inds = get_labelinds_from_probs(predictions)
+        #     pred_labels = []
+        #     for p in pred_inds:
+        #         pred_labels.append(index_to_label[temp_index_to_label[p]])
+        #     non_train_labels_strs = [index_to_label[lbl] for lbl in non_train_labels]
+        #     print(classification_report(non_train_labels_strs, pred_labels), flush=True)
+        #     print("*" * 80, flush=True)
+        #
+        #     print("****************** CLASSIFICATION REPORT FOR FIRST EP WRONG DOCUMENTS WRT GT ********************",
+        #           flush=True)
+        #     predictions = test(model, tokenizer, non_train_data)
+        #     pred_inds = get_labelinds_from_probs(predictions)
+        #     pred_labels = []
+        #     for p in pred_inds:
+        #         pred_labels.append(index_to_label[temp_index_to_label[p]])
+        #     true_non_train_labels_strs = [index_to_label[lbl] for lbl in true_non_train_labels]
+        #     print(classification_report(true_non_train_labels_strs, pred_labels), flush=True)
+        #     print("*" * 80, flush=True)
 
         print("****************** CLASSIFICATION REPORT FOR REST DOCUMENTS WRT GT ********************", flush=True)
         predictions = test(model, tokenizer, X_test)
