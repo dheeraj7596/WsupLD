@@ -233,6 +233,9 @@ def filter(X, y_pseudo, y_true, tokenizer, embedding_matrix, percent_thresh, ite
         except:
             inds_map[j] = [i]
 
+    if iteration == 0:
+        percent_thresh = 1
+
     thresh_map = dict(Counter(y_pseudo))
     print("Counts of pseudo-labels ", thresh_map, flush=True)
     for i in thresh_map:
