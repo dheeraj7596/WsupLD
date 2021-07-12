@@ -225,7 +225,7 @@ class PlotCallback(tensorflow.keras.callbacks.Callback):
                     self.wrong["stability"][index].append(0)
 
 
-def filter(X, y_pseudo, y_true, tokenizer, embedding_matrix, percent_thresh, iteration=None):
+def filter(X, y_pseudo, y_true, tokenizer, embedding_matrix, percent_thresh, iteration=None, dataset=None):
     inds_map = {}
     for i, j in enumerate(y_pseudo):
         try:
@@ -234,7 +234,10 @@ def filter(X, y_pseudo, y_true, tokenizer, embedding_matrix, percent_thresh, ite
             inds_map[j] = [i]
 
     if iteration == 0:
-        percent_thresh = 1
+        if "nyt" in dataset:
+            percent_thresh = 1
+        if "20news" in dataset:
+            percent_thresh = 0.9
 
     thresh_map = dict(Counter(y_pseudo))
     print("Counts of pseudo-labels ", thresh_map, flush=True)

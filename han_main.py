@@ -196,7 +196,8 @@ if __name__ == "__main__":
                                                                                                        tokenizer,
                                                                                                        embedding_matrix,
                                                                                                        percent_thresh,
-                                                                                                       iteration=it)
+                                                                                                       iteration=it,
+                                                                                                       dataset=dataset)
             y_train = [temp_index_to_label[y] for y in y_train]
             non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
         # elif filter_flag == 2:
