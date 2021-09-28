@@ -1,4 +1,3 @@
-from bert_train import *
 import pickle
 import json, sys
 import os
@@ -6,11 +5,12 @@ from sklearn.metrics import classification_report
 import torch
 from util import *
 import matplotlib.pyplot as plt
+from cnn_model.train_cnn import filter, test, train_cnn
 import copy
-
+import torchtext.data as data
+import random
 
 if __name__ == "__main__":
-    # base_path = "./data/"
     base_path = "/data/dheeraj/WsupLD/data/"
     dataset = sys.argv[3]
     data_path = base_path + dataset + "/"
@@ -22,10 +22,10 @@ if __name__ == "__main__":
     dump_flag = False
     plt_flag = int(sys.argv[5])
     filter_flag = int(sys.argv[4])
+    percent_thresh = float(sys.argv[6])
     bins = [0, 0.25, 0.5, 0.75, 1]
     bins_five = [0, 1, 2, 3, 4, 5]
     num_its = 5
-    # use_gpu = 0
 
     seed_val = 42
     random.seed(seed_val)
@@ -84,6 +84,13 @@ if __name__ == "__main__":
             wrong_bootstrap["match"].append(0)
             wrong_bootstrap["first_ep"].append(0)
 
+    text_field = data.Field(lower=True)
+    label_field = data.Field(sequential=False,
+                             use_vocab=False,
+                             pad_token=None,
+                             unk_token=None
+                             )
+
     for it in range(num_its):
         temp_label_to_index = {}
         temp_index_to_label = {}
@@ -111,24 +118,38 @@ if __name__ == "__main__":
                 temp_index_to_label[i] = y
             y_train = [temp_label_to_index[y] for y in y_train]
 
+        text_field.build_vocab(X_train)
+        label_field.build_vocab(y_train)
+
         if filter_flag == 1:
             print("Filtering started..", flush=True)
-            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = filter(
-                X_train, y_train, y_true, device, it)
+            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = filter(X_train,
+                                                                                                       y_train,
+                                                                                                       y_true,
+                                                                                                       percent_thresh,
+                                                                                                       device,
+                                                                                                       text_field,
+                                                                                                       label_field,
+                                                                                                       it)
             y_train = [temp_index_to_label[y] for y in y_train]
             non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
-        elif filter_flag == 2:
-            print("Filtering started..", flush=True)
-            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob = prob_filter(
-                X_train, y_train, y_true, device, it)
-            y_train = [temp_index_to_label[y] for y in y_train]
-            non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
-            # probs = np.sort(probs)[::-1]
-            # plt.figure()
-            # plt.plot(probs)
-            # plt.axhline(cutoff_prob, color='r')
-            # plt.savefig(plot_dump_dir + "prob_filter_cutoff_prob_" + str(it) + ".png")
-            # pickle.dump(X_train, open(data_path + "X_train_prob_" + str(it) + ".pkl", "wb"))
+        # elif filter_flag == 2:
+        #     print("Filtering started..", flush=True)
+        #     X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob = prob_filter(
+        #         X_train,
+        #         y_train,
+        #         y_true,
+        #         device,
+        #         it)
+        #     y_train = [temp_index_to_label[y] for y in y_train]
+        #     non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
+
+        # probs = np.sort(probs)[::-1]
+        # plt.figure()
+        # plt.plot(probs)
+        # plt.axhline(cutoff_prob, color='r')
+        # plt.savefig(plot_dump_dir + "prob_filter_cutoff_prob_" + str(it) + ".png")
+        # pickle.dump(X_train, open(data_path + "X_train_prob_" + str(it) + ".pkl", "wb"))
         print("******************AFTER FILTERING: classification report of pseudo-labels******************", flush=True)
         print(classification_report(y_true, y_train), flush=True)
 
@@ -177,8 +198,8 @@ if __name__ == "__main__":
         y_train = [temp_label_to_index[y] for y in y_train]
 
         print("Training model..", flush=True)
-        model, correct_bootstrap, wrong_bootstrap = train_bert(X_train, y_train, device, correct_bootstrap,
-                                                               wrong_bootstrap, label_dyn=True)
+        model, correct_bootstrap, wrong_bootstrap = train_cnn(X_train, y_train, device, text_field, label_field,
+                                                              correct_bootstrap, wrong_bootstrap, label_dyn=True)
         if plt_flag:
             plt.figure()
             plt.hist(correct_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
@@ -201,8 +222,7 @@ if __name__ == "__main__":
             plt.savefig(plot_dump_dir + "wrong_it_first_ep_" + str(it) + ".png")
 
         print("****************** CLASSIFICATION REPORT FOR All DOCUMENTS ********************", flush=True)
-        predictions = test(model, X_all, y_all_inds, device)
-        pred_inds = get_labelinds_from_probs(predictions)
+        pred_inds, _ = test(model, X_all, y_all_inds, text_field, label_field, device)
         pred_labels = []
         for p in pred_inds:
             pred_labels.append(index_to_label[temp_index_to_label[p]])
@@ -213,8 +233,7 @@ if __name__ == "__main__":
             print(
                 "****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT PSEUDO ********************",
                 flush=True)
-            predictions = test(model, X_train, y_train, device)
-            pred_inds = get_labelinds_from_probs(predictions)
+            pred_inds, _ = test(model, X_train, y_train, text_field, label_field, device)
             pred_labels = []
             for p in pred_inds:
                 pred_labels.append(index_to_label[temp_index_to_label[p]])
@@ -224,8 +243,7 @@ if __name__ == "__main__":
 
             print("****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT GT ********************",
                   flush=True)
-            predictions = test(model, X_train, y_true, device)
-            pred_inds = get_labelinds_from_probs(predictions)
+            pred_inds, _ = test(model, X_train, y_true, text_field, label_field, device)
             pred_labels = []
             for p in pred_inds:
                 pred_labels.append(index_to_label[temp_index_to_label[p]])
@@ -236,8 +254,7 @@ if __name__ == "__main__":
             print(
                 "****************** CLASSIFICATION REPORT FOR FIRST EP WRONG DOCUMENTS WRT PSEUDO ********************",
                 flush=True)
-            predictions = test(model, non_train_data, non_train_labels, device)
-            pred_inds = get_labelinds_from_probs(predictions)
+            pred_inds, _ = test(model, non_train_data, non_train_labels, text_field, label_field, device)
             pred_labels = []
             for p in pred_inds:
                 pred_labels.append(index_to_label[temp_index_to_label[p]])
@@ -247,8 +264,7 @@ if __name__ == "__main__":
 
             print("****************** CLASSIFICATION REPORT FOR FIRST EP WRONG DOCUMENTS WRT GT ********************",
                   flush=True)
-            predictions = test(model, non_train_data, true_non_train_labels, device)
-            pred_inds = get_labelinds_from_probs(predictions)
+            pred_inds, _ = test(model, non_train_data, true_non_train_labels, text_field, label_field, device)
             pred_labels = []
             for p in pred_inds:
                 pred_labels.append(index_to_label[temp_index_to_label[p]])
@@ -257,8 +273,7 @@ if __name__ == "__main__":
             print("*" * 80, flush=True)
 
         print("****************** CLASSIFICATION REPORT FOR REST DOCUMENTS WRT GT ********************", flush=True)
-        predictions = test(model, X_test, y_test, device)
-        pred_inds = get_labelinds_from_probs(predictions)
+        pred_inds, _ = test(model, X_test, y_test, text_field, label_field, device)
         pred_labels = []
         for p in pred_inds:
             pred_labels.append(index_to_label[temp_index_to_label[p]])
@@ -266,7 +281,7 @@ if __name__ == "__main__":
         print(classification_report(y_test_strs, pred_labels), flush=True)
         print("*" * 80, flush=True)
 
-        predictions = test(model, X_test, y_test, device)
+        _, predictions = test(model, X_test, y_test, text_field, label_field, device)
         for i, p in enumerate(predictions):
             if i == 0:
                 pred = p
