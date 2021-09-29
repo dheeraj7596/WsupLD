@@ -65,8 +65,8 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
     best_epoch = 0
     best_model = None
     best_loss = float("inf")
-    model.train()
     for epoch in range(1, num_epochs + 1):
+        model.train()
         for batch in train_iter:
             feature, target = batch.text, batch.label
             feature.t_()  # batch first
@@ -161,9 +161,9 @@ def train(train_iter, dev_iter, text_field, label_field, model, device, correct,
     best_epoch = 0
     best_model = None
     best_loss = float("inf")
-    model.train()
     epochs_run = 0
     for epoch in range(1, num_epochs + 1):
+        model.train()
         epochs_run += 1
         for batch in train_iter:
             feature, target = batch.text, batch.label
@@ -320,7 +320,7 @@ def save(model, save_dir, save_prefix, steps):
 
 def test(model, X, y, text_field, label_field, device):
     dataset = TrainValFullDataset(X, y, text_field, label_field)
-    iterator = data.Iterator(dataset, batch_size=64, train=False, shuffle=False, repeat=False, sort=False,
+    iterator = data.Iterator(dataset, batch_size=32, train=False, shuffle=False, repeat=False, sort=False,
                              sort_within_batch=False, device=device)
 
     pred_labels, pred_probs, true_labels = test_eval(iterator, model, device)
