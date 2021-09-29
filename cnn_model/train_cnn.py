@@ -31,7 +31,7 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
                                                                  val_y, X_train, y_true)
 
     train_iter, dev_iter, full_data_iter = data.BucketIterator.splits((train_data, val_data, full_data),
-                                                                      batch_sizes=(256, 256, 256), sort=False,
+                                                                      batch_sizes=(128, 128, 128), sort=False,
                                                                       sort_within_batch=False)
 
     embed_num = len(text_field.vocab)
@@ -228,7 +228,7 @@ def train_cnn(X, y, device, text_field, label_field, correct_bootstrap, wrong_bo
     train_data, val_data = TrainValFullDataset.splits(text_field, label_field, train_X, train_y, val_X,
                                                       val_y, None, None)
 
-    train_iter, dev_iter = data.BucketIterator.splits((train_data, val_data), batch_sizes=(256, 256),
+    train_iter, dev_iter = data.BucketIterator.splits((train_data, val_data), batch_sizes=(128, 128),
                                                       sort=False, sort_within_batch=False)
     embed_num = len(text_field.vocab)
     class_num = len(label_field.vocab)
@@ -320,7 +320,7 @@ def save(model, save_dir, save_prefix, steps):
 
 def test(model, X, y, text_field, label_field, device):
     dataset = TrainValFullDataset(X, y, text_field, label_field)
-    iterator = data.Iterator(dataset, batch_size=256, train=False, shuffle=False, repeat=False, sort=False,
+    iterator = data.Iterator(dataset, batch_size=128, train=False, shuffle=False, repeat=False, sort=False,
                              sort_within_batch=False, device=device)
 
     pred_labels, pred_probs, true_labels = test_eval(iterator, model, device)
