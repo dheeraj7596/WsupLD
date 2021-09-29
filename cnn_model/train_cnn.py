@@ -10,6 +10,7 @@ from cnn_model.dataset import TrainValFullDataset
 from collections import Counter
 from util import compute_train_non_train_inds
 import numpy as np
+import time
 
 
 def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_field, it):
@@ -167,10 +168,13 @@ def train(train_iter, dev_iter, text_field, label_field, model, device, correct,
         model.train()
         epochs_run += 1
         for batch in train_iter:
+            start_batch = time.time()
             feature, target = batch.text, batch.label
             feature.t_()  # batch first
+            start_t = time.time()
             if device is not None:
                 feature, target = feature.to(device), target.to(device)
+            print("Moving to device", time.time() - start_t, flush=True)
 
             optimizer.zero_grad()
             logit = model(feature)
@@ -188,6 +192,8 @@ def train(train_iter, dev_iter, text_field, label_field, model, device, correct,
                                                                              accuracy.item(),
                                                                              corrects.item(),
                                                                              batch.batch_size))
+
+            print("Batch processing time", time.time() - start_batch, flush=True)
 
         if label_dyn:
             if len(correct["text"]) > 0:
@@ -225,12 +231,16 @@ def train(train_iter, dev_iter, text_field, label_field, model, device, correct,
 
 
 def train_cnn(X, y, device, text_field, label_field, correct_bootstrap, wrong_bootstrap, label_dyn=False):
+    start_t = time.time()
     train_X, val_X, train_y, val_y = train_test_split(X, y, test_size=0.1)
     train_data, val_data = TrainValFullDataset.splits(text_field, label_field, train_X, train_y, val_X,
                                                       val_y, None, None)
-
+    print("For generating train_data, val_data", time.time() - start_t, flush=True)
+    start_t = time.time()
     train_iter, dev_iter = data.BucketIterator.splits((train_data, val_data), batch_sizes=(64, 64),
                                                       sort=False, sort_within_batch=False)
+    print("For generating train_iter, dev_iter", time.time() - start_t, flush=True)
+
     embed_num = len(text_field.vocab)
     class_num = len(label_field.vocab)
     kernel_sizes = [3, 4, 5]

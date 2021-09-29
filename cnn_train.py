@@ -41,6 +41,9 @@ if __name__ == "__main__":
         device = torch.device("cpu")
 
     df = pickle.load(open(data_path + "df.pkl", "rb"))
+
+    df = df[:1000]
+
     with open(data_path + "seedwords.json") as fp:
         label_term_dict = json.load(fp)
 
@@ -199,7 +202,7 @@ if __name__ == "__main__":
 
         print("Training model..", flush=True)
         model, correct_bootstrap, wrong_bootstrap = train_cnn(X_train, y_train, device, text_field, label_field,
-                                                              correct_bootstrap, wrong_bootstrap, label_dyn=True)
+                                                              correct_bootstrap, wrong_bootstrap, label_dyn=filter_flag)
         if plt_flag:
             plt.figure()
             plt.hist(correct_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
