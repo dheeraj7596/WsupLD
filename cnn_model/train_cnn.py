@@ -105,10 +105,11 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
             else:
                 count += 1
 
-        print("Number of labels reached 50 percent threshold", count)
+        print("Number of labels reached 50 percent threshold", count, flush=True)
         for i in filter_flag_map:
             if not filter_flag_map[i]:
-                print("For label ", i, " Number expected ", thresh_map[i], " Found ", len(train_inds_map[i]))
+                print("For label ", i, " Number expected ", thresh_map[i], " Found ", len(train_inds_map[i]),
+                      flush=True)
 
         temp_flg = True
         for i in filter_flag_map:
@@ -124,8 +125,8 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
             best_model = model
         else:
             if epoch - best_epoch >= early_stop:
-                print('early stop by {} epochs.'.format(early_stop))
-                print("Best epoch: ", best_epoch, "Current epoch: ", epoch)
+                print('early stop by {} epochs.'.format(early_stop), flush=True)
+                print("Best epoch: ", best_epoch, "Current epoch: ", epoch, flush=True)
                 break
 
     train_data = []
@@ -212,8 +213,8 @@ def train(train_iter, dev_iter, text_field, label_field, model, device, correct,
             best_model = model
         else:
             if epoch - best_epoch >= early_stop:
-                print('early stop by {} epochs.'.format(early_stop))
-                print("Best epoch: ", best_epoch, "Current epoch: ", epoch)
+                print('early stop by {} epochs.'.format(early_stop), flush=True)
+                print("Best epoch: ", best_epoch, "Current epoch: ", epoch, flush=True)
                 break
 
     if label_dyn:
@@ -267,7 +268,7 @@ def eval(data_iter, model, device):
     print('\nEvaluation - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(avg_loss,
                                                                        accuracy,
                                                                        corrects,
-                                                                       size))
+                                                                       size), flush=True)
     return avg_loss
 
 
