@@ -7,7 +7,7 @@ from util import *
 import matplotlib.pyplot as plt
 from cnn_model.train_cnn import filter, test, train_cnn
 import copy
-import torchtext.data as data
+import torchtext.legacy.data as data
 import random
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ import sys
 import torch.autograd as autograd
 import torch.nn.functional as F
 import torch
-import torchtext.data as data
+import torchtext.legacy.data as data
 from sklearn.model_selection import train_test_split
 from cnn_model.model import CNN_Text
 from cnn_model.dataset import TrainValFullDataset

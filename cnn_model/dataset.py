@@ -1,5 +1,5 @@
-from torchtext.data import Dataset
-import torchtext.data as data
+from torchtext.legacy.data import Dataset
+import torchtext.legacy.data as data
 
 
 class TrainValFullDataset(Dataset):
