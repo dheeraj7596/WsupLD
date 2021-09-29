@@ -237,7 +237,7 @@ def train_cnn(X, y, device, text_field, label_field, correct_bootstrap, wrong_bo
                                                       val_y, None, None)
     print("For generating train_data, val_data", time.time() - start_t, flush=True)
     start_t = time.time()
-    train_iter, dev_iter = data.BucketIterator.splits((train_data, val_data), batch_sizes=(64, 64),
+    train_iter, dev_iter = data.BucketIterator.splits((train_data, val_data), batch_sizes=(256, 256),
                                                       sort=False, sort_within_batch=False)
     print("For generating train_iter, dev_iter", time.time() - start_t, flush=True)
 
