@@ -14,6 +14,7 @@ import time
 
 
 def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_field, it):
+    torch.cuda.empty_cache()
     inds_map = {}
     for i, j in enumerate(y_train):
         try:
@@ -160,6 +161,7 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
             non_train_labels.append(y_train[loop_ind])
             true_non_train_labels.append(y_true[loop_ind])
 
+    torch.cuda.empty_cache()
     return train_data, train_labels, true_train_labels, non_train_data, non_train_labels, true_non_train_labels
 
 
