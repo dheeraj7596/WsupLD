@@ -57,6 +57,18 @@ if __name__ == "__main__":
 
     print("Generating pseudo labels..", flush=True)
     X_train_inds, y_train, y_true = generate_pseudo_labels(df_copy, labels, label_term_dict, tokenizer)
+    pickle.dump(X_train_inds, open(data_path + "X_train_inds_initial.pkl", "wb"))
+    pickle.dump(y_train, open(data_path + "y_train_initial.pkl", "wb"))
+    pickle.dump(y_true, open(data_path + "y_true_initial.pkl", "wb"))
+    pickle.dump(label_to_index, open(data_path + "label_to_index.pkl", "wb"))
+    pickle.dump(index_to_label, open(data_path + "index_to_label.pkl", "wb"))
+
+    # X_train_inds = pickle.load(open(data_path + "X_train_inds_initial.pkl", "rb"))
+    # y_train = pickle.load(open(data_path + "y_train_initial.pkl", "rb"))
+    # y_true = pickle.load(open(data_path + "y_true_initial.pkl", "rb"))
+    # label_to_index = pickle.load(open(data_path + "label_to_index.pkl", "rb"))
+    # index_to_label = pickle.load(open(data_path + "index_to_label.pkl", "rb"))
+
     X_test_inds = list(set(range(len(df))) - set(X_train_inds))
 
     X_train = list(df.iloc[X_train_inds]["text"])
@@ -281,12 +293,7 @@ if __name__ == "__main__":
         print(classification_report(y_test_strs, pred_labels), flush=True)
         print("*" * 80, flush=True)
 
-        _, predictions = test(model, X_test, y_test, text_field, label_field, device)
-        for i, p in enumerate(predictions):
-            if i == 0:
-                pred = p
-            else:
-                pred = np.concatenate((pred, p))
+        _, pred = test(model, X_test, y_test, text_field, label_field, device)
 
         pred_labels = []
         removed_inds = []

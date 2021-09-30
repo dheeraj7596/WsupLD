@@ -171,10 +171,8 @@ def train(train_iter, dev_iter, text_field, label_field, model, device, correct,
             start_batch = time.time()
             feature, target = batch.text, batch.label
             feature.t_()  # batch first
-            start_t = time.time()
             if device is not None:
                 feature, target = feature.to(device), target.to(device)
-            print("Moving to device", time.time() - start_t, flush=True)
 
             optimizer.zero_grad()
             logit = model(feature)
@@ -212,7 +210,9 @@ def train(train_iter, dev_iter, text_field, label_field, model, device, correct,
                         if wrong["first_ep"][index] == 0:
                             wrong["first_ep"][index] = epoch
 
+        start_t = time.time()
         dev_loss = eval(dev_iter, model, device)
+        print("Evaluation on val time", time.time() - start_t)
         if dev_loss <= best_loss:
             best_loss = dev_loss
             best_epoch = epoch
@@ -302,6 +302,8 @@ def test_eval(data_iter, model, device):
     pred_probs = torch.cat(total_probs).contiguous().detach().cpu().numpy()
     pred_labels = torch.cat(pred_labels).contiguous().detach().cpu().numpy()
     true_labels = torch.cat(true_labels).contiguous().detach().cpu().numpy()
+
+    torch.cuda.empty_cache()
     return pred_labels, pred_probs, true_labels
 
 
@@ -331,8 +333,8 @@ def save(model, save_dir, save_prefix, steps):
 
 def test(model, X, y, text_field, label_field, device):
     dataset = TrainValFullDataset(X, y, text_field, label_field)
-    iterator = data.Iterator(dataset, batch_size=32, train=False, shuffle=False, repeat=False, sort=False,
-                             sort_within_batch=False, device=device)
+    iterator = data.Iterator(dataset, batch_size=16, train=False, shuffle=False, repeat=False, sort=False,
+                             sort_within_batch=False)
 
     pred_labels, pred_probs, true_labels = test_eval(iterator, model, device)
     return pred_labels, pred_probs
