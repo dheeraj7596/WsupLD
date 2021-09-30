@@ -57,11 +57,11 @@ if __name__ == "__main__":
 
     print("Generating pseudo labels..", flush=True)
     X_train_inds, y_train, y_true = generate_pseudo_labels(df_copy, labels, label_term_dict, tokenizer)
-    pickle.dump(X_train_inds, open(data_path + "X_train_inds_initial.pkl", "wb"))
-    pickle.dump(y_train, open(data_path + "y_train_initial.pkl", "wb"))
-    pickle.dump(y_true, open(data_path + "y_true_initial.pkl", "wb"))
-    pickle.dump(label_to_index, open(data_path + "label_to_index.pkl", "wb"))
-    pickle.dump(index_to_label, open(data_path + "index_to_label.pkl", "wb"))
+    # pickle.dump(X_train_inds, open(data_path + "X_train_inds_initial.pkl", "wb"))
+    # pickle.dump(y_train, open(data_path + "y_train_initial.pkl", "wb"))
+    # pickle.dump(y_true, open(data_path + "y_true_initial.pkl", "wb"))
+    # pickle.dump(label_to_index, open(data_path + "label_to_index.pkl", "wb"))
+    # pickle.dump(index_to_label, open(data_path + "index_to_label.pkl", "wb"))
 
     # X_train_inds = pickle.load(open(data_path + "X_train_inds_initial.pkl", "rb"))
     # y_train = pickle.load(open(data_path + "y_train_initial.pkl", "rb"))

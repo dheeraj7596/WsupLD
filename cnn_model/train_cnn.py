@@ -32,7 +32,7 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
                                                                  val_y, X_train, y_true)
 
     train_iter, dev_iter, full_data_iter = data.BucketIterator.splits((train_data, val_data, full_data),
-                                                                      batch_sizes=(64, 64, 64), sort=False,
+                                                                      batch_sizes=(256, 256, 16), sort=False,
                                                                       sort_within_batch=False)
 
     embed_num = len(text_field.vocab)
