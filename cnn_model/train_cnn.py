@@ -33,7 +33,7 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
                                                                  val_y, X_train, y_true)
 
     train_iter, dev_iter, full_data_iter = data.BucketIterator.splits((train_data, val_data, full_data),
-                                                                      batch_sizes=(256, 256, 16), sort=False,
+                                                                      batch_sizes=(128, 128, 16), sort=False,
                                                                       sort_within_batch=False)
 
     embed_num = len(text_field.vocab)
@@ -250,7 +250,7 @@ def train_cnn(X, y, device, text_field, label_field, correct_bootstrap, wrong_bo
                                                       val_y, None, None)
     print("For generating train_data, val_data", time.time() - start_t, flush=True)
     start_t = time.time()
-    train_iter, dev_iter = data.BucketIterator.splits((train_data, val_data), batch_sizes=(256, 256),
+    train_iter, dev_iter = data.BucketIterator.splits((train_data, val_data), batch_sizes=(128, 128),
                                                       sort=False, sort_within_batch=False)
     print("For generating train_iter, dev_iter", time.time() - start_t, flush=True)
 
