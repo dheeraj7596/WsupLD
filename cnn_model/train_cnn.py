@@ -66,6 +66,8 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
     best_epoch = 0
     best_model = None
     best_loss = float("inf")
+    stop_flag = False
+
     for epoch in range(1, num_epochs + 1):
         model.train()
         for batch in train_iter:
@@ -117,6 +119,7 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
             temp_flg = temp_flg and filter_flag_map[i]
 
         if temp_flg:
+            stop_flag = True
             break
 
         dev_loss = eval(dev_iter, model, device)
@@ -129,6 +132,14 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
                 print('early stop by {} epochs.'.format(early_stop), flush=True)
                 print("Best epoch: ", best_epoch, "Current epoch: ", epoch, flush=True)
                 break
+
+    if not stop_flag:
+        print("MAX EPOCHS REACHED!!!!!!", flush=True)
+        for i in filter_flag_map:
+            if not filter_flag_map[i]:
+                print("Resetting train, non-train inds for label ", i)
+                train_inds_map[i] = inds_map[i]
+                non_train_inds_map[i] = []
 
     train_data = []
     train_labels = []
