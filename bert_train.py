@@ -1075,6 +1075,27 @@ def prob_filter(X, y_pseudo, y_true, device, iteration):
     return train_data, train_labels, true_train_labels, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob
 
 
+def random_filter(X, y_pseudo, y_true, iteration, dataset):
+    dic = bert_data_it_dict()
+    try:
+        num = dic[dataset][iteration]
+    except:
+        if dataset not in dic:
+            raise Exception("Dataset out of bounds " + dataset)
+        elif iteration not in dic[dataset]:
+            raise Exception("Iteration out of bounds " + dataset + str(iteration))
+        else:
+            raise Exception("Something went wrong " + dataset + str(iteration))
+
+    length = len(X)
+    if num >= length:
+        return X, y_pseudo, y_true, [], [], []
+    else:
+        train_data, non_train_data, train_labels, non_train_labels, true_train_labels, true_non_train_labels = train_test_split(
+            X, y_pseudo, y_true, stratify=y_pseudo, test_size=(length - num))
+        return train_data, train_labels, true_train_labels, non_train_data, non_train_labels, true_non_train_labels
+
+
 if __name__ == "__main__":
     # base_path = "./data/"
     base_path = "/data/dheeraj/WsupLD/data/"

@@ -118,6 +118,15 @@ def create_label_index_maps(labels):
     return label_to_index, index_to_label
 
 
+def bert_data_it_dict():
+    dic = {"nyt-coarse": {0: 8817, 1: 12821, 2: 12875, 3: 12966, 4: 12999},
+           "nyt-fine": {0: 6738, 1: 10770, 2: 11199, 3: 11420, 4: 11527},
+           "20news-coarse-nomisc": {0: 7377, 1: 17047, 2: 17409, 3: 17470, 4: 17524},
+           "20news-fine-nomisc": {0: 9751, 1: 14727, 2: 15668, 3: 15841, 4: 15862},
+           "agnews": {0: 32264, 1: 114160, 2: 118153, 3: 118060, 4: 118198}}
+    return dic
+
+
 def compute_stability_scores(stability_list):
     stability_scores = []
     for lst in stability_list:

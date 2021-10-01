@@ -144,6 +144,14 @@ if __name__ == "__main__":
             X_train = temp_x_train
             y_train = temp_y_train
             y_true = temp_y_true
+        elif filter_flag == 4:
+            # random filter
+            y_train = [temp_index_to_label[y] for y in y_train]
+            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = random_filter(X_train,
+                                                                                                              y_train,
+                                                                                                              y_true,
+                                                                                                              it,
+                                                                                                              dataset)
 
         print("******************AFTER FILTERING: classification report of pseudo-labels******************", flush=True)
         print(classification_report(y_true, y_train), flush=True)
@@ -225,7 +233,7 @@ if __name__ == "__main__":
         print(classification_report(y_all, pred_labels), flush=True)
         print("*" * 80, flush=True)
 
-        if filter_flag and filter_flag != 3:
+        if filter_flag and filter_flag not in [3, 4]:
             print(
                 "****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT PSEUDO ********************",
                 flush=True)
