@@ -8,7 +8,6 @@ from util import *
 import matplotlib.pyplot as plt
 import copy
 
-
 if __name__ == "__main__":
     # base_path = "./data/"
     base_path = "/data/dheeraj/WsupLD/data/"
@@ -112,12 +111,14 @@ if __name__ == "__main__":
             y_train = [temp_label_to_index[y] for y in y_train]
 
         if filter_flag == 1:
+            # top50-epoch filter
             print("Filtering started..", flush=True)
             X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = filter(
                 X_train, y_train, y_true, device, it)
             y_train = [temp_index_to_label[y] for y in y_train]
             non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
         elif filter_flag == 2:
+            # probability filter
             print("Filtering started..", flush=True)
             X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob = prob_filter(
                 X_train, y_train, y_true, device, it)
@@ -129,6 +130,18 @@ if __name__ == "__main__":
             # plt.axhline(cutoff_prob, color='r')
             # plt.savefig(plot_dump_dir + "prob_filter_cutoff_prob_" + str(it) + ".png")
             # pickle.dump(X_train, open(data_path + "X_train_prob_" + str(it) + ".pkl", "wb"))
+        elif filter_flag == 3:
+            # upperbound
+            y_train = [temp_index_to_label[y] for y in y_train]
+            temp_y_train = []
+            temp_x_train = []
+            for loop_ind in range(len(y_train)):
+                if y_train[loop_ind] == y_true[loop_ind]:
+                    temp_x_train.append(X_train[loop_ind])
+                    temp_y_train.append(y_train[loop_ind])
+            X_train = temp_x_train
+            y_train = temp_y_train
+
         print("******************AFTER FILTERING: classification report of pseudo-labels******************", flush=True)
         print(classification_report(y_true, y_train), flush=True)
 
@@ -209,7 +222,7 @@ if __name__ == "__main__":
         print(classification_report(y_all, pred_labels), flush=True)
         print("*" * 80, flush=True)
 
-        if filter_flag:
+        if filter_flag and filter_flag != 3:
             print(
                 "****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT PSEUDO ********************",
                 flush=True)
