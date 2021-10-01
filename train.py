@@ -121,7 +121,7 @@ if __name__ == "__main__":
             # probability filter
             print("Filtering started..", flush=True)
             X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob = prob_filter(
-                X_train, y_train, y_true, device, it)
+                X_train, y_train, y_true, device, dataset, it)
             y_train = [temp_index_to_label[y] for y in y_train]
             non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
             # probs = np.sort(probs)[::-1]

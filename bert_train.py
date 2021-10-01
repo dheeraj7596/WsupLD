@@ -14,6 +14,20 @@ from sklearn.metrics import classification_report
 from collections import Counter
 
 
+def get_num(dataset, iteration):
+    dic = bert_data_it_dict()
+    try:
+        num = dic[dataset][iteration]
+    except:
+        if dataset not in dic:
+            raise Exception("Dataset out of bounds " + dataset)
+        elif iteration not in dic[dataset]:
+            raise Exception("Iteration out of bounds " + dataset + str(iteration))
+        else:
+            raise Exception("Something went wrong " + dataset + str(iteration))
+    return num
+
+
 def format_time(elapsed):
     '''
     Takes a time in seconds and returns a string hh:mm:ss
@@ -732,7 +746,7 @@ def get_true_label_probs(predictions, true):
     return probs
 
 
-def prob_filter(X, y_pseudo, y_true, device, iteration):
+def prob_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
     start = time.time()
     input_ids, attention_masks, labels = bert_tokenize(tokenizer, X, y_pseudo)
@@ -926,133 +940,10 @@ def prob_filter(X, y_pseudo, y_true, device, iteration):
     first_ep_preds, first_ep_true_labels = evaluate(model, prediction_dataloader, device)
     probs = get_true_label_probs(first_ep_preds, y_pseudo)
     inds = list(np.argsort(probs)[::-1])
-    if iteration == 0:
-        # nyt-coarse
-        # train_data_inds = inds[:8740]
-        # cutoff_prob = probs[inds[8739]]
+    num = get_num(dataset_name, iteration)
 
-        # 20news-coarse
-        # train_data_inds = inds[:8163]
-        # cutoff_prob = probs[inds[8162]]
-
-        # agnews
-        # train_data_inds = inds[:32288]
-        # cutoff_prob = probs[inds[32287]]
-
-        # 20news-coarse-nomisc
-        # train_data_inds = inds[:7286]
-        # cutoff_prob = probs[inds[7285]]
-
-        # train_data_inds = inds[:int(len(inds) / 2)]
-        # cutoff_prob = probs[inds[int(len(inds) / 2) - 1]]
-
-        for i in inds:
-            if probs[i] < 0.9:
-                break
-        train_data_inds = inds[:i]
-        cutoff_prob = probs[inds[i - 1]]
-    elif iteration == 1:
-        # nyt-coarse
-        # train_data_inds = inds[:12885]
-        # cutoff_prob = probs[inds[12884]]
-
-        # 20news-coarse
-        # train_data_inds = inds[:17829]
-        # cutoff_prob = probs[inds[17829]]
-
-        # agnews
-        # train_data_inds = inds[:114114]
-        # cutoff_prob = probs[inds[114113]]
-
-        # 20news-coarse-nomisc
-        # train_data_inds = inds[:17232]
-        # cutoff_prob = probs[inds[17231]]
-
-        # train_data_inds = inds[:int(len(inds) / 2)]
-        # cutoff_prob = probs[inds[int(len(inds) / 2) - 1]]
-
-        for i in inds:
-            if probs[i] < 0.9:
-                break
-        train_data_inds = inds[:i]
-        cutoff_prob = probs[inds[i - 1]]
-    elif iteration == 2:
-        # nyt-coarse
-        # train_data_inds = inds[:12959]
-        # cutoff_prob = probs[inds[12958]]
-
-        # 20news-coarse
-        # train_data_inds = inds[:18385]
-        # cutoff_prob = probs[inds[18384]]
-
-        # agnews
-        # train_data_inds = inds[:118356]
-        # cutoff_prob = probs[inds[118355]]
-
-        # 20news-coarse-nomisc
-        # train_data_inds = inds[:17542]
-        # cutoff_prob = probs[inds[17541]]
-
-        # train_data_inds = inds[:int(len(inds) / 2)]
-        # cutoff_prob = probs[inds[int(len(inds) / 2) - 1]]
-
-        for i in inds:
-            if probs[i] < 0.9:
-                break
-        train_data_inds = inds[:i]
-        cutoff_prob = probs[inds[i - 1]]
-    elif iteration == 3:
-        # nyt-coarse
-        # train_data_inds = inds[:12999]
-        # cutoff_prob = probs[inds[12998]]
-
-        # 20news-coarse
-        # train_data_inds = inds[:18500]
-        # cutoff_prob = probs[inds[18499]]
-
-        # agnews
-        # train_data_inds = inds[:118733]
-        # cutoff_prob = probs[inds[118732]]
-
-        # 20news-coarse-nomisc
-        # train_data_inds = inds[:17622]
-        # cutoff_prob = probs[inds[17621]]
-
-        # train_data_inds = inds[:int(len(inds) / 2)]
-        # cutoff_prob = probs[inds[int(len(inds) / 2) - 1]]
-
-        for i in inds:
-            if probs[i] < 0.9:
-                break
-        train_data_inds = inds[:i]
-        cutoff_prob = probs[inds[i - 1]]
-    elif iteration == 4:
-        # nyt-coarse
-        # train_data_inds = inds[:13007]
-        # cutoff_prob = probs[inds[13006]]
-
-        # 20news-coarse
-        # train_data_inds = inds[:18822]
-        # cutoff_prob = probs[inds[18821]]
-
-        # agnews
-        # train_data_inds = inds[:118774]
-        # cutoff_prob = probs[inds[118773]]
-
-        # 20news-coarse-nomisc
-        # train_data_inds = inds[:17668]
-        # cutoff_prob = probs[inds[17667]]
-
-        # train_data_inds = inds[:int(len(inds) / 2)]
-        # cutoff_prob = probs[inds[int(len(inds) / 2) - 1]]
-
-        for i in inds:
-            if probs[i] < 0.9:
-                break
-        train_data_inds = inds[:i]
-        cutoff_prob = probs[inds[i - 1]]
-    else:
-        raise Exception("Iteration out of bounds")
+    train_data_inds = inds[:num]
+    cutoff_prob = probs[inds[num - 1]]
 
     train_data = []
     train_labels = []
@@ -1076,17 +967,7 @@ def prob_filter(X, y_pseudo, y_true, device, iteration):
 
 
 def random_filter(X, y_pseudo, y_true, iteration, dataset):
-    dic = bert_data_it_dict()
-    try:
-        num = dic[dataset][iteration]
-    except:
-        if dataset not in dic:
-            raise Exception("Dataset out of bounds " + dataset)
-        elif iteration not in dic[dataset]:
-            raise Exception("Iteration out of bounds " + dataset + str(iteration))
-        else:
-            raise Exception("Something went wrong " + dataset + str(iteration))
-
+    num = get_num(dataset, iteration)
     length = len(X)
     if num >= length:
         return X, y_pseudo, y_true, [], [], []
