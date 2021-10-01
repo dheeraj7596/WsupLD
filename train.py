@@ -135,12 +135,15 @@ if __name__ == "__main__":
             y_train = [temp_index_to_label[y] for y in y_train]
             temp_y_train = []
             temp_x_train = []
+            temp_y_true = []
             for loop_ind in range(len(y_train)):
                 if y_train[loop_ind] == y_true[loop_ind]:
                     temp_x_train.append(X_train[loop_ind])
                     temp_y_train.append(y_train[loop_ind])
+                    temp_y_true.append(y_true[loop_ind])
             X_train = temp_x_train
             y_train = temp_y_train
+            y_true = temp_y_true
 
         print("******************AFTER FILTERING: classification report of pseudo-labels******************", flush=True)
         print(classification_report(y_true, y_train), flush=True)
