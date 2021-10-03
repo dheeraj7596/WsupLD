@@ -112,14 +112,14 @@ if __name__ == "__main__":
 
         if filter_flag == 1:
             # top50-epoch filter
-            print("Filtering started..", flush=True)
+            print("Top50-epoch Filtering started..", flush=True)
             X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = filter(
                 X_train, y_train, y_true, device, it)
             y_train = [temp_index_to_label[y] for y in y_train]
             non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
         elif filter_flag == 2:
             # probability filter
-            print("Filtering started..", flush=True)
+            print("Probability Filtering started..", flush=True)
             X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob = prob_filter(
                 X_train, y_train, y_true, device, dataset, it)
             y_train = [temp_index_to_label[y] for y in y_train]
@@ -146,6 +146,7 @@ if __name__ == "__main__":
             y_true = temp_y_true
         elif filter_flag == 4:
             # random filter
+            print("Random Filtering started..", flush=True)
             y_train = [temp_index_to_label[y] for y in y_train]
             X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = random_filter(X_train,
                                                                                                               y_train,
@@ -154,7 +155,7 @@ if __name__ == "__main__":
                                                                                                               dataset)
         elif filter_flag == 5:
             # problematic score
-            print("Filtering started..", flush=True)
+            print("Problematic score Filtering started..", flush=True)
             X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob = prob_score_filter(
                 X_train, y_train, y_true, device, dataset, it)
             y_train = [temp_index_to_label[y] for y in y_train]
