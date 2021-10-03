@@ -156,7 +156,7 @@ if __name__ == "__main__":
         elif filter_flag == 5:
             # problematic score
             print("Problematic score Filtering started..", flush=True)
-            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob = prob_score_filter(
+            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = prob_score_filter(
                 X_train, y_train, y_true, device, dataset, it)
             y_train = [temp_index_to_label[y] for y in y_train]
             non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
