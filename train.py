@@ -19,6 +19,7 @@ if __name__ == "__main__":
     use_gpu = int(sys.argv[1])
     gpu_id = int(sys.argv[2])
     dump_flag = False
+    anal_flag = False
     plt_flag = int(sys.argv[5])
     filter_flag = int(sys.argv[4])
     bins = [0, 0.25, 0.5, 0.75, 1]
@@ -241,7 +242,7 @@ if __name__ == "__main__":
         print(classification_report(y_all, pred_labels), flush=True)
         print("*" * 80, flush=True)
 
-        if filter_flag and filter_flag not in [3, 4]:
+        if anal_flag and filter_flag not in [3, 4]:
             print(
                 "****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT PSEUDO ********************",
                 flush=True)
