@@ -49,7 +49,7 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
     model = cnn
     lr = 0.001
     num_epochs = 256
-    early_stop = 5
+    early_stop = 3
     log_interval = 100
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -94,6 +94,7 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
                                                                              corrects.item(),
                                                                              batch.batch_size))
 
+        torch.cuda.empty_cache()
         pred_labels, pred_probs, true_labels = test_eval(full_data_iter, model, device)
 
         count = 0
@@ -205,6 +206,8 @@ def train(train_iter, dev_iter, text_field, label_field, model, device, correct,
                                                                              batch.batch_size))
 
             print("Batch processing time", time.time() - start_batch, flush=True)
+
+        torch.cuda.empty_cache()
 
         if label_dyn:
             if len(correct["text"]) > 0:

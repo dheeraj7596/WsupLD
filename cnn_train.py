@@ -22,6 +22,7 @@ if __name__ == "__main__":
     dump_flag = False
     plt_flag = int(sys.argv[5])
     filter_flag = int(sys.argv[4])
+    anal_flag = False
     percent_thresh = float(sys.argv[6])
     bins = [0, 0.25, 0.5, 0.75, 1]
     bins_five = [0, 1, 2, 3, 4, 5]
@@ -241,7 +242,7 @@ if __name__ == "__main__":
         print(classification_report(y_all, pred_labels), flush=True)
         print("*" * 80, flush=True)
 
-        if filter_flag:
+        if anal_flag:
             print(
                 "****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT PSEUDO ********************",
                 flush=True)
