@@ -85,7 +85,7 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
 
             steps += 1
             if steps % log_interval == 0:
-                corrects = (torch.max(logit, 1)[1].view(target.size()).data == target.data).sum()
+                corrects = (torch.max(logit, 1)[1].view(target.size()) == target).sum()
                 accuracy = 100.0 * corrects / batch.batch_size
                 sys.stdout.write(
                     '\rBatch[{}] - loss: {:.6f}  acc: {:.4f}%({}/{})'.format(steps,
@@ -179,6 +179,7 @@ def train(train_iter, dev_iter, text_field, label_field, model, device, correct,
     best_loss = float("inf")
     epochs_run = 0
     for epoch in range(1, num_epochs + 1):
+        print("Epoch:", epoch, flush=True)
         model.train()
         epochs_run += 1
         for batch in train_iter:
@@ -213,7 +214,7 @@ def train(train_iter, dev_iter, text_field, label_field, model, device, correct,
             steps += 1
             if steps % log_interval == 0:
                 start_t = time.time()
-                corrects = (torch.max(logit, 1)[1].view(target.size()).data == target.data).sum()
+                corrects = (torch.max(logit, 1)[1].view(target.size()) == target).sum()
                 accuracy = 100.0 * corrects / batch.batch_size
                 sys.stdout.write(
                     '\rBatch[{}] - loss: {:.6f}  acc: {:.4f}%({}/{})'.format(steps,
@@ -300,12 +301,12 @@ def eval(data_iter, model, device):
         if device is not None:
             feature, target = feature.to(device), target.to(device)
 
-        logit = model(feature)
+        with torch.no_grad():
+            logit = model(feature)
         loss = F.cross_entropy(logit, target, size_average=False)
 
         avg_loss += loss.item()
-        corrects += (torch.max(logit, 1)
-                     [1].view(target.size()).data == target.data).sum()
+        corrects += (torch.max(logit, 1)[1].view(target.size()) == target).sum()
 
     size = len(data_iter.dataset)
     avg_loss /= size
@@ -314,6 +315,7 @@ def eval(data_iter, model, device):
                                                                        accuracy,
                                                                        corrects,
                                                                        size), flush=True)
+    torch.cuda.empty_cache()
     return avg_loss
 
 
@@ -328,11 +330,13 @@ def test_eval(data_iter, model, device):
         if device is not None:
             feature, target = feature.to(device), target.to(device)
 
-        logit = model(feature)
+        with torch.no_grad():
+            logit = model(feature)
+
         probs = F.softmax(logit, dim=-1)
-        pred_labels.append(torch.max(logit, 1)[1].view(target.size()).data)
+        pred_labels.append(torch.max(logit, 1)[1].view(target.size()))
         total_probs.append(probs)
-        true_labels.append(target.data)
+        true_labels.append(target)
 
     pred_probs = torch.cat(total_probs).contiguous().detach().cpu().numpy()
     pred_labels = torch.cat(pred_labels).contiguous().detach().cpu().numpy()
