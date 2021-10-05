@@ -186,30 +186,30 @@ def train(train_iter, dev_iter, text_field, label_field, model, device, correct,
             start_batch = time.time()
             start_t = time.time()
             feature, target = batch.text, batch.label
-            print("Getting feature, target from batch", time.time() - start_t, flush=True)
+            # print("Getting feature, target from batch", time.time() - start_t, flush=True)
             start_t = time.time()
             feature.t_()  # batch first
-            print("Making batch first", time.time() - start_t, flush=True)
+            # print("Making batch first", time.time() - start_t, flush=True)
             start_t = time.time()
             if device is not None:
                 feature, target = feature.to(device), target.to(device)
-            print("Moving to device", time.time() - start_t, flush=True)
+            # print("Moving to device", time.time() - start_t, flush=True)
 
             start_t = time.time()
             optimizer.zero_grad()
-            print("zero grad", time.time() - start_t, flush=True)
+            # print("zero grad", time.time() - start_t, flush=True)
             start_t = time.time()
             logit = model(feature)
-            print("Model", time.time() - start_t, flush=True)
+            # print("Model", time.time() - start_t, flush=True)
             start_t = time.time()
             loss = F.cross_entropy(logit, target)
-            print("Loss comp", time.time() - start_t, flush=True)
+            # print("Loss comp", time.time() - start_t, flush=True)
             start_t = time.time()
             loss.backward()
-            print("Loss backward", time.time() - start_t, flush=True)
+            # print("Loss backward", time.time() - start_t, flush=True)
             start_t = time.time()
             optimizer.step()
-            print("Opt step", time.time() - start_t, flush=True)
+            # print("Opt step", time.time() - start_t, flush=True)
 
             steps += 1
             if steps % log_interval == 0:
