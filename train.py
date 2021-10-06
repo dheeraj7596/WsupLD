@@ -23,6 +23,7 @@ if __name__ == "__main__":
     train_flag = False
     plt_flag = int(sys.argv[5])
     filter_flag = int(sys.argv[4])
+    percent_thresh = float(sys.argv[6])
     bins = [0, 0.25, 0.5, 0.75, 1]
     bins_five = [0, 1, 2, 3, 4, 5]
     num_its = 1
@@ -116,7 +117,7 @@ if __name__ == "__main__":
             # top50-epoch filter
             print("Top50-epoch Filtering started..", flush=True)
             X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = filter(
-                X_train, y_train, y_true, device, it)
+                X_train, y_train, y_true, device, percent_thresh, it)
             y_train = [temp_index_to_label[y] for y in y_train]
             non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
         elif filter_flag == 2:

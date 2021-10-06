@@ -462,7 +462,7 @@ def train_bert(X, y, device, correct, wrong, label_dyn=False):
     return model, correct, wrong
 
 
-def filter(X, y_pseudo, y_true, device, iteration=None):
+def filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteration=None):
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
     start = time.time()
     input_ids, attention_masks, labels = bert_tokenize(tokenizer, X, y_pseudo)
@@ -497,7 +497,7 @@ def filter(X, y_pseudo, y_true, device, iteration=None):
     thresh_map = dict(Counter(y_pseudo))
     print("Counts of pseudo-labels ", thresh_map, flush=True)
     for i in thresh_map:
-        thresh_map[i] = int(thresh_map[i] / 2)
+        thresh_map[i] = int(thresh_map[i] * percent_thresh)
 
     print("Threshold map ", thresh_map, flush=True)
 
