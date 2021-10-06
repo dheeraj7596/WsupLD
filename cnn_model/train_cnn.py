@@ -129,11 +129,11 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
             best_loss = dev_loss
             best_epoch = epoch
             best_model = model
-        else:
-            if epoch - best_epoch >= early_stop:
-                print('early stop by {} epochs.'.format(early_stop), flush=True)
-                print("Best epoch: ", best_epoch, "Current epoch: ", epoch, flush=True)
-                break
+        # else:
+        #     if epoch - best_epoch >= early_stop:
+        #         print('early stop by {} epochs.'.format(early_stop), flush=True)
+        #         print("Best epoch: ", best_epoch, "Current epoch: ", epoch, flush=True)
+        #         break
 
     if not stop_flag:
         print("MAX EPOCHS REACHED!!!!!!", flush=True)
