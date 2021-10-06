@@ -20,11 +20,12 @@ if __name__ == "__main__":
     gpu_id = int(sys.argv[2])
     dump_flag = False
     anal_flag = False
+    train_flag = False
     plt_flag = int(sys.argv[5])
     filter_flag = int(sys.argv[4])
     bins = [0, 0.25, 0.5, 0.75, 1]
     bins_five = [0, 1, 2, 3, 4, 5]
-    num_its = 5
+    num_its = 1
     # use_gpu = 0
 
     seed_val = 42
@@ -208,6 +209,9 @@ if __name__ == "__main__":
             temp_label_to_index[y] = i
             temp_index_to_label[i] = y
         y_train = [temp_label_to_index[y] for y in y_train]
+
+        if not train_flag:
+            continue
 
         print("Training model..", flush=True)
         model, correct_bootstrap, wrong_bootstrap = train_bert(X_train, y_train, device, correct_bootstrap,
