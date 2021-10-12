@@ -1413,6 +1413,28 @@ def random_filter(X, y_pseudo, y_true, iteration, dataset):
         return train_data, train_labels, true_train_labels, non_train_data, non_train_labels, true_non_train_labels
 
 
+def compute_correct_wrong_coverage(model, prediction_dataloader, device, y_pseudo, y_true):
+    preds, first_ep_true_labels = evaluate(model, prediction_dataloader, device)
+    pred_inds = get_labelinds_from_probs(preds)
+
+    filtered_labels = []
+    filtered_true_labels = []
+    for ind in range(len(y_pseudo)):
+        if pred_inds[ind] == y_pseudo[ind]:
+            filtered_labels.append(y_pseudo[ind])
+            filtered_true_labels.append(y_true[ind])
+
+    coverage = len(filtered_labels)
+    correct = 0
+    wrong = 0
+    for i, j in zip(filtered_labels, filtered_true_labels):
+        if i == j:
+            correct += 1
+        else:
+            wrong += 1
+    return correct, wrong, coverage
+
+
 def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteration=None):
     correct_list = []
     wrong_list = []
@@ -1441,30 +1463,6 @@ def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteratio
 
     num_labels = len(set(y_pseudo))
 
-    stop_flag = False
-    inds_map = {}
-    for i, j in enumerate(y_pseudo):
-        try:
-            inds_map[j].append(i)
-        except:
-            inds_map[j] = [i]
-
-    thresh_map = dict(Counter(y_pseudo))
-    print("Counts of pseudo-labels ", thresh_map, flush=True)
-    for i in thresh_map:
-        thresh_map[i] = int(thresh_map[i] * percent_thresh)
-
-    print("Threshold map ", thresh_map, flush=True)
-
-    filter_flag_map = {}
-    train_inds_map = {}
-    non_train_inds_map = {}
-    for i in thresh_map:
-        filter_flag_map[i] = False
-        train_inds_map[i] = []
-        non_train_inds_map[i] = []
-    # Tell pytorch to run this model on the GPU.
-
     # Load BertForSequenceClassification, the pretrained BERT model with a single
     # linear classification layer on top.
     model = BertForSequenceClassification.from_pretrained(
@@ -1485,7 +1483,15 @@ def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteratio
     # Number of training epochs. The BERT authors recommend between 2 and 4.
     # We chose to run for 4, but we'll see later that this may be over-fitting the
     # training data.
-    epochs = 10
+    epochs = 4
+
+    prediction_sampler = SequentialSampler(dataset)
+    prediction_dataloader = DataLoader(dataset,
+                                       sampler=prediction_sampler,
+                                       batch_size=batch_size,
+                                       num_workers=16,
+                                       pin_memory=True
+                                       )
 
     # Total number of training steps is [number of batches] x [number of epochs].
     # (Note that this is not the same as the number of training samples).
@@ -1516,9 +1522,7 @@ def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteratio
 
     # For each epoch...
 
-    print("Getting data that can be trained in 1 epoch..", flush=True)
-    epoch_i = 0
-    while not stop_flag and epoch_i < epochs:
+    for epoch_i in range(epochs):
 
         # ========================================
         #               Training
@@ -1555,6 +1559,14 @@ def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteratio
                 # Report progress.
                 print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(train_dataloader), elapsed),
                       flush=True)
+                correct, wrong, coverage = compute_correct_wrong_coverage(model, prediction_dataloader, device,
+                                                                          y_pseudo, y_true)
+                correct_list.append(correct)
+                wrong_list.append(wrong)
+                coverage_list.append(coverage)
+                print("Coverage:", coverage, flush=True)
+                print("Correct:", correct, flush=True)
+                print("Wrong:", wrong, flush=True)
 
             # Unpack this training batch from our dataloader.
             #
@@ -1623,69 +1635,7 @@ def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteratio
         print("", flush=True)
         print("  Average training loss: {0:.2f}".format(avg_train_loss), flush=True)
         print("  Training epoch took: {:}".format(training_time), flush=True)
-
-        prediction_sampler = SequentialSampler(dataset)
-        prediction_dataloader = DataLoader(dataset,
-                                           sampler=prediction_sampler,
-                                           batch_size=batch_size,
-                                           num_workers=16,
-                                           pin_memory=True
-                                           )
-
-        first_ep_preds, first_ep_true_labels = evaluate(model, prediction_dataloader, device)
-        first_ep_pred_inds = get_labelinds_from_probs(first_ep_preds)
-
-        count = 0
-        for i in filter_flag_map:
-            if not filter_flag_map[i]:
-                train_inds, non_train_inds = compute_train_non_train_inds(first_ep_pred_inds, y_pseudo, inds_map, i)
-                train_inds_map[i] = train_inds
-                non_train_inds_map[i] = non_train_inds
-                if len(train_inds) >= thresh_map[i]:
-                    filter_flag_map[i] = True
-                    count += 1
-            else:
-                count += 1
-
-        print("Number of labels reached 50 percent threshold", count)
-        for i in filter_flag_map:
-            if not filter_flag_map[i]:
-                print("For label ", i, " Number expected ", thresh_map[i], " Found ", len(train_inds_map[i]))
-
-        temp_flg = True
-        for i in filter_flag_map:
-            temp_flg = temp_flg and filter_flag_map[i]
-        stop_flag = temp_flg
-        epoch_i += 1
-
-    if not stop_flag:
-        print("MAX EPOCHS REACHED!!!!!!", flush=True)
-        for i in filter_flag_map:
-            if not filter_flag_map[i]:
-                print("Resetting train, non-train inds for label ", i)
-                train_inds_map[i] = inds_map[i]
-                non_train_inds_map[i] = []
-
-    train_data = []
-    train_labels = []
-    true_train_labels = []
-    non_train_data = []
-    non_train_labels = []
-    true_non_train_labels = []
-
-    for lbl in train_inds_map:
-        for loop_ind in train_inds_map[lbl]:
-            train_data.append(X[loop_ind])
-            train_labels.append(y_pseudo[loop_ind])
-            true_train_labels.append(y_true[loop_ind])
-
-    for lbl in non_train_inds_map:
-        for loop_ind in non_train_inds_map[lbl]:
-            non_train_data.append(X[loop_ind])
-            non_train_labels.append(y_pseudo[loop_ind])
-            true_non_train_labels.append(y_true[loop_ind])
-
-    return train_data, train_labels, true_train_labels, non_train_data, non_train_labels, true_non_train_labels
+    return correct_list, wrong_list, coverage_list
 
 
 if __name__ == "__main__":
