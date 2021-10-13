@@ -65,19 +65,19 @@ if __name__ == "__main__":
     # plt.show()
 
     # nyt-coarse
-    # risk_epoch = [0.0558, 0.0654, 0.0669, 0.0912]
-    # risk_prob = [0.0759, 0.078, 0.0776, 0.0889]
-    # coverage = [0.672, 0.678, 0.681, 0.7]
+    # risk_epoch = [8284, 8282, 8271, 8289, 8341, 8335, 8414]
+    # risk_prob = [8125, 8186, 8218, 8245, 8336, 8334, 8414]
+    # coverage = [0.93, 0.938, 0.946, 0.945, 0.964, 0.965, 1]
 
     # 20news-fine
-    risk_epoch = [0.226, 0.2276, 0.2352, 0.2444]
-    risk_prob = [0.239, 0.2391, 0.2399, 0.2425]
-    coverage = [0.584, 0.592, 0.6, 0.616]
+    risk_epoch = [7442, 7508, 7627, 7625, 7644, 7771]
+    risk_prob = [7326, 7427, 7608, 7613, 7685, 7771]
+    coverage = [0.912, 0.927, 0.959, 0.9613, 0.9684, 1]
 
     plt.plot(coverage, risk_epoch, label="Epoch-based filter")
     plt.plot(coverage, risk_prob, label="Probability-based filter")
     plt.xlabel("Coverage")
-    plt.ylabel("Risk")
+    plt.ylabel("Risk=#Correctly labeled samples")
     plt.legend()
     plt.title("20News-Fine")
     plt.savefig("./data/plots/20news_fine_rc.png")
