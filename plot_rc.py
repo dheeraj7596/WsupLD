@@ -60,6 +60,12 @@ if __name__ == "__main__":
 
     plt.plot(coverage, risk_epoch, label="Epoch-based filter")
     plt.plot(coverage, risk_prob, label="Probability-based filter")
+
+    if dataset == "nyt-coarse":
+        plt.plot(coverage, [8375] * len(coverage), '--', label="No filter")
+    else:
+        plt.plot(coverage, [7771] * len(coverage), '--', label="No filter")
+
     plt.xlabel("Coverage")
     plt.ylabel("Risk=#Correctly labeled samples")
     plt.legend(loc='lower right')
