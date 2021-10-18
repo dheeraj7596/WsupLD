@@ -19,14 +19,14 @@ if __name__ == "__main__":
     use_gpu = int(sys.argv[1])
     gpu_id = int(sys.argv[2])
     dump_flag = False
-    anal_flag = True
+    anal_flag = False
     train_flag = True
     plt_flag = int(sys.argv[5])
     filter_flag = int(sys.argv[4])
     percent_thresh = float(sys.argv[6])
     bins = [0, 0.25, 0.5, 0.75, 1]
     bins_five = [0, 1, 2, 3, 4, 5]
-    num_its = 1
+    num_its = 5
     # use_gpu = 0
 
     seed_val = 42
