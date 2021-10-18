@@ -1,5 +1,4 @@
-from transformers import BertForSequenceClassification, BertTokenizer, AdamW, BertConfig, \
-    get_linear_schedule_with_warmup
+from transformers import RobertaForSequenceClassification, RobertaTokenizer, AdamW, get_linear_schedule_with_warmup
 from torch.utils.data import TensorDataset, random_split
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 import torch
@@ -46,7 +45,7 @@ def flat_accuracy(preds, labels):
     return np.sum(pred_flat == labels_flat) / len(labels_flat)
 
 
-def bert_tokenize(tokenizer, sentences, labels):
+def tokenize(tokenizer, sentences, labels):
     input_ids = []
     attention_masks = []
     # For every sentence...
@@ -115,8 +114,8 @@ def create_data_loaders(dataset):
 def train(train_dataloader, validation_dataloader, device, num_labels, correct, wrong, label_dyn=False):
     # Load BertForSequenceClassification, the pretrained BERT model with a single
     # linear classification layer on top.
-    model = BertForSequenceClassification.from_pretrained(
-        "bert-base-uncased",  # Use the 12-layer BERT model, with an uncased vocab.
+    model = RobertaForSequenceClassification.from_pretrained(
+        "roberta-base",  # Use the 12-layer BERT model, with an uncased vocab.
         num_labels=num_labels,  # The number of output labels--2 for binary classification.
         # You can increase this for multi-class tasks.
         output_attentions=False,  # Whether the model returns attentions weights.
@@ -133,7 +132,7 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
     # Number of training epochs. The BERT authors recommend between 2 and 4.
     # We chose to run for 4, but we'll see later that this may be over-fitting the
     # training data.
-    epochs = 4
+    epochs = 3
 
     # Total number of training steps is [number of batches] x [number of epochs].
     # (Note that this is not the same as the number of training samples).
@@ -419,8 +418,8 @@ def evaluate(model, prediction_dataloader, device):
 
 def test(model, X_test, y_test, device):
     start = time.time()
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
-    input_ids, attention_masks, labels = bert_tokenize(tokenizer, X_test, y_test)
+    tokenizer = RobertaTokenizer.from_pretrained('roberta-base', do_lower_case=True)
+    input_ids, attention_masks, labels = tokenize(tokenizer, X_test, y_test)
     print("Tokenizing text time:", time.time() - start, flush=True)
     batch_size = 32
     # Create the DataLoader.
@@ -440,9 +439,9 @@ def test(model, X_test, y_test, device):
     return predictions
 
 
-def train_bert(X, y, device, correct, wrong, label_dyn=False):
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
-    input_ids, attention_masks, labels = bert_tokenize(tokenizer, X, y)
+def train_cls(X, y, device, correct, wrong, label_dyn=False):
+    tokenizer = RobertaTokenizer.from_pretrained('roberta-base', do_lower_case=True)
+    input_ids, attention_masks, labels = tokenize(tokenizer, X, y)
 
     # Combine the training inputs into a TensorDataset.
     dataset = TensorDataset(input_ids, attention_masks, labels)
@@ -463,9 +462,9 @@ def train_bert(X, y, device, correct, wrong, label_dyn=False):
 
 
 def filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteration=None):
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+    tokenizer = RobertaTokenizer.from_pretrained('roberta-base', do_lower_case=True)
     start = time.time()
-    input_ids, attention_masks, labels = bert_tokenize(tokenizer, X, y_pseudo)
+    input_ids, attention_masks, labels = tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
 
     # Combine the training inputs into a TensorDataset.
@@ -512,8 +511,8 @@ def filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteration=None):
 
     # Load BertForSequenceClassification, the pretrained BERT model with a single
     # linear classification layer on top.
-    model = BertForSequenceClassification.from_pretrained(
-        "bert-base-uncased",  # Use the 12-layer BERT model, with an uncased vocab.
+    model = RobertaForSequenceClassification.from_pretrained(
+        "roberta-base",  # Use the 12-layer BERT model, with an uncased vocab.
         num_labels=num_labels,  # The number of output labels--2 for binary classification.
         # You can increase this for multi-class tasks.
         output_attentions=False,  # Whether the model returns attentions weights.
@@ -530,7 +529,7 @@ def filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteration=None):
     # Number of training epochs. The BERT authors recommend between 2 and 4.
     # We chose to run for 4, but we'll see later that this may be over-fitting the
     # training data.
-    epochs = 10
+    epochs = 3
 
     # Total number of training steps is [number of batches] x [number of epochs].
     # (Note that this is not the same as the number of training samples).
@@ -747,9 +746,9 @@ def get_true_label_probs(predictions, true):
 
 
 def prob_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+    tokenizer = RobertaTokenizer.from_pretrained('roberta-base', do_lower_case=True)
     start = time.time()
-    input_ids, attention_masks, labels = bert_tokenize(tokenizer, X, y_pseudo)
+    input_ids, attention_masks, labels = tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
 
     # Combine the training inputs into a TensorDataset.
@@ -773,8 +772,8 @@ def prob_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
 
     # Load BertForSequenceClassification, the pretrained BERT model with a single
     # linear classification layer on top.
-    model = BertForSequenceClassification.from_pretrained(
-        "bert-base-uncased",  # Use the 12-layer BERT model, with an uncased vocab.
+    model = RobertaForSequenceClassification.from_pretrained(
+        "roberta-base",  # Use the 12-layer BERT model, with an uncased vocab.
         num_labels=num_labels,  # The number of output labels--2 for binary classification.
         # You can increase this for multi-class tasks.
         output_attentions=False,  # Whether the model returns attentions weights.
@@ -791,7 +790,7 @@ def prob_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
     # Number of training epochs. The BERT authors recommend between 2 and 4.
     # We chose to run for 4, but we'll see later that this may be over-fitting the
     # training data.
-    epochs = 4
+    epochs = 3
 
     # Total number of training steps is [number of batches] x [number of epochs].
     # (Note that this is not the same as the number of training samples).
@@ -969,9 +968,9 @@ def prob_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
 def dump_probs(X, y_pseudo_orig, y_true, label_to_index, index_to_label, device, data_path):
     y_pseudo = [label_to_index[l] for l in y_pseudo_orig]
 
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+    tokenizer = RobertaTokenizer.from_pretrained('roberta-base', do_lower_case=True)
     start = time.time()
-    input_ids, attention_masks, labels = bert_tokenize(tokenizer, X, y_pseudo)
+    input_ids, attention_masks, labels = tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
 
     # Combine the training inputs into a TensorDataset.
@@ -995,8 +994,8 @@ def dump_probs(X, y_pseudo_orig, y_true, label_to_index, index_to_label, device,
 
     # Load BertForSequenceClassification, the pretrained BERT model with a single
     # linear classification layer on top.
-    model = BertForSequenceClassification.from_pretrained(
-        "bert-base-uncased",  # Use the 12-layer BERT model, with an uncased vocab.
+    model = RobertaForSequenceClassification.from_pretrained(
+        "roberta-base",  # Use the 12-layer BERT model, with an uncased vocab.
         num_labels=num_labels,  # The number of output labels--2 for binary classification.
         # You can increase this for multi-class tasks.
         output_attentions=False,  # Whether the model returns attentions weights.
@@ -1013,7 +1012,7 @@ def dump_probs(X, y_pseudo_orig, y_true, label_to_index, index_to_label, device,
     # Number of training epochs. The BERT authors recommend between 2 and 4.
     # We chose to run for 4, but we'll see later that this may be over-fitting the
     # training data.
-    epochs = 4
+    epochs = 3
 
     # Total number of training steps is [number of batches] x [number of epochs].
     # (Note that this is not the same as the number of training samples).
@@ -1178,9 +1177,9 @@ def prob_score_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
     match = []
     for i in X:
         match.append(0)
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+    tokenizer = RobertaTokenizer.from_pretrained('roberta-base', do_lower_case=True)
     start = time.time()
-    input_ids, attention_masks, labels = bert_tokenize(tokenizer, X, y_pseudo)
+    input_ids, attention_masks, labels = tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
 
     # Combine the training inputs into a TensorDataset.
@@ -1204,8 +1203,8 @@ def prob_score_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
 
     # Load BertForSequenceClassification, the pretrained BERT model with a single
     # linear classification layer on top.
-    model = BertForSequenceClassification.from_pretrained(
-        "bert-base-uncased",  # Use the 12-layer BERT model, with an uncased vocab.
+    model = RobertaForSequenceClassification.from_pretrained(
+        "roberta-base",  # Use the 12-layer BERT model, with an uncased vocab.
         num_labels=num_labels,  # The number of output labels--2 for binary classification.
         # You can increase this for multi-class tasks.
         output_attentions=False,  # Whether the model returns attentions weights.
@@ -1222,7 +1221,7 @@ def prob_score_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
     # Number of training epochs. The BERT authors recommend between 2 and 4.
     # We chose to run for 4, but we'll see later that this may be over-fitting the
     # training data.
-    epochs = 4
+    epochs = 3
 
     # Total number of training steps is [number of batches] x [number of epochs].
     # (Note that this is not the same as the number of training samples).
@@ -1440,9 +1439,9 @@ def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteratio
     wrong_list = []
     coverage_list = []
 
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+    tokenizer = RobertaTokenizer.from_pretrained('roberta-base', do_lower_case=True)
     start = time.time()
-    input_ids, attention_masks, labels = bert_tokenize(tokenizer, X, y_pseudo)
+    input_ids, attention_masks, labels = tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
 
     # Combine the training inputs into a TensorDataset.
@@ -1465,8 +1464,8 @@ def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteratio
 
     # Load BertForSequenceClassification, the pretrained BERT model with a single
     # linear classification layer on top.
-    model = BertForSequenceClassification.from_pretrained(
-        "bert-base-uncased",  # Use the 12-layer BERT model, with an uncased vocab.
+    model = RobertaForSequenceClassification.from_pretrained(
+        "roberta-base",  # Use the 12-layer BERT model, with an uncased vocab.
         num_labels=num_labels,  # The number of output labels--2 for binary classification.
         # You can increase this for multi-class tasks.
         output_attentions=False,  # Whether the model returns attentions weights.
@@ -1483,7 +1482,7 @@ def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteratio
     # Number of training epochs. The BERT authors recommend between 2 and 4.
     # We chose to run for 4, but we'll see later that this may be over-fitting the
     # training data.
-    epochs = 4
+    epochs = 3
 
     prediction_sampler = SequentialSampler(dataset)
     prediction_dataloader = DataLoader(dataset,
@@ -1673,7 +1672,7 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test, y_train_inds, y_test_inds = train_test_split(X_all, y_all, y_all_inds,
                                                                                    stratify=y_all, test_size=0.1)
     # Tokenize all of the sentences and map the tokens to their word IDs.
-    model, _, _ = train_bert(X_train, y_train_inds, device, None, None, label_dyn=False)
+    model, _, _ = train_cls(X_train, y_train_inds, device, None, None, label_dyn=False)
 
     predictions = test(model, X_test, y_test_inds, device)
     pred_inds = get_labelinds_from_probs(predictions)

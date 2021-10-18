@@ -1,4 +1,4 @@
-from bert_train import *
+from roberta_train import *
 import pickle
 import json, sys
 import os
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     use_gpu = int(sys.argv[1])
     gpu_id = int(sys.argv[2])
     dump_flag = False
-    anal_flag = False
+    anal_flag = True
     train_flag = True
     plt_flag = int(sys.argv[5])
     filter_flag = int(sys.argv[4])
@@ -227,8 +227,8 @@ if __name__ == "__main__":
             continue
 
         print("Training model..", flush=True)
-        model, correct_bootstrap, wrong_bootstrap = train_bert(X_train, y_train, device, correct_bootstrap,
-                                                               wrong_bootstrap, label_dyn=True)
+        model, correct_bootstrap, wrong_bootstrap = train_cls(X_train, y_train, device, correct_bootstrap,
+                                                              wrong_bootstrap, label_dyn=True)
         if plt_flag:
             plt.figure()
             plt.hist(correct_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
