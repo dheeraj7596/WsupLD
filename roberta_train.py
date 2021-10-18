@@ -14,7 +14,7 @@ from collections import Counter
 
 
 def get_num(dataset, iteration):
-    dic = bert_data_it_dict()
+    dic = roberta_data_it_dict()
     try:
         num = dic[dataset][iteration]
     except:

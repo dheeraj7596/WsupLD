@@ -133,6 +133,14 @@ def bert_data_it_dict():
     return dic
 
 
+def roberta_data_it_dict():
+    dic = {"nyt-coarse": {0: 8743, 1: 12747, 2: 12902, 3: 12862, 4: 12896},
+           "nyt-fine": {0: 6657, 1: 10694, 2: 11349, 3: 11396, 4: 11430},
+           "20news-coarse-nomisc": {0: 7390, 1: 16639, 2: 17149, 3: 17386, 4: 17434},
+           "20news-fine-nomisc": {0: 9377, 1: 14547, 2: 15475, 3: 15449, 4: 15831}}
+    return dic
+
+
 def compute_stability_scores(stability_list):
     stability_scores = []
     for lst in stability_list:
