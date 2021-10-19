@@ -1,4 +1,4 @@
-from roberta_train import *
+from xlnet_train import *
 import pickle
 import json, sys
 import os
