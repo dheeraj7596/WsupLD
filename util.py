@@ -142,6 +142,14 @@ def roberta_data_it_dict():
     return dic
 
 
+def xlnet_data_it_dict():
+    dic = {
+        "nyt-fine": {0: 6674, 1: 10601, 2: 11324, 3: 11420, 4: 11366},
+        "20news-fine-nomisc": {0: 9393, 1: 15018, 2: 15459, 3: 15573, 4: 15639},
+    }
+    return dic
+
+
 def compute_stability_scores(stability_list):
     stability_scores = []
     for lst in stability_list:
