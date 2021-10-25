@@ -145,15 +145,6 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
     # This training code is based on the `run_glue.py` script here:
     # https://github.com/huggingface/transformers/blob/5bfcd0485ece086ebcbed2d008813037968a9e58/examples/run_glue.py#L128
 
-    # Set the seed value all over the place to make this reproducible.
-    seed_val = 42
-
-    random.seed(seed_val)
-    np.random.seed(seed_val)
-    torch.manual_seed(seed_val)
-    if device.type == "cuda":
-        torch.cuda.manual_seed_all(seed_val)
-
     # We'll store a number of quantities such as training and validation loss,
     # validation accuracy, and timings.
     training_stats = []
@@ -542,15 +533,6 @@ def filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteration=None):
     # This training code is based on the `run_glue.py` script here:
     # https://github.com/huggingface/transformers/blob/5bfcd0485ece086ebcbed2d008813037968a9e58/examples/run_glue.py#L128
 
-    # Set the seed value all over the place to make this reproducible.
-    seed_val = 42
-
-    random.seed(seed_val)
-    np.random.seed(seed_val)
-    torch.manual_seed(seed_val)
-    if device.type == "cuda":
-        torch.cuda.manual_seed_all(seed_val)
-
     # We'll store a number of quantities such as training and validation loss,
     # validation accuracy, and timings.
     training_stats = []
@@ -803,15 +785,6 @@ def prob_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
     # This training code is based on the `run_glue.py` script here:
     # https://github.com/huggingface/transformers/blob/5bfcd0485ece086ebcbed2d008813037968a9e58/examples/run_glue.py#L128
 
-    # Set the seed value all over the place to make this reproducible.
-    seed_val = 42
-
-    random.seed(seed_val)
-    np.random.seed(seed_val)
-    torch.manual_seed(seed_val)
-    if device.type == "cuda":
-        torch.cuda.manual_seed_all(seed_val)
-
     # We'll store a number of quantities such as training and validation loss,
     # validation accuracy, and timings.
     training_stats = []
@@ -1025,15 +998,6 @@ def dump_probs(X, y_pseudo_orig, y_true, label_to_index, index_to_label, device,
     # This training code is based on the `run_glue.py` script here:
     # https://github.com/huggingface/transformers/blob/5bfcd0485ece086ebcbed2d008813037968a9e58/examples/run_glue.py#L128
 
-    # Set the seed value all over the place to make this reproducible.
-    seed_val = 42
-
-    random.seed(seed_val)
-    np.random.seed(seed_val)
-    torch.manual_seed(seed_val)
-    if device.type == "cuda":
-        torch.cuda.manual_seed_all(seed_val)
-
     # We'll store a number of quantities such as training and validation loss,
     # validation accuracy, and timings.
     training_stats = []
@@ -1233,15 +1197,6 @@ def prob_score_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
                                                 num_training_steps=total_steps)
     # This training code is based on the `run_glue.py` script here:
     # https://github.com/huggingface/transformers/blob/5bfcd0485ece086ebcbed2d008813037968a9e58/examples/run_glue.py#L128
-
-    # Set the seed value all over the place to make this reproducible.
-    seed_val = 42
-
-    random.seed(seed_val)
-    np.random.seed(seed_val)
-    torch.manual_seed(seed_val)
-    if device.type == "cuda":
-        torch.cuda.manual_seed_all(seed_val)
 
     # We'll store a number of quantities such as training and validation loss,
     # validation accuracy, and timings.
@@ -1503,15 +1458,6 @@ def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteratio
     # This training code is based on the `run_glue.py` script here:
     # https://github.com/huggingface/transformers/blob/5bfcd0485ece086ebcbed2d008813037968a9e58/examples/run_glue.py#L128
 
-    # Set the seed value all over the place to make this reproducible.
-    seed_val = 42
-
-    random.seed(seed_val)
-    np.random.seed(seed_val)
-    torch.manual_seed(seed_val)
-    if device.type == "cuda":
-        torch.cuda.manual_seed_all(seed_val)
-
     # We'll store a number of quantities such as training and validation loss,
     # validation accuracy, and timings.
     training_stats = []
@@ -1651,14 +1597,6 @@ if __name__ == "__main__":
         device = torch.device('cuda:' + str(gpu_id))
     else:
         device = torch.device("cpu")
-
-    seed_val = 42
-    random.seed(seed_val)
-    np.random.seed(seed_val)
-    torch.manual_seed(seed_val)
-    torch.cuda.manual_seed_all(seed_val)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
 
     df = pickle.load(open(data_path + "df.pkl", "rb"))
 
