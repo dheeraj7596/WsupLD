@@ -6,6 +6,7 @@ import torch
 import torchtext.legacy.data as data
 from sklearn.model_selection import train_test_split
 from cnn_model.model import CNN_Text
+from cnn_model.cnn_nlp import CNN_NLP
 from cnn_model.dataset import TrainValFullDataset
 from collections import Counter
 from util import compute_train_non_train_inds
@@ -280,10 +281,17 @@ def train_cnn(X, y, device, text_field, label_field, correct_bootstrap, wrong_bo
     embed_num = len(text_field.vocab)
     class_num = len(label_field.vocab)
     kernel_sizes = [3, 4, 5]
-    cnn = CNN_Text(
-        embed_num=embed_num,
-        class_num=class_num,
-        kernel_sizes=kernel_sizes)
+    # cnn = CNN_Text(
+    #     embed_num=embed_num,
+    #     class_num=class_num,
+    #     kernel_sizes=kernel_sizes)
+
+    cnn = CNN_NLP(
+        vocab_size=embed_num,
+        embed_dim=300,
+        num_classes=class_num,
+        dropout=0.5
+    )
     if device is not None:
         cnn = cnn.to(device)
     model, correct_bootstrap, wrong_bootstrap = train(train_iter, dev_iter, text_field, label_field, cnn, device,
