@@ -29,7 +29,7 @@ if __name__ == "__main__":
     num_its = 5
     # use_gpu = 0
 
-    seed_val = 42
+    seed_val = 19
     random.seed(seed_val)
     np.random.seed(seed_val)
     torch.manual_seed(seed_val)
