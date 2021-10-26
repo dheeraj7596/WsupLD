@@ -5,13 +5,212 @@ import torch.nn.functional as F
 import torch
 import torchtext.legacy.data as data
 from sklearn.model_selection import train_test_split
-from cnn_model.model import CNN_Text
 from cnn_model.cnn_nlp import CNN_NLP
 from cnn_model.dataset import TrainValFullDataset
 from collections import Counter
-from util import compute_train_non_train_inds
+from util import compute_train_non_train_inds, cnn_data_it_dict
 import numpy as np
 import time
+
+
+def get_num(dataset, iteration):
+    dic = cnn_data_it_dict()
+    try:
+        num = dic[dataset][iteration]
+    except:
+        if dataset not in dic:
+            raise Exception("Dataset out of bounds " + dataset)
+        elif iteration not in dic[dataset]:
+            raise Exception("Iteration out of bounds " + dataset + str(iteration))
+        else:
+            raise Exception("Something went wrong " + dataset + str(iteration))
+    return num
+
+
+def random_filter(X_train, y_train, y_true, dataset, it):
+    num = get_num(dataset, it)
+    length = len(X_train)
+    if num >= length:
+        return X_train, y_train, y_true, [], [], []
+    else:
+        train_data, non_train_data, train_labels, non_train_labels, true_train_labels, true_non_train_labels = train_test_split(
+            X_train, y_train, y_true, stratify=y_train, test_size=(length - num))
+        return train_data, train_labels, true_train_labels, non_train_data, non_train_labels, true_non_train_labels
+
+
+def prob_filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_field, dataset, it):
+    start_t = time.time()
+    train_X, val_X, train_y, val_y = train_test_split(X_train, y_train, test_size=0.1, stratify=y_train)
+    train_data, val_data, full_data = TrainValFullDataset.splits(text_field, label_field, train_X, train_y, val_X,
+                                                                 val_y, X_train, y_train)
+    print("For generating train_data, val_data", time.time() - start_t, flush=True)
+    start_t = time.time()
+    train_iter, dev_iter, full_data_iter = data.BucketIterator.splits((train_data, val_data, full_data),
+                                                                      batch_sizes=(128, 128, 16), sort=False,
+                                                                      sort_within_batch=False)
+    print("For generating train_iter, dev_iter", time.time() - start_t, flush=True)
+
+    embed_num = len(text_field.vocab)
+    class_num = len(label_field.vocab)
+    kernel_sizes = [3, 4, 5]
+    # cnn = CNN_Text(
+    #     embed_num=embed_num,
+    #     class_num=class_num,
+    #     kernel_sizes=kernel_sizes)
+
+    cnn = CNN_NLP(
+        vocab_size=embed_num,
+        embed_dim=300,
+        num_classes=class_num,
+        dropout=0.5
+    )
+    if device is not None:
+        cnn = cnn.to(device)
+    model, _, _ = train(train_iter, dev_iter, text_field, label_field, cnn, device, None, None, lr=0.001,
+                        num_epochs=256, label_dyn=False)
+
+    torch.cuda.empty_cache()
+    pred_labels, pred_probs, true_labels = test_eval(full_data_iter, model, device)
+    inds = list(np.argsort(pred_probs)[::-1])
+    num = get_num(dataset, it)
+
+    train_data_inds = inds[:num]
+
+    train_data = []
+    train_labels = []
+    true_train_labels = []
+    non_train_data = []
+    non_train_labels = []
+    true_non_train_labels = []
+
+    non_train_data_inds = list(set(range(len(y_train))) - set(train_data_inds))
+    for loop_ind in train_data_inds:
+        train_data.append(X_train[loop_ind])
+        train_labels.append(y_train[loop_ind])
+        true_train_labels.append(y_true[loop_ind])
+
+    for loop_ind in non_train_data_inds:
+        non_train_data.append(X_train[loop_ind])
+        non_train_labels.append(y_train[loop_ind])
+        true_non_train_labels.append(y_true[loop_ind])
+
+    torch.cuda.empty_cache()
+    return train_data, train_labels, true_train_labels, non_train_data, non_train_labels, true_non_train_labels
+
+
+def prob_score_filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_field, dataset, it):
+    match = []
+    for i in X_train:
+        match.append(0)
+    torch.cuda.empty_cache()
+
+    train_X, val_X, train_y, val_y = train_test_split(X_train, y_train, test_size=0.1, stratify=y_train)
+    train_data, val_data, full_data = TrainValFullDataset.splits(text_field, label_field, train_X, train_y, val_X,
+                                                                 val_y, X_train, y_true)
+
+    train_iter, dev_iter, full_data_iter = data.BucketIterator.splits((train_data, val_data, full_data),
+                                                                      batch_sizes=(128, 128, 16), sort=False,
+                                                                      sort_within_batch=False)
+
+    embed_num = len(text_field.vocab)
+    class_num = len(label_field.vocab)
+    kernel_sizes = [3, 4, 5]
+    # cnn = CNN_Text(
+    #     embed_num=embed_num,
+    #     class_num=class_num,
+    #     kernel_sizes=kernel_sizes)
+
+    cnn = CNN_NLP(
+        vocab_size=embed_num,
+        embed_dim=300,
+        num_classes=class_num,
+        dropout=0.5
+    )
+    if device is not None:
+        cnn = cnn.to(device)
+
+    model = cnn
+    lr = 0.001
+    num_epochs = 40
+    early_stop = 3
+    log_interval = 100
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+
+    steps = 0
+    best_epoch = 0
+    best_model = None
+    best_loss = float("inf")
+
+    for epoch in range(1, num_epochs + 1):
+        model.train()
+        for batch in train_iter:
+            feature, target = batch.text, batch.label
+            feature.t_()  # batch first
+            if device is not None:
+                feature, target = feature.to(device), target.to(device)
+
+            optimizer.zero_grad()
+            logit = model(feature)
+            loss = F.cross_entropy(logit, target)
+            loss.backward()
+            optimizer.step()
+
+            steps += 1
+            if steps % log_interval == 0:
+                corrects = (torch.max(logit, 1)[1].view(target.size()) == target).sum()
+                accuracy = 100.0 * corrects / batch.batch_size
+                sys.stdout.write(
+                    '\rBatch[{}] - loss: {:.6f}  acc: {:.4f}%({}/{})'.format(steps,
+                                                                             loss.item(),
+                                                                             accuracy.item(),
+                                                                             corrects.item(),
+                                                                             batch.batch_size))
+
+        torch.cuda.empty_cache()
+        pred_labels, pred_probs, true_labels = test_eval(full_data_iter, model, device)
+
+        length = len(pred_labels)
+        for loop_variable in range(length):
+            if pred_labels[loop_variable] == y_train[loop_variable]:
+                match[loop_variable] += 1
+
+        dev_loss = eval(dev_iter, model, device)
+        if dev_loss <= best_loss:
+            best_loss = dev_loss
+            best_epoch = epoch
+            best_model = model
+        else:
+            if epoch - best_epoch >= early_stop:
+                print('early stop by {} epochs.'.format(early_stop), flush=True)
+                print("Best epoch: ", best_epoch, "Current epoch: ", epoch, flush=True)
+                break
+
+    inds = list(np.argsort(match)[::-1])
+    num = get_num(dataset, it)
+
+    train_data_inds = inds[:num]
+
+    train_data = []
+    train_labels = []
+    true_train_labels = []
+    non_train_data = []
+    non_train_labels = []
+    true_non_train_labels = []
+
+    non_train_data_inds = list(set(range(len(y_train))) - set(train_data_inds))
+    for loop_ind in train_data_inds:
+        train_data.append(X_train[loop_ind])
+        train_labels.append(y_train[loop_ind])
+        true_train_labels.append(y_true[loop_ind])
+
+    for loop_ind in non_train_data_inds:
+        non_train_data.append(X_train[loop_ind])
+        non_train_labels.append(y_train[loop_ind])
+        true_non_train_labels.append(y_true[loop_ind])
+
+    torch.cuda.empty_cache()
+    return train_data, train_labels, true_train_labels, non_train_data, non_train_labels, true_non_train_labels
 
 
 def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_field, it):
@@ -137,11 +336,11 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
             best_loss = dev_loss
             best_epoch = epoch
             best_model = model
-        # else:
-        #     if epoch - best_epoch >= early_stop:
-        #         print('early stop by {} epochs.'.format(early_stop), flush=True)
-        #         print("Best epoch: ", best_epoch, "Current epoch: ", epoch, flush=True)
-        #         break
+        else:
+            if epoch - best_epoch >= early_stop:
+                print('early stop by {} epochs.'.format(early_stop), flush=True)
+                print("Best epoch: ", best_epoch, "Current epoch: ", epoch, flush=True)
+                break
 
     if not stop_flag:
         print("MAX EPOCHS REACHED!!!!!!", flush=True)
@@ -393,46 +592,45 @@ def test(model, X, y, text_field, label_field, device):
     pred_labels, pred_probs, true_labels = test_eval(iterator, model, device)
     return pred_labels, pred_probs
 
-
-if __name__ == "__main__":
-    X = ["As kids, we lived together",
-         "we fnust20, we laughed, we cried",
-         "we did not always show the love",
-         "As kids, we lived together",
-         "we fnust20, we laughed, we cried",
-         "we did not always show the love",
-         "As kids, we lived together",
-         "we fnust20, we laughed, we cried",
-         "we did not always show the love",
-         "As kids, we lived together",
-         "we fnust20, we laughed, we cried",
-         "we did not always show the love"
-         ]
-    y = [0, 2, 0, 4, 5, 6, 0, 4, 5, 3, 2, 1]
-    X_full = ["As kids, we lived together",
-              "we fnust20, we laughed, we cried",
-              "we did not always show the love",
-              "As kids, we lived together",
-              "we fnust20, we laughed, we cried",
-              "we did not always show the love",
-              "As kids, we lived together",
-              "we fnust20, we laughed, we cried",
-              "we did not always show the love",
-              "As kids, we lived together",
-              "we fnust20, we laughed, we cried",
-              "we did not always show the love"
-              ]
-    y_full = [0, 2, 0, 4, 5, 6, 0, 4, 5, 3, 2, 1]
-    use_gpu = False
-    save_dir = "./data/"
-    text_field = data.Field(lower=True)
-    label_field = data.Field(sequential=False,
-                             use_vocab=False,
-                             pad_token=None,
-                             unk_token=None
-                             )
-
-    device = torch.device("cpu")
-    text_field.build_vocab(X)
-    label_field.build_vocab(y)
-    train_cnn(X, y, device, text_field, label_field, None, None, False)
+# if __name__ == "__main__":
+#     X = ["As kids, we lived together",
+#          "we fnust20, we laughed, we cried",
+#          "we did not always show the love",
+#          "As kids, we lived together",
+#          "we fnust20, we laughed, we cried",
+#          "we did not always show the love",
+#          "As kids, we lived together",
+#          "we fnust20, we laughed, we cried",
+#          "we did not always show the love",
+#          "As kids, we lived together",
+#          "we fnust20, we laughed, we cried",
+#          "we did not always show the love"
+#          ]
+#     y = [0, 2, 0, 4, 5, 6, 0, 4, 5, 3, 2, 1]
+#     X_full = ["As kids, we lived together",
+#               "we fnust20, we laughed, we cried",
+#               "we did not always show the love",
+#               "As kids, we lived together",
+#               "we fnust20, we laughed, we cried",
+#               "we did not always show the love",
+#               "As kids, we lived together",
+#               "we fnust20, we laughed, we cried",
+#               "we did not always show the love",
+#               "As kids, we lived together",
+#               "we fnust20, we laughed, we cried",
+#               "we did not always show the love"
+#               ]
+#     y_full = [0, 2, 0, 4, 5, 6, 0, 4, 5, 3, 2, 1]
+#     use_gpu = False
+#     save_dir = "./data/"
+#     text_field = data.Field(lower=True)
+#     label_field = data.Field(sequential=False,
+#                              use_vocab=False,
+#                              pad_token=None,
+#                              unk_token=None
+#                              )
+#
+#     device = torch.device("cpu")
+#     text_field.build_vocab(X)
+#     label_field.build_vocab(y)
+#     train_cnn(X, y, device, text_field, label_field, None, None, False)
