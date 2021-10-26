@@ -40,10 +40,17 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
     embed_num = len(text_field.vocab)
     class_num = len(label_field.vocab)
     kernel_sizes = [3, 4, 5]
-    cnn = CNN_Text(
-        embed_num=embed_num,
-        class_num=class_num,
-        kernel_sizes=kernel_sizes)
+    # cnn = CNN_Text(
+    #     embed_num=embed_num,
+    #     class_num=class_num,
+    #     kernel_sizes=kernel_sizes)
+
+    cnn = CNN_NLP(
+        vocab_size=embed_num,
+        embed_dim=300,
+        num_classes=class_num,
+        dropout=0.5
+    )
     if device is not None:
         cnn = cnn.to(device)
 
