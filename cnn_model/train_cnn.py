@@ -56,7 +56,7 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
 
     model = cnn
     lr = 0.001
-    num_epochs = 256
+    num_epochs = 40
     early_stop = 3
     log_interval = 100
 
