@@ -12,6 +12,9 @@ import pickle
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 from collections import Counter
+import os
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
 def get_num(dataset, iteration):
