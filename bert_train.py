@@ -1,4 +1,4 @@
-from transformers import BertForSequenceClassification, BertTokenizer, AdamW, BertConfig, \
+from transformers import BertForSequenceClassification, BertTokenizerFast, AdamW, BertConfig, \
     get_linear_schedule_with_warmup
 from torch.utils.data import TensorDataset, random_split
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
@@ -47,34 +47,44 @@ def flat_accuracy(preds, labels):
 
 
 def bert_tokenize(tokenizer, sentences, labels):
-    input_ids = []
-    attention_masks = []
-    # For every sentence...
-    for sent in sentences:
-        # `encode_plus` will:
-        #   (1) Tokenize the sentence.
-        #   (2) Prepend the `[CLS]` token to the start.
-        #   (3) Append the `[SEP]` token to the end.
-        #   (4) Map tokens to their IDs.
-        #   (5) Pad or truncate the sentence to `max_length`
-        #   (6) Create attention masks for [PAD] tokens.
-        encoded_dict = tokenizer.encode_plus(
-            sent,  # Sentence to encode.
-            add_special_tokens=True,  # Add '[CLS]' and '[SEP]'
-            max_length=512,  # Pad & truncate all sentences.
-            pad_to_max_length=True,
-            return_attention_mask=True,  # Construct attn. masks.
-            return_tensors='pt',  # Return pytorch tensors.
-        )
-
-        # Add the encoded sentence to the list.
-        input_ids.append(encoded_dict['input_ids'])
-
-        # And its attention mask (simply differentiates padding from non-padding).
-        attention_masks.append(encoded_dict['attention_mask'])
-    # Convert the lists into tensors.
-    input_ids = torch.cat(input_ids, dim=0)
-    attention_masks = torch.cat(attention_masks, dim=0)
+    # input_ids = []
+    # attention_masks = []
+    # # For every sentence...
+    # for sent in sentences:
+    #     # `encode_plus` will:
+    #     #   (1) Tokenize the sentence.
+    #     #   (2) Prepend the `[CLS]` token to the start.
+    #     #   (3) Append the `[SEP]` token to the end.
+    #     #   (4) Map tokens to their IDs.
+    #     #   (5) Pad or truncate the sentence to `max_length`
+    #     #   (6) Create attention masks for [PAD] tokens.
+    #     encoded_dict = tokenizer.encode_plus(
+    #         sent,  # Sentence to encode.
+    #         add_special_tokens=True,  # Add '[CLS]' and '[SEP]'
+    #         max_length=512,  # Pad & truncate all sentences.
+    #         pad_to_max_length=True,
+    #         return_attention_mask=True,  # Construct attn. masks.
+    #         return_tensors='pt',  # Return pytorch tensors.
+    #     )
+    #
+    #     # Add the encoded sentence to the list.
+    #     input_ids.append(encoded_dict['input_ids'])
+    #
+    #     # And its attention mask (simply differentiates padding from non-padding).
+    #     attention_masks.append(encoded_dict['attention_mask'])
+    # # Convert the lists into tensors.
+    # input_ids = torch.cat(input_ids, dim=0)
+    # attention_masks = torch.cat(attention_masks, dim=0)
+    temp = tokenizer(
+        sentences,
+        add_special_tokens=True,  # Add '[CLS]' and '[SEP]'
+        max_length=512,  # Pad & truncate all sentences.
+        pad_to_max_length=True,
+        return_attention_mask=True,  # Construct attn. masks.
+        return_tensors='pt',  # Return pytorch tensors.
+    )
+    input_ids = temp["input_ids"]
+    attention_masks = temp["attention_mask"]
     labels = torch.tensor(labels)
     # Print sentence 0, now as a list of IDs.
     # print('Original: ', sentences[0])
@@ -410,7 +420,7 @@ def evaluate(model, prediction_dataloader, device):
 
 def test(model, X_test, y_test, device):
     start = time.time()
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+    tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased', do_lower_case=True)
     input_ids, attention_masks, labels = bert_tokenize(tokenizer, X_test, y_test)
     print("Tokenizing text time:", time.time() - start, flush=True)
     batch_size = 32
@@ -432,7 +442,7 @@ def test(model, X_test, y_test, device):
 
 
 def train_bert(X, y, device, correct, wrong, label_dyn=False):
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+    tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased', do_lower_case=True)
     input_ids, attention_masks, labels = bert_tokenize(tokenizer, X, y)
 
     # Combine the training inputs into a TensorDataset.
@@ -454,7 +464,7 @@ def train_bert(X, y, device, correct, wrong, label_dyn=False):
 
 
 def filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteration=None):
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+    tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased', do_lower_case=True)
     start = time.time()
     input_ids, attention_masks, labels = bert_tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
@@ -533,7 +543,6 @@ def filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteration=None):
                                                 num_training_steps=total_steps)
     # This training code is based on the `run_glue.py` script here:
     # https://github.com/huggingface/transformers/blob/5bfcd0485ece086ebcbed2d008813037968a9e58/examples/run_glue.py#L128
-
 
     # We'll store a number of quantities such as training and validation loss,
     # validation accuracy, and timings.
@@ -730,7 +739,7 @@ def get_true_label_probs(predictions, true):
 
 
 def prob_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+    tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased', do_lower_case=True)
     start = time.time()
     input_ids, attention_masks, labels = bert_tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
@@ -786,7 +795,6 @@ def prob_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
                                                 num_training_steps=total_steps)
     # This training code is based on the `run_glue.py` script here:
     # https://github.com/huggingface/transformers/blob/5bfcd0485ece086ebcbed2d008813037968a9e58/examples/run_glue.py#L128
-
 
     # We'll store a number of quantities such as training and validation loss,
     # validation accuracy, and timings.
@@ -944,7 +952,7 @@ def prob_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
 def dump_probs(X, y_pseudo_orig, y_true, label_to_index, index_to_label, device, data_path):
     y_pseudo = [label_to_index[l] for l in y_pseudo_orig]
 
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+    tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased', do_lower_case=True)
     start = time.time()
     input_ids, attention_masks, labels = bert_tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
@@ -1144,7 +1152,7 @@ def prob_score_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
     match = []
     for i in X:
         match.append(0)
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+    tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased', do_lower_case=True)
     start = time.time()
     input_ids, attention_masks, labels = bert_tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
@@ -1397,7 +1405,7 @@ def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteratio
     wrong_list = []
     coverage_list = []
 
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+    tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased', do_lower_case=True)
     start = time.time()
     input_ids, attention_masks, labels = bert_tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
