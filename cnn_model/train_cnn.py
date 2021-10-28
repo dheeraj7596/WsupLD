@@ -45,9 +45,10 @@ def prob_filter(X_train, y_train, y_true, percent_thresh, device, text_field, la
                                                                  val_y, X_train, y_train)
     print("For generating train_data, val_data", time.time() - start_t, flush=True)
     start_t = time.time()
-    train_iter, dev_iter, full_data_iter = data.BucketIterator.splits((train_data, val_data, full_data),
-                                                                      batch_sizes=(128, 128, 16), sort=False,
-                                                                      sort_within_batch=False)
+    train_iter, dev_iter = data.BucketIterator.splits((train_data, val_data), batch_sizes=(128, 128), sort=False,
+                                                      sort_within_batch=False)
+    full_data_iter = data.Iterator(full_data, batch_size=16, train=False, repeat=False, shuffle=False, sort=False,
+                                   sort_within_batch=False)
     print("For generating train_iter, dev_iter", time.time() - start_t, flush=True)
 
     embed_num = len(text_field.vocab)
@@ -108,9 +109,10 @@ def prob_score_filter(X_train, y_train, y_true, percent_thresh, device, text_fie
     train_data, val_data, full_data = TrainValFullDataset.splits(text_field, label_field, train_X, train_y, val_X,
                                                                  val_y, X_train, y_true)
 
-    train_iter, dev_iter, full_data_iter = data.BucketIterator.splits((train_data, val_data, full_data),
-                                                                      batch_sizes=(128, 128, 16), sort=False,
-                                                                      sort_within_batch=False)
+    train_iter, dev_iter = data.BucketIterator.splits((train_data, val_data), batch_sizes=(128, 128), sort=False,
+                                                      sort_within_batch=False)
+    full_data_iter = data.Iterator(full_data, batch_size=16, train=False, repeat=False, shuffle=False, sort=False,
+                                   sort_within_batch=False)
 
     embed_num = len(text_field.vocab)
     class_num = len(label_field.vocab)
@@ -232,9 +234,10 @@ def filter(X_train, y_train, y_true, percent_thresh, device, text_field, label_f
     train_data, val_data, full_data = TrainValFullDataset.splits(text_field, label_field, train_X, train_y, val_X,
                                                                  val_y, X_train, y_true)
 
-    train_iter, dev_iter, full_data_iter = data.BucketIterator.splits((train_data, val_data, full_data),
-                                                                      batch_sizes=(128, 128, 16), sort=False,
-                                                                      sort_within_batch=False)
+    train_iter, dev_iter = data.BucketIterator.splits((train_data, val_data), batch_sizes=(128, 128), sort=False,
+                                                      sort_within_batch=False)
+    full_data_iter = data.Iterator(full_data, batch_size=16, train=False, repeat=False, shuffle=False, sort=False,
+                                   sort_within_batch=False)
 
     embed_num = len(text_field.vocab)
     class_num = len(label_field.vocab)
