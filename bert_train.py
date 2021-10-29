@@ -901,7 +901,11 @@ def prob_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
     num = get_num(dataset_name, iteration)
 
     train_data_inds = inds[:num]
-    cutoff_prob = probs[inds[num - 1]]
+    length = len(X)
+    if num > length:
+        cutoff_prob = probs[-1]
+    else:
+        cutoff_prob = probs[inds[num - 1]]
 
     train_data = []
     train_labels = []
