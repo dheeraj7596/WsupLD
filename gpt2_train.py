@@ -106,6 +106,7 @@ def train(train_dataloader, validation_dataloader, device, num_labels, correct, 
         output_attentions=False,  # Whether the model returns attentions weights.
         output_hidden_states=False,  # Whether the model returns all hidden-states.
     )
+    model.config.pad_token_id = model.config.eos_token_id
     model = model.to(device)
 
     # Note: AdamW is a class from the huggingface library (as opposed to pytorch)
@@ -395,6 +396,7 @@ def evaluate(model, prediction_dataloader, device):
 def test(model, X_test, y_test, device):
     start = time.time()
     tokenizer = GPT2TokenizerFast.from_pretrained('gpt2', do_lower_case=True)
+    tokenizer.pad_token = tokenizer.eos_token
     input_ids, attention_masks, labels = tokenize(tokenizer, X_test, y_test)
     print("Tokenizing text time:", time.time() - start, flush=True)
     batch_size = 4
@@ -417,6 +419,7 @@ def test(model, X_test, y_test, device):
 
 def train_cls(X, y, device, correct, wrong, label_dyn=False):
     tokenizer = GPT2TokenizerFast.from_pretrained('gpt2', do_lower_case=True)
+    tokenizer.pad_token = tokenizer.eos_token
     input_ids, attention_masks, labels = tokenize(tokenizer, X, y)
 
     # Combine the training inputs into a TensorDataset.
@@ -439,6 +442,7 @@ def train_cls(X, y, device, correct, wrong, label_dyn=False):
 
 def filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteration=None):
     tokenizer = GPT2TokenizerFast.from_pretrained('gpt2', do_lower_case=True)
+    tokenizer.pad_token = tokenizer.eos_token
     start = time.time()
     input_ids, attention_masks, labels = tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
@@ -494,6 +498,7 @@ def filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteration=None):
         output_attentions=False,  # Whether the model returns attentions weights.
         output_hidden_states=False,  # Whether the model returns all hidden-states.
     )
+    model.config.pad_token_id = model.config.eos_token_id
     model = model.to(device)
 
     # Note: AdamW is a class from the huggingface library (as opposed to pytorch)
@@ -714,6 +719,7 @@ def get_true_label_probs(predictions, true):
 
 def prob_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
     tokenizer = GPT2TokenizerFast.from_pretrained('gpt2', do_lower_case=True)
+    tokenizer.pad_token = tokenizer.eos_token
     start = time.time()
     input_ids, attention_masks, labels = tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
@@ -746,6 +752,7 @@ def prob_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
         output_attentions=False,  # Whether the model returns attentions weights.
         output_hidden_states=False,  # Whether the model returns all hidden-states.
     )
+    model.config.pad_token_id = model.config.eos_token_id
     model = model.to(device)
 
     # Note: AdamW is a class from the huggingface library (as opposed to pytorch)
@@ -931,6 +938,7 @@ def dump_probs(X, y_pseudo_orig, y_true, label_to_index, index_to_label, device,
     y_pseudo = [label_to_index[l] for l in y_pseudo_orig]
 
     tokenizer = GPT2TokenizerFast.from_pretrained('gpt2', do_lower_case=True)
+    tokenizer.pad_token = tokenizer.eos_token
     start = time.time()
     input_ids, attention_masks, labels = tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
@@ -963,6 +971,7 @@ def dump_probs(X, y_pseudo_orig, y_true, label_to_index, index_to_label, device,
         output_attentions=False,  # Whether the model returns attentions weights.
         output_hidden_states=False,  # Whether the model returns all hidden-states.
     )
+    model.config.pad_token_id = model.config.eos_token_id
     model = model.to(device)
 
     # Note: AdamW is a class from the huggingface library (as opposed to pytorch)
@@ -1131,6 +1140,7 @@ def prob_score_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
     for i in X:
         match.append(0)
     tokenizer = GPT2TokenizerFast.from_pretrained('gpt2', do_lower_case=True)
+    tokenizer.pad_token = tokenizer.eos_token
     start = time.time()
     input_ids, attention_masks, labels = tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
@@ -1163,6 +1173,7 @@ def prob_score_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
         output_attentions=False,  # Whether the model returns attentions weights.
         output_hidden_states=False,  # Whether the model returns all hidden-states.
     )
+    model.config.pad_token_id = model.config.eos_token_id
     model = model.to(device)
 
     # Note: AdamW is a class from the huggingface library (as opposed to pytorch)
@@ -1384,6 +1395,7 @@ def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteratio
     coverage_list = []
 
     tokenizer = GPT2TokenizerFast.from_pretrained('gpt2', do_lower_case=True)
+    tokenizer.pad_token = tokenizer.eos_token
     start = time.time()
     input_ids, attention_masks, labels = tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
@@ -1415,6 +1427,7 @@ def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteratio
         output_attentions=False,  # Whether the model returns attentions weights.
         output_hidden_states=False,  # Whether the model returns all hidden-states.
     )
+    model.config.pad_token_id = model.config.eos_token_id
     model = model.to(device)
 
     # Note: AdamW is a class from the huggingface library (as opposed to pytorch)
