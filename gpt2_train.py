@@ -1,4 +1,4 @@
-from transformers import XLNetForSequenceClassification, XLNetTokenizerFast, AdamW, get_linear_schedule_with_warmup
+from transformers import GPT2ForSequenceClassification, GPT2TokenizerFast, AdamW, get_linear_schedule_with_warmup
 from torch.utils.data import TensorDataset, random_split
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 import torch
@@ -17,7 +17,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
 def get_num(dataset, iteration):
-    dic = xlnet_data_it_dict()
+    dic = gpt2_data_it_dict()
     try:
         num = dic[dataset][iteration]
     except:
@@ -75,7 +75,7 @@ def create_data_loaders(dataset):
     # The DataLoader needs to know our batch size for training, so we specify it
     # here. For fine-tuning BERT on a specific task, the authors recommend a batch
     # size of 16 or 32.
-    batch_size = 32
+    batch_size = 4
     # Create the DataLoaders for our training and validation sets.
     # We'll take training samples in random order.
     train_dataloader = DataLoader(
@@ -99,8 +99,8 @@ def create_data_loaders(dataset):
 def train(train_dataloader, validation_dataloader, device, num_labels, correct, wrong, label_dyn=False):
     # Load BertForSequenceClassification, the pretrained BERT model with a single
     # linear classification layer on top.
-    model = XLNetForSequenceClassification.from_pretrained(
-        "xlnet-base-cased",  # Use the 12-layer BERT model, with an uncased vocab.
+    model = GPT2ForSequenceClassification.from_pretrained(
+        "gpt2",  # Use the 12-layer BERT model, with an uncased vocab.
         num_labels=num_labels,  # The number of output labels--2 for binary classification.
         # You can increase this for multi-class tasks.
         output_attentions=False,  # Whether the model returns attentions weights.
@@ -394,10 +394,10 @@ def evaluate(model, prediction_dataloader, device):
 
 def test(model, X_test, y_test, device):
     start = time.time()
-    tokenizer = XLNetTokenizerFast.from_pretrained('xlnet-base-cased', do_lower_case=True)
+    tokenizer = GPT2TokenizerFast.from_pretrained('gpt2', do_lower_case=True)
     input_ids, attention_masks, labels = tokenize(tokenizer, X_test, y_test)
     print("Tokenizing text time:", time.time() - start, flush=True)
-    batch_size = 32
+    batch_size = 4
     # Create the DataLoader.
     start = time.time()
     prediction_data = TensorDataset(input_ids, attention_masks, labels)
@@ -416,7 +416,7 @@ def test(model, X_test, y_test, device):
 
 
 def train_cls(X, y, device, correct, wrong, label_dyn=False):
-    tokenizer = XLNetTokenizerFast.from_pretrained('xlnet-base-cased', do_lower_case=True)
+    tokenizer = GPT2TokenizerFast.from_pretrained('gpt2', do_lower_case=True)
     input_ids, attention_masks, labels = tokenize(tokenizer, X, y)
 
     # Combine the training inputs into a TensorDataset.
@@ -438,7 +438,7 @@ def train_cls(X, y, device, correct, wrong, label_dyn=False):
 
 
 def filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteration=None):
-    tokenizer = XLNetTokenizerFast.from_pretrained('xlnet-base-cased', do_lower_case=True)
+    tokenizer = GPT2TokenizerFast.from_pretrained('gpt2', do_lower_case=True)
     start = time.time()
     input_ids, attention_masks, labels = tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
@@ -446,7 +446,7 @@ def filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteration=None):
     # Combine the training inputs into a TensorDataset.
     dataset = TensorDataset(input_ids, attention_masks, labels)
 
-    batch_size = 32
+    batch_size = 4
     # Create the DataLoaders for our training and validation sets.
     # We'll take training samples in random order.
     start = time.time()
@@ -487,8 +487,8 @@ def filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteration=None):
 
     # Load BertForSequenceClassification, the pretrained BERT model with a single
     # linear classification layer on top.
-    model = XLNetForSequenceClassification.from_pretrained(
-        "xlnet-base-cased",  # Use the 12-layer BERT model, with an uncased vocab.
+    model = GPT2ForSequenceClassification.from_pretrained(
+        "gpt2",  # Use the 12-layer BERT model, with an uncased vocab.
         num_labels=num_labels,  # The number of output labels--2 for binary classification.
         # You can increase this for multi-class tasks.
         output_attentions=False,  # Whether the model returns attentions weights.
@@ -713,7 +713,7 @@ def get_true_label_probs(predictions, true):
 
 
 def prob_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
-    tokenizer = XLNetTokenizerFast.from_pretrained('xlnet-base-cased', do_lower_case=True)
+    tokenizer = GPT2TokenizerFast.from_pretrained('gpt2', do_lower_case=True)
     start = time.time()
     input_ids, attention_masks, labels = tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
@@ -721,7 +721,7 @@ def prob_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
     # Combine the training inputs into a TensorDataset.
     dataset = TensorDataset(input_ids, attention_masks, labels)
 
-    batch_size = 32
+    batch_size = 4
     # Create the DataLoaders for our training and validation sets.
     # We'll take training samples in random order.
     start = time.time()
@@ -739,8 +739,8 @@ def prob_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
 
     # Load BertForSequenceClassification, the pretrained BERT model with a single
     # linear classification layer on top.
-    model = XLNetForSequenceClassification.from_pretrained(
-        "xlnet-base-cased",  # Use the 12-layer BERT model, with an uncased vocab.
+    model = GPT2ForSequenceClassification.from_pretrained(
+        "gpt2",  # Use the 12-layer BERT model, with an uncased vocab.
         num_labels=num_labels,  # The number of output labels--2 for binary classification.
         # You can increase this for multi-class tasks.
         output_attentions=False,  # Whether the model returns attentions weights.
@@ -930,7 +930,7 @@ def prob_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
 def dump_probs(X, y_pseudo_orig, y_true, label_to_index, index_to_label, device, data_path):
     y_pseudo = [label_to_index[l] for l in y_pseudo_orig]
 
-    tokenizer = XLNetTokenizerFast.from_pretrained('xlnet-base-cased', do_lower_case=True)
+    tokenizer = GPT2TokenizerFast.from_pretrained('gpt2', do_lower_case=True)
     start = time.time()
     input_ids, attention_masks, labels = tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
@@ -938,7 +938,7 @@ def dump_probs(X, y_pseudo_orig, y_true, label_to_index, index_to_label, device,
     # Combine the training inputs into a TensorDataset.
     dataset = TensorDataset(input_ids, attention_masks, labels)
 
-    batch_size = 32
+    batch_size = 4
     # Create the DataLoaders for our training and validation sets.
     # We'll take training samples in random order.
     start = time.time()
@@ -956,8 +956,8 @@ def dump_probs(X, y_pseudo_orig, y_true, label_to_index, index_to_label, device,
 
     # Load BertForSequenceClassification, the pretrained BERT model with a single
     # linear classification layer on top.
-    model = XLNetForSequenceClassification.from_pretrained(
-        "xlnet-base-cased",  # Use the 12-layer BERT model, with an uncased vocab.
+    model = GPT2ForSequenceClassification.from_pretrained(
+        "gpt2",  # Use the 12-layer BERT model, with an uncased vocab.
         num_labels=num_labels,  # The number of output labels--2 for binary classification.
         # You can increase this for multi-class tasks.
         output_attentions=False,  # Whether the model returns attentions weights.
@@ -1130,7 +1130,7 @@ def prob_score_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
     match = []
     for i in X:
         match.append(0)
-    tokenizer = XLNetTokenizerFast.from_pretrained('xlnet-base-cased', do_lower_case=True)
+    tokenizer = GPT2TokenizerFast.from_pretrained('gpt2', do_lower_case=True)
     start = time.time()
     input_ids, attention_masks, labels = tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
@@ -1138,7 +1138,7 @@ def prob_score_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
     # Combine the training inputs into a TensorDataset.
     dataset = TensorDataset(input_ids, attention_masks, labels)
 
-    batch_size = 32
+    batch_size = 4
     # Create the DataLoaders for our training and validation sets.
     # We'll take training samples in random order.
     start = time.time()
@@ -1156,8 +1156,8 @@ def prob_score_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
 
     # Load BertForSequenceClassification, the pretrained BERT model with a single
     # linear classification layer on top.
-    model = XLNetForSequenceClassification.from_pretrained(
-        "xlnet-base-cased",  # Use the 12-layer BERT model, with an uncased vocab.
+    model = GPT2ForSequenceClassification.from_pretrained(
+        "gpt2",  # Use the 12-layer BERT model, with an uncased vocab.
         num_labels=num_labels,  # The number of output labels--2 for binary classification.
         # You can increase this for multi-class tasks.
         output_attentions=False,  # Whether the model returns attentions weights.
@@ -1383,7 +1383,7 @@ def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteratio
     wrong_list = []
     coverage_list = []
 
-    tokenizer = XLNetTokenizerFast.from_pretrained('xlnet-base-cased', do_lower_case=True)
+    tokenizer = GPT2TokenizerFast.from_pretrained('gpt2', do_lower_case=True)
     start = time.time()
     input_ids, attention_masks, labels = tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
@@ -1391,7 +1391,7 @@ def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteratio
     # Combine the training inputs into a TensorDataset.
     dataset = TensorDataset(input_ids, attention_masks, labels)
 
-    batch_size = 32
+    batch_size = 4
     # Create the DataLoaders for our training and validation sets.
     # We'll take training samples in random order.
     start = time.time()
@@ -1408,8 +1408,8 @@ def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteratio
 
     # Load BertForSequenceClassification, the pretrained BERT model with a single
     # linear classification layer on top.
-    model = XLNetForSequenceClassification.from_pretrained(
-        "xlnet-base-cased",  # Use the 12-layer BERT model, with an uncased vocab.
+    model = GPT2ForSequenceClassification.from_pretrained(
+        "gpt2",  # Use the 12-layer BERT model, with an uncased vocab.
         num_labels=num_labels,  # The number of output labels--2 for binary classification.
         # You can increase this for multi-class tasks.
         output_attentions=False,  # Whether the model returns attentions weights.

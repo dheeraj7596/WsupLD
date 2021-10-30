@@ -164,6 +164,12 @@ def cnn_data_it_dict():
     return dic
 
 
+def gpt2_data_it_dict():
+    dic = {
+    }
+    return dic
+
+
 def compute_stability_scores(stability_list):
     stability_scores = []
     for lst in stability_list:
