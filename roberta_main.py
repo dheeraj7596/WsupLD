@@ -46,11 +46,19 @@ if __name__ == "__main__":
     with open(data_path + "seedwords.json") as fp:
         label_term_dict = json.load(fp)
 
+    if dataset == "dblp":
+        phrase_id_map = pickle.load(open(data_path + "phrase_id_map.pkl", "rb"))
+        label_term_dict = modify_phrases(label_term_dict, phrase_id_map)
+
     labels = list(set(df["label"]))
     label_to_index, index_to_label = create_label_index_maps(labels)
 
-    df_copy = copy.deepcopy(df)
-    df_copy = preprocess(df_copy)
+    if dataset != "dblp":
+        df_copy = copy.deepcopy(df)
+        df_copy = preprocess(df_copy)
+    else:
+        df_copy = pickle.load(open(data_path + "df_mapped_labels_phrase_removed_stopwords_test_thresh_3.pkl", "rb"))
+
     tokenizer = fit_get_tokenizer(df_copy.text, max_words=150000)
 
     X_all = list(df["text"])
