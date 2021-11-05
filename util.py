@@ -2,6 +2,27 @@ import numpy as np
 from tensorflow.keras.preprocessing.text import Tokenizer
 from nltk.corpus import stopwords
 import string
+import random
+
+
+def generate_name(id):
+    return "fnust" + str(id)
+
+
+def modify_phrases(label_term_dict, phrase_id_map, random_k=0):
+    for l in label_term_dict:
+        temp_list = []
+        for term in label_term_dict[l]:
+            try:
+                temp_list.append(generate_name(phrase_id_map[term]))
+            except:
+                temp_list.append(term)
+        if random_k:
+            random.shuffle(temp_list)
+            label_term_dict[l] = temp_list[:random_k]
+        else:
+            label_term_dict[l] = temp_list
+    return label_term_dict
 
 
 def preprocess(df):
