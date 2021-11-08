@@ -30,8 +30,8 @@ def get_x_y():
     for w in wro:
         wro[w] = wro[w] / count_wro
 
-    cor_y = np.array([cor[0], cor[1], cor[2], cor[3], cor[4]])
-    wro_y = np.array([wro[0], wro[1], wro[2], wro[3], wro[4]])
+    cor_y = np.array([cor[1], cor[2], cor[3], cor[4], cor[0]])
+    wro_y = np.array([wro[1], wro[2], wro[3], wro[4], wro[0]])
     return cor_y, wro_y
 
 
@@ -56,7 +56,8 @@ if __name__ == "__main__":
     ax.set_ylabel('Proportion of Samples learnt')
     ax.set_title('Proportion of Samples vs Learnt Epoch')
     ax.set_xticks(ind + width / 2)
-    ax.set_xticklabels(('N/A', '1', '2', '3', '4'))
+    ax.set_xticklabels(('1', '2', '3', '4', 'Never'))
 
     ax.legend((rects1[0], rects2[0]), ('Correct', 'Wrong'))
     plt.savefig('./data/nyt-coarse/prelim_exp.png')
+    # plt.show()
