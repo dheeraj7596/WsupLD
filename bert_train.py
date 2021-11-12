@@ -928,9 +928,7 @@ def prob_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
     return train_data, train_labels, true_train_labels, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob
 
 
-def dump_probs(X, y_pseudo_orig, y_true, label_to_index, index_to_label, device, data_path):
-    y_pseudo = [label_to_index[l] for l in y_pseudo_orig]
-
+def dump_probs(X, y_pseudo, y_true, device, data_path):
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased', do_lower_case=True)
     start = time.time()
     input_ids, attention_masks, labels = bert_tokenize(tokenizer, X, y_pseudo)
@@ -1114,17 +1112,10 @@ def dump_probs(X, y_pseudo_orig, y_true, label_to_index, index_to_label, device,
 
     first_ep_preds, first_ep_true_labels = evaluate(model, prediction_dataloader, device)
     probs = get_true_label_probs(first_ep_preds, y_pseudo)
-    pred_inds = get_labelinds_from_probs(first_ep_preds)
-    pred_labels = []
-    for p in pred_inds:
-        pred_labels.append(index_to_label[p])
 
     pickle.dump(probs, open(data_path + "probs_prob_filter.pkl", "wb"))
-    pickle.dump(pred_labels, open(data_path + "pred_labels_prob_filter.pkl", "wb"))
-    pickle.dump(y_pseudo_orig, open(data_path + "y_pseudo_prob_filter.pkl", "wb"))
+    pickle.dump(y_pseudo, open(data_path + "y_pseudo_prob_filter.pkl", "wb"))
     pickle.dump(y_true, open(data_path + "y_true_prob_filter.pkl", "wb"))
-    pickle.dump(label_to_index, open(data_path + "label_to_index_prob_filter.pkl", "wb"))
-    pickle.dump(index_to_label, open(data_path + "index_to_label_prob_filter.pkl", "wb"))
 
 
 def prob_score_filter(X, y_pseudo, y_true, device, dataset_name, iteration):
