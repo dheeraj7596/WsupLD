@@ -26,7 +26,7 @@ if __name__ == "__main__":
     percent_thresh = float(sys.argv[6])
     bins = [0, 0.25, 0.5, 0.75, 1]
     bins_five = [0, 1, 2, 3, 4, 5]
-    num_its = 5
+    num_its = 1
     # use_gpu = 0
 
     seed_val = 19
@@ -182,6 +182,9 @@ if __name__ == "__main__":
             pickle.dump(correct_list, open(data_path + "correct_list_batch_epoch_filter.pkl", "wb"))
             pickle.dump(wrong_list, open(data_path + "wrong_list_batch_epoch_filter.pkl", "wb"))
             pickle.dump(coverage_list, open(data_path + "coverage_list_batch_epoch_filter.pkl", "wb"))
+            break
+        elif filter_flag == 7:
+            dump_probs(X_train, y_train, y_true, device, data_path)
             break
 
         print("******************AFTER FILTERING: classification report of pseudo-labels******************", flush=True)
