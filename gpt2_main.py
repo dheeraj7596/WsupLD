@@ -179,9 +179,9 @@ if __name__ == "__main__":
             print("Top50-batch epoch Filtering started..", flush=True)
             correct_list, wrong_list, coverage_list = batch_epoch_filter(X_train, y_train, y_true, device,
                                                                          percent_thresh, it)
-            pickle.dump(correct_list, open(data_path + "correct_list_batch_epoch_filter.pkl", "wb"))
-            pickle.dump(wrong_list, open(data_path + "wrong_list_batch_epoch_filter.pkl", "wb"))
-            pickle.dump(coverage_list, open(data_path + "coverage_list_batch_epoch_filter.pkl", "wb"))
+            pickle.dump(correct_list, open(data_path + "correct_list_batch_epoch_filter_gpt2.pkl", "wb"))
+            pickle.dump(wrong_list, open(data_path + "wrong_list_batch_epoch_filter_gpt2.pkl", "wb"))
+            pickle.dump(coverage_list, open(data_path + "coverage_list_batch_epoch_filter_gpt2.pkl", "wb"))
             break
         elif filter_flag == 7:
             dump_probs(X_train, y_train, y_true, device, data_path)
