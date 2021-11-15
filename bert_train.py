@@ -1348,14 +1348,15 @@ def random_filter(X, y_pseudo, y_true, iteration, dataset):
         return train_data, train_labels, true_train_labels, non_train_data, non_train_labels, true_non_train_labels
 
 
-def compute_correct_wrong_coverage(model, prediction_dataloader, device, y_pseudo, y_true):
+def compute_correct_wrong_coverage(model, prediction_dataloader, device, y_pseudo, y_true, correct_dic):
     preds, first_ep_true_labels = evaluate(model, prediction_dataloader, device)
     pred_inds = get_labelinds_from_probs(preds)
 
     filtered_labels = []
     filtered_true_labels = []
     for ind in range(len(y_pseudo)):
-        if pred_inds[ind] == y_pseudo[ind]:
+        if pred_inds[ind] == y_pseudo[ind] or correct_dic[ind]:
+            correct_dic[ind] = 1
             filtered_labels.append(y_pseudo[ind])
             filtered_true_labels.append(y_true[ind])
 
@@ -1367,13 +1368,17 @@ def compute_correct_wrong_coverage(model, prediction_dataloader, device, y_pseud
             correct += 1
         else:
             wrong += 1
-    return correct, wrong, coverage
+    return correct, wrong, coverage, correct_dic
 
 
 def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteration=None):
     correct_list = []
     wrong_list = []
     coverage_list = []
+
+    correct_dic = []
+    for i in range(len(X)):
+        correct_dic.append(0)
 
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased', do_lower_case=True)
     start = time.time()
@@ -1485,8 +1490,9 @@ def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteratio
                 # Report progress.
                 print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(train_dataloader), elapsed),
                       flush=True)
-                correct, wrong, coverage = compute_correct_wrong_coverage(model, prediction_dataloader, device,
-                                                                          y_pseudo, y_true)
+                correct, wrong, coverage, correct_dic = compute_correct_wrong_coverage(model, prediction_dataloader,
+                                                                                       device, y_pseudo, y_true,
+                                                                                       correct_dic)
                 correct_list.append(correct)
                 wrong_list.append(wrong)
                 coverage_list.append(coverage)
