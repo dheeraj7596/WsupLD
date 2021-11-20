@@ -70,14 +70,25 @@ if __name__ == "__main__":
     # coverage = [0.93, 0.938, 0.946, 0.945, 0.964, 0.965, 1]
 
     # 20news-fine
-    risk_epoch = [7442, 7508, 7627, 7625, 7644, 7771]
-    risk_prob = [7326, 7427, 7608, 7613, 7685, 7771]
-    coverage = [0.912, 0.927, 0.959, 0.9613, 0.9684, 1]
+    # risk_epoch = [7442, 7508, 7627, 7625, 7644, 7771]
+    # risk_prob = [7326, 7427, 7608, 7613, 7685, 7771]
+    # coverage = [0.912, 0.927, 0.959, 0.9613, 0.9684, 1]
+    #
+    # plt.plot(coverage, risk_epoch, label="Epoch-based filter")
+    # plt.plot(coverage, risk_prob, label="Probability-based filter")
+    # plt.xlabel("Coverage")
+    # plt.ylabel("Risk=#Correctly labeled samples")
+    # plt.legend()
+    # plt.title("20News-Fine")
+    # plt.savefig("./data/plots/20news_fine_rc.png")
 
-    plt.plot(coverage, risk_epoch, label="Epoch-based filter")
-    plt.plot(coverage, risk_prob, label="Probability-based filter")
-    plt.xlabel("Coverage")
-    plt.ylabel("Risk=#Correctly labeled samples")
-    plt.legend()
-    plt.title("20News-Fine")
-    plt.savefig("./data/plots/20news_fine_rc.png")
+    perf = [0.72, 0.74, 0.59, 0.57, 0.54, 0.53]
+    its = range(1, len(perf) + 1)
+
+    plt.plot(its, perf)
+    plt.ylabel("Macro F1")
+    plt.xlabel("Iteration")
+    plt.title("Performance vs Iteration")
+    plt.yticks([0, 0.10, 0.20, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
+    plt.savefig("./data/plots/conwea_it.png")
+    # plt.show()
