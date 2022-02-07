@@ -240,6 +240,8 @@ if __name__ == "__main__":
         print("Training model..", flush=True)
         model, correct_bootstrap, wrong_bootstrap = train_bert(X_train, y_train, device, correct_bootstrap,
                                                                wrong_bootstrap, label_dyn=True)
+        # pickle.dump(correct_bootstrap["first_ep"], open(data_path + "correct_it_first_ep_0.pkl", "wb"))
+        # pickle.dump(wrong_bootstrap["first_ep"], open(data_path + "wrong_it_first_ep_0.pkl", "wb"))
         if plt_flag:
             plt.figure()
             plt.hist(correct_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
