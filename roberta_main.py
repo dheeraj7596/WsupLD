@@ -21,6 +21,7 @@ if __name__ == "__main__":
     dump_flag = False
     anal_flag = False
     train_flag = True
+    pred_dump_flag = True
     plt_flag = int(sys.argv[5])
     filter_flag = int(sys.argv[4])
     percent_thresh = float(sys.argv[6])
@@ -266,6 +267,9 @@ if __name__ == "__main__":
             pred_labels.append(index_to_label[temp_index_to_label[p]])
         print(classification_report(y_all, pred_labels), flush=True)
         print("*" * 80, flush=True)
+
+        if pred_dump_flag:
+            pickle.dump(pred_labels, open(data_path + "roberta_pred_labels_" + str(filter_flag) + ".pkl", "wb"))
 
         if anal_flag and filter_flag not in [3, 4]:
             print(

@@ -21,12 +21,13 @@ if __name__ == "__main__":
     dump_flag = False
     anal_flag = False
     train_flag = True
+    pred_dump_flag = True
     plt_flag = int(sys.argv[5])
     filter_flag = int(sys.argv[4])
     percent_thresh = float(sys.argv[6])
     bins = [0, 0.25, 0.5, 0.75, 1]
     bins_five = [0, 1, 2, 3, 4, 5]
-    num_its = 1
+    num_its = 5
     # use_gpu = 0
 
     seed_val = 19
@@ -271,6 +272,9 @@ if __name__ == "__main__":
             pred_labels.append(index_to_label[temp_index_to_label[p]])
         print(classification_report(y_all, pred_labels), flush=True)
         print("*" * 80, flush=True)
+
+        if pred_dump_flag:
+            pickle.dump(pred_labels, open(data_path + "bert_pred_labels_" + str(filter_flag) + ".pkl", "wb"))
 
         if anal_flag and filter_flag not in [3, 4]:
             print(
