@@ -103,7 +103,7 @@ def split_buckets(X_train, y_train, y_true, dataset):
         y_train_list.append(bucket_y_train)
         y_true_list.append(bucket_y_true)
         print("Fourth bucket size", fourth_bucket_size, "# correct", len(correct_inds), "# wrong", len(wrong_inds),
-              "noise rate", wrong_size / fourth_bucket_size)
+              "noise rate", len(wrong_inds) / fourth_bucket_size)
 
     elif dataset == "books":
         first_bucket_size = int(total / 3)
@@ -151,7 +151,7 @@ def split_buckets(X_train, y_train, y_true, dataset):
         y_train_list.append(bucket_y_train)
         y_true_list.append(bucket_y_true)
         print("Third bucket size", third_bucket_size, "# correct", len(correct_inds), "# wrong", len(wrong_inds),
-              "noise rate", wrong_size / third_bucket_size)
+              "noise rate", len(wrong_inds) / third_bucket_size)
     else:
         raise Exception
 
