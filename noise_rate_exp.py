@@ -41,7 +41,7 @@ def split_buckets(X_train, y_train, y_true, dataset):
     y_train_list = []
     y_true_list = []
 
-    if dataset == "20news-fine":
+    if dataset == "20news-fine-nomisc":
         first_bucket_size = int(total / 4)
         wrong_size = int(0.1 * first_bucket_size)
         correct_size = first_bucket_size - wrong_size
