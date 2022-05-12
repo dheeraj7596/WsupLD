@@ -8,6 +8,155 @@ from util import *
 import matplotlib.pyplot as plt
 import copy
 
+
+def create_bucket(X_train, correct_inds, correct_size, wrong_inds, wrong_size, y_train, y_true):
+    first_correct_inds = random.sample(correct_inds, correct_size)
+    first_wrong_inds = random.sample(wrong_inds, wrong_size)
+    first_inds = first_correct_inds + first_wrong_inds
+    bucket_x_train = []
+    bucket_y_train = []
+    bucket_y_true = []
+    for i in first_inds:
+        bucket_x_train.append(X_train[i])
+        bucket_y_train.append(y_train[i])
+        bucket_y_true.append(y_true[i])
+
+    correct_inds = list(set(correct_inds) - set(first_correct_inds))
+    wrong_inds = list(set(wrong_inds) - set(first_wrong_inds))
+    return bucket_x_train, bucket_y_train, bucket_y_true, correct_inds, wrong_inds
+
+
+def split_buckets(X_train, y_train, y_true, dataset):
+    correct_inds = []
+    wrong_inds = []
+    for i in range(len(y_train)):
+        if y_train[i] == y_true[i]:
+            correct_inds.append(i)
+        else:
+            wrong_inds.append(i)
+
+    total = len(X_train)
+
+    X_train_list = []
+    y_train_list = []
+    y_true_list = []
+
+    if dataset == "20news-fine":
+        first_bucket_size = int(total / 4)
+        wrong_size = int(0.1 * first_bucket_size)
+        correct_size = first_bucket_size - wrong_size
+        bucket_x_train, bucket_y_train, bucket_y_true, correct_inds, wrong_inds = create_bucket(X_train,
+                                                                                                correct_inds,
+                                                                                                correct_size,
+                                                                                                wrong_inds,
+                                                                                                wrong_size,
+                                                                                                y_train,
+                                                                                                y_true)
+        X_train_list.append(bucket_x_train)
+        y_train_list.append(bucket_y_train)
+        y_true_list.append(bucket_y_true)
+        print("First bucket size", first_bucket_size, "# correct", correct_size, "# wrong", wrong_size, "noise rate",
+              wrong_size / first_bucket_size)
+
+        second_bucket_size = int(total / 4)
+        wrong_size = int(0.2 * second_bucket_size)
+        correct_size = second_bucket_size - wrong_size
+        bucket_x_train, bucket_y_train, bucket_y_true, correct_inds, wrong_inds = create_bucket(X_train,
+                                                                                                correct_inds,
+                                                                                                correct_size,
+                                                                                                wrong_inds,
+                                                                                                wrong_size,
+                                                                                                y_train,
+                                                                                                y_true)
+        X_train_list.append(bucket_x_train)
+        y_train_list.append(bucket_y_train)
+        y_true_list.append(bucket_y_true)
+        print("Second bucket size", second_bucket_size, "# correct", correct_size, "# wrong", wrong_size, "noise rate",
+              wrong_size / second_bucket_size)
+
+        third_bucket_size = int(total / 4)
+        wrong_size = int(0.3 * third_bucket_size)
+        correct_size = third_bucket_size - wrong_size
+        bucket_x_train, bucket_y_train, bucket_y_true, correct_inds, wrong_inds = create_bucket(X_train,
+                                                                                                correct_inds,
+                                                                                                correct_size,
+                                                                                                wrong_inds,
+                                                                                                wrong_size,
+                                                                                                y_train,
+                                                                                                y_true)
+        X_train_list.append(bucket_x_train)
+        y_train_list.append(bucket_y_train)
+        y_true_list.append(bucket_y_true)
+        print("Third bucket size", third_bucket_size, "# correct", correct_size, "# wrong", wrong_size, "noise rate",
+              wrong_size / third_bucket_size)
+
+        fourth_bucket_size = total - first_bucket_size - second_bucket_size - third_bucket_size
+        bucket_x_train = []
+        bucket_y_train = []
+        bucket_y_true = []
+        fourth_inds = correct_inds + wrong_inds
+        for i in fourth_inds:
+            bucket_x_train.append(X_train[i])
+            bucket_y_train.append(y_train[i])
+            bucket_y_true.append(y_true[i])
+        X_train_list.append(bucket_x_train)
+        y_train_list.append(bucket_y_train)
+        y_true_list.append(bucket_y_true)
+        print("Fourth bucket size", fourth_bucket_size, "# correct", len(correct_inds), "# wrong", len(wrong_inds),
+              "noise rate", wrong_size / fourth_bucket_size)
+
+    elif dataset == "books":
+        first_bucket_size = int(total / 3)
+        wrong_size = int(0.13 * first_bucket_size)
+        correct_size = first_bucket_size - wrong_size
+        bucket_x_train, bucket_y_train, bucket_y_true, correct_inds, wrong_inds = create_bucket(X_train,
+                                                                                                correct_inds,
+                                                                                                correct_size,
+                                                                                                wrong_inds,
+                                                                                                wrong_size,
+                                                                                                y_train,
+                                                                                                y_true)
+        X_train_list.append(bucket_x_train)
+        y_train_list.append(bucket_y_train)
+        y_true_list.append(bucket_y_true)
+        print("First bucket size", first_bucket_size, "# correct", correct_size, "# wrong", wrong_size, "noise rate",
+              wrong_size / first_bucket_size)
+
+        second_bucket_size = int(total / 3)
+        wrong_size = int(0.33 * second_bucket_size)
+        correct_size = second_bucket_size - wrong_size
+        bucket_x_train, bucket_y_train, bucket_y_true, correct_inds, wrong_inds = create_bucket(X_train,
+                                                                                                correct_inds,
+                                                                                                correct_size,
+                                                                                                wrong_inds,
+                                                                                                wrong_size,
+                                                                                                y_train,
+                                                                                                y_true)
+        X_train_list.append(bucket_x_train)
+        y_train_list.append(bucket_y_train)
+        y_true_list.append(bucket_y_true)
+        print("Second bucket size", second_bucket_size, "# correct", correct_size, "# wrong", wrong_size, "noise rate",
+              wrong_size / second_bucket_size)
+
+        third_bucket_size = total - first_bucket_size - second_bucket_size
+        bucket_x_train = []
+        bucket_y_train = []
+        bucket_y_true = []
+        third_inds = correct_inds + wrong_inds
+        for i in third_inds:
+            bucket_x_train.append(X_train[i])
+            bucket_y_train.append(y_train[i])
+            bucket_y_true.append(y_true[i])
+        X_train_list.append(bucket_x_train)
+        y_train_list.append(bucket_y_train)
+        y_true_list.append(bucket_y_true)
+        print("Third bucket size", third_bucket_size, "# correct", len(correct_inds), "# wrong", len(wrong_inds),
+              "noise rate", wrong_size / third_bucket_size)
+    else:
+        raise Exception
+
+    return X_train_list, y_train_list, y_true_list
+
 if __name__ == "__main__":
     # base_path = "./data/"
     base_path = "/data/dheeraj/WsupLD/data/"
@@ -21,7 +170,7 @@ if __name__ == "__main__":
     dump_flag = False
     anal_flag = False
     train_flag = True
-    pred_dump_flag = True
+    pred_dump_flag = False
     plt_flag = int(sys.argv[5])
     filter_flag = int(sys.argv[4])
     percent_thresh = float(sys.argv[6])
@@ -81,131 +230,10 @@ if __name__ == "__main__":
     y_test = list(df.iloc[X_test_inds]["label"])
     y_test = [label_to_index[l] for l in y_test]
 
-    correct_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
-    wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
+    X_train_list, y_train_list, y_true_list = split_buckets(X_train, y_train, y_true, dataset)
 
-    for i, sent in enumerate(X_train):
-        if y_train[i] == y_true[i]:
-            correct_bootstrap["text"].append(sent)
-            correct_bootstrap["true"].append(y_true[i])
-            correct_bootstrap["pred"].append(y_train[i])
-            correct_bootstrap["match"].append(0)
-            correct_bootstrap["first_ep"].append(0)
-        else:
-            wrong_bootstrap["text"].append(sent)
-            wrong_bootstrap["true"].append(y_true[i])
-            wrong_bootstrap["pred"].append(y_train[i])
-            wrong_bootstrap["match"].append(0)
-            wrong_bootstrap["first_ep"].append(0)
-
-    for it in range(num_its):
-        temp_label_to_index = {}
-        temp_index_to_label = {}
-
-        print("Iteration:", it, flush=True)
-
-        print("Correct Samples:", len(correct_bootstrap["text"]), flush=True)
-        print("Wrong Samples:", len(wrong_bootstrap["text"]), flush=True)
-
-        if dump_flag:
-            pickle.dump(X_train, open(data_path + "X_train_" + str(it) + ".pkl", "wb"))
-            pickle.dump(y_train, open(data_path + "y_train_" + str(it) + ".pkl", "wb"))
-            pickle.dump(y_true, open(data_path + "y_true_" + str(it) + ".pkl", "wb"))
-
-        non_train_data = []
-        non_train_labels = []
-        true_non_train_labels = []
-
-        print("****************BEFORE FILTERING: classification report of pseudo-labels******************", flush=True)
-        print(classification_report(y_true, y_train), flush=True)
-
-        if filter_flag:
-            for i, y in enumerate(sorted(list(set(y_train)))):
-                temp_label_to_index[y] = i
-                temp_index_to_label[i] = y
-            y_train = [temp_label_to_index[y] for y in y_train]
-
-        if filter_flag == 1:
-            # top50-epoch filter
-            print("Top50-epoch Filtering started..", flush=True)
-            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = filter(
-                X_train, y_train, y_true, device, percent_thresh, it)
-            y_train = [temp_index_to_label[y] for y in y_train]
-            non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
-        elif filter_flag == 2:
-            # probability filter
-            print("Probability Filtering started..", flush=True)
-            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob = prob_filter(
-                X_train, y_train, y_true, device, dataset, it)
-            y_train = [temp_index_to_label[y] for y in y_train]
-            non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
-            # probs = np.sort(probs)[::-1]
-            # plt.figure()
-            # plt.plot(probs)
-            # plt.axhline(cutoff_prob, color='r')
-            # plt.savefig(plot_dump_dir + "prob_filter_cutoff_prob_" + str(it) + ".png")
-            # pickle.dump(X_train, open(data_path + "X_train_prob_" + str(it) + ".pkl", "wb"))
-        elif filter_flag == 3:
-            # upperbound
-            y_train = [temp_index_to_label[y] for y in y_train]
-            temp_y_train = []
-            temp_x_train = []
-            temp_y_true = []
-            for loop_ind in range(len(y_train)):
-                if y_train[loop_ind] == y_true[loop_ind]:
-                    temp_x_train.append(X_train[loop_ind])
-                    temp_y_train.append(y_train[loop_ind])
-                    temp_y_true.append(y_true[loop_ind])
-            X_train = temp_x_train
-            y_train = temp_y_train
-            y_true = temp_y_true
-        elif filter_flag == 4:
-            # random filter
-            print("Random Filtering started..", flush=True)
-            y_train = [temp_index_to_label[y] for y in y_train]
-            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = random_filter(X_train,
-                                                                                                              y_train,
-                                                                                                              y_true,
-                                                                                                              it,
-                                                                                                              dataset)
-        elif filter_flag == 5:
-            # problematic score
-            print("Problematic score Filtering started..", flush=True)
-            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = prob_score_filter(
-                X_train, y_train, y_true, device, dataset, it)
-            y_train = [temp_index_to_label[y] for y in y_train]
-            non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
-        elif filter_flag == 6:
-            # top50-epoch filter
-            print("Top50-batch epoch Filtering started..", flush=True)
-            correct_list, wrong_list, coverage_list = batch_epoch_filter(X_train, y_train, y_true, device,
-                                                                         percent_thresh, it)
-            pickle.dump(correct_list, open(data_path + "correct_list_batch_epoch_filter.pkl", "wb"))
-            pickle.dump(wrong_list, open(data_path + "wrong_list_batch_epoch_filter.pkl", "wb"))
-            pickle.dump(coverage_list, open(data_path + "coverage_list_batch_epoch_filter.pkl", "wb"))
-            break
-
-        print("******************AFTER FILTERING: classification report of pseudo-labels******************", flush=True)
-        print(classification_report(y_true, y_train), flush=True)
-
-        if len(set(y_train)) < len(label_to_index):
-            print("Number of labels in training set after filtering:", len(set(y_train)))
-            # raise Exception(
-            #     "Number of labels expected " + str(len(label_to_index)) + " but found " + str(len(set(y_train))))
-
-        if dump_flag:
-            pickle.dump(X_train, open(data_path + "X_train_filtered_" + str(it) + ".pkl", "wb"))
-            pickle.dump(y_train, open(data_path + "y_train_filtered_" + str(it) + ".pkl", "wb"))
-            pickle.dump(y_true, open(data_path + "y_true_filtered_" + str(it) + ".pkl", "wb"))
-
-            pickle.dump(non_train_data, open(data_path + "non_train_data_" + str(it) + ".pkl", "wb"))
-            pickle.dump(non_train_labels, open(data_path + "non_train_labels_" + str(it) + ".pkl", "wb"))
-            pickle.dump(true_non_train_labels, open(data_path + "true_non_train_labels_" + str(it) + ".pkl", "wb"))
-
-        for i in range(len(non_train_data)):
-            X_test.append(non_train_data[i])
-            y_test.append(true_non_train_labels[i])
-
+    for X_train, y_train, y_true in zip(X_train_list, y_train_list, y_true_list):
+        print("*********BUCKET STARTED**********")
         correct_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
         wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
 
@@ -223,160 +251,285 @@ if __name__ == "__main__":
                 wrong_bootstrap["match"].append(0)
                 wrong_bootstrap["first_ep"].append(0)
 
-        print("Filtering completed..", flush=True)
-        print("Correct Samples in New training data:", len(correct_bootstrap["text"]), flush=True)
-        print("Wrong Samples in New training data:", len(wrong_bootstrap["text"]), flush=True)
+        for it in range(num_its):
+            temp_label_to_index = {}
+            temp_index_to_label = {}
 
-        for i, y in enumerate(sorted(list(set(y_train)))):
-            temp_label_to_index[y] = i
-            temp_index_to_label[i] = y
-        y_train = [temp_label_to_index[y] for y in y_train]
+            print("Iteration:", it, flush=True)
 
-        if not train_flag:
-            continue
+            print("Correct Samples:", len(correct_bootstrap["text"]), flush=True)
+            print("Wrong Samples:", len(wrong_bootstrap["text"]), flush=True)
 
-        print("Training model..", flush=True)
-        model, correct_bootstrap, wrong_bootstrap = train_cls(X_train, y_train, device, correct_bootstrap,
-                                                              wrong_bootstrap, label_dyn=True)
-        if plt_flag:
-            plt.figure()
-            plt.hist(correct_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
-            plt.xticks(bins)
-            plt.savefig(plot_dump_dir + "correct_it_" + str(it) + ".png")
+            if dump_flag:
+                pickle.dump(X_train, open(data_path + "X_train_" + str(it) + ".pkl", "wb"))
+                pickle.dump(y_train, open(data_path + "y_train_" + str(it) + ".pkl", "wb"))
+                pickle.dump(y_true, open(data_path + "y_true_" + str(it) + ".pkl", "wb"))
 
-            plt.figure()
-            plt.hist(wrong_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
-            plt.xticks(bins)
-            plt.savefig(plot_dump_dir + "wrong_it_" + str(it) + ".png")
+            non_train_data = []
+            non_train_labels = []
+            true_non_train_labels = []
 
-            plt.figure()
-            plt.hist(correct_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_five)
-            plt.xticks(bins_five)
-            plt.savefig(plot_dump_dir + "correct_it_first_ep_" + str(it) + ".png")
+            print("****************BEFORE FILTERING: classification report of pseudo-labels******************", flush=True)
+            print(classification_report(y_true, y_train), flush=True)
 
-            plt.figure()
-            plt.hist(wrong_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_five)
-            plt.xticks(bins_five)
-            plt.savefig(plot_dump_dir + "wrong_it_first_ep_" + str(it) + ".png")
+            if filter_flag:
+                for i, y in enumerate(sorted(list(set(y_train)))):
+                    temp_label_to_index[y] = i
+                    temp_index_to_label[i] = y
+                y_train = [temp_label_to_index[y] for y in y_train]
 
-        print("****************** CLASSIFICATION REPORT FOR All DOCUMENTS ********************", flush=True)
-        predictions = test(model, X_all, y_all_inds, device)
-        pred_inds = get_labelinds_from_probs(predictions)
-        pred_labels = []
-        for p in pred_inds:
-            pred_labels.append(index_to_label[temp_index_to_label[p]])
-        print(classification_report(y_all, pred_labels), flush=True)
-        print("*" * 80, flush=True)
+            if filter_flag == 1:
+                # top50-epoch filter
+                print("Top50-epoch Filtering started..", flush=True)
+                X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = filter(
+                    X_train, y_train, y_true, device, percent_thresh, it)
+                y_train = [temp_index_to_label[y] for y in y_train]
+                non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
+            elif filter_flag == 2:
+                # probability filter
+                print("Probability Filtering started..", flush=True)
+                X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob = prob_filter(
+                    X_train, y_train, y_true, device, dataset, it)
+                y_train = [temp_index_to_label[y] for y in y_train]
+                non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
+                # probs = np.sort(probs)[::-1]
+                # plt.figure()
+                # plt.plot(probs)
+                # plt.axhline(cutoff_prob, color='r')
+                # plt.savefig(plot_dump_dir + "prob_filter_cutoff_prob_" + str(it) + ".png")
+                # pickle.dump(X_train, open(data_path + "X_train_prob_" + str(it) + ".pkl", "wb"))
+            elif filter_flag == 3:
+                # upperbound
+                y_train = [temp_index_to_label[y] for y in y_train]
+                temp_y_train = []
+                temp_x_train = []
+                temp_y_true = []
+                for loop_ind in range(len(y_train)):
+                    if y_train[loop_ind] == y_true[loop_ind]:
+                        temp_x_train.append(X_train[loop_ind])
+                        temp_y_train.append(y_train[loop_ind])
+                        temp_y_true.append(y_true[loop_ind])
+                X_train = temp_x_train
+                y_train = temp_y_train
+                y_true = temp_y_true
+            elif filter_flag == 4:
+                # random filter
+                print("Random Filtering started..", flush=True)
+                y_train = [temp_index_to_label[y] for y in y_train]
+                X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = random_filter(X_train,
+                                                                                                                  y_train,
+                                                                                                                  y_true,
+                                                                                                                  it,
+                                                                                                                  dataset)
+            elif filter_flag == 5:
+                # problematic score
+                print("Problematic score Filtering started..", flush=True)
+                X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = prob_score_filter(
+                    X_train, y_train, y_true, device, dataset, it)
+                y_train = [temp_index_to_label[y] for y in y_train]
+                non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
+            elif filter_flag == 6:
+                # top50-epoch filter
+                print("Top50-batch epoch Filtering started..", flush=True)
+                correct_list, wrong_list, coverage_list = batch_epoch_filter(X_train, y_train, y_true, device,
+                                                                             percent_thresh, it)
+                pickle.dump(correct_list, open(data_path + "correct_list_batch_epoch_filter.pkl", "wb"))
+                pickle.dump(wrong_list, open(data_path + "wrong_list_batch_epoch_filter.pkl", "wb"))
+                pickle.dump(coverage_list, open(data_path + "coverage_list_batch_epoch_filter.pkl", "wb"))
+                break
 
-        if pred_dump_flag:
-            pickle.dump(pred_labels, open(data_path + "roberta_pred_labels_" + str(filter_flag) + ".pkl", "wb"))
+            print("******************AFTER FILTERING: classification report of pseudo-labels******************", flush=True)
+            print(classification_report(y_true, y_train), flush=True)
 
-        if anal_flag and filter_flag not in [3, 4]:
-            print(
-                "****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT PSEUDO ********************",
-                flush=True)
-            predictions = test(model, X_train, y_train, device)
-            pred_inds = get_labelinds_from_probs(predictions)
-            pred_labels = []
-            for p in pred_inds:
-                pred_labels.append(index_to_label[temp_index_to_label[p]])
-            y_train_strs = [index_to_label[temp_index_to_label[lbl]] for lbl in y_train]
-            print(classification_report(y_train_strs, pred_labels), flush=True)
-            print("*" * 80, flush=True)
+            if len(set(y_train)) < len(label_to_index):
+                print("Number of labels in training set after filtering:", len(set(y_train)))
+                # raise Exception(
+                #     "Number of labels expected " + str(len(label_to_index)) + " but found " + str(len(set(y_train))))
 
-            print("****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT GT ********************",
-                  flush=True)
-            predictions = test(model, X_train, y_true, device)
-            pred_inds = get_labelinds_from_probs(predictions)
-            pred_labels = []
-            for p in pred_inds:
-                pred_labels.append(index_to_label[temp_index_to_label[p]])
-            y_true_train_strs = [index_to_label[lbl] for lbl in y_true]
-            print(classification_report(y_true_train_strs, pred_labels), flush=True)
-            print("*" * 80, flush=True)
+            if dump_flag:
+                pickle.dump(X_train, open(data_path + "X_train_filtered_" + str(it) + ".pkl", "wb"))
+                pickle.dump(y_train, open(data_path + "y_train_filtered_" + str(it) + ".pkl", "wb"))
+                pickle.dump(y_true, open(data_path + "y_true_filtered_" + str(it) + ".pkl", "wb"))
 
-            print(
-                "****************** CLASSIFICATION REPORT FOR FIRST EP WRONG DOCUMENTS WRT PSEUDO ********************",
-                flush=True)
-            predictions = test(model, non_train_data, non_train_labels, device)
-            pred_inds = get_labelinds_from_probs(predictions)
-            pred_labels = []
-            for p in pred_inds:
-                pred_labels.append(index_to_label[temp_index_to_label[p]])
-            non_train_labels_strs = [index_to_label[lbl] for lbl in non_train_labels]
-            print(classification_report(non_train_labels_strs, pred_labels), flush=True)
-            print("*" * 80, flush=True)
+                pickle.dump(non_train_data, open(data_path + "non_train_data_" + str(it) + ".pkl", "wb"))
+                pickle.dump(non_train_labels, open(data_path + "non_train_labels_" + str(it) + ".pkl", "wb"))
+                pickle.dump(true_non_train_labels, open(data_path + "true_non_train_labels_" + str(it) + ".pkl", "wb"))
 
-            print("****************** CLASSIFICATION REPORT FOR FIRST EP WRONG DOCUMENTS WRT GT ********************",
-                  flush=True)
-            predictions = test(model, non_train_data, true_non_train_labels, device)
-            pred_inds = get_labelinds_from_probs(predictions)
-            pred_labels = []
-            for p in pred_inds:
-                pred_labels.append(index_to_label[temp_index_to_label[p]])
-            true_non_train_labels_strs = [index_to_label[lbl] for lbl in true_non_train_labels]
-            print(classification_report(true_non_train_labels_strs, pred_labels), flush=True)
-            print("*" * 80, flush=True)
+            for i in range(len(non_train_data)):
+                X_test.append(non_train_data[i])
+                y_test.append(true_non_train_labels[i])
 
-        if num_its <= 1:
-            break
+            correct_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
+            wrong_bootstrap = {"text": [], "true": [], "pred": [], "match": [], "first_ep": []}
 
-        print("****************** CLASSIFICATION REPORT FOR REST DOCUMENTS WRT GT ********************", flush=True)
-        predictions = test(model, X_test, y_test, device)
-        pred_inds = get_labelinds_from_probs(predictions)
-        pred_labels = []
-        for p in pred_inds:
-            pred_labels.append(index_to_label[temp_index_to_label[p]])
-        y_test_strs = [index_to_label[lbl] for lbl in y_test]
-        print(classification_report(y_test_strs, pred_labels), flush=True)
-        print("*" * 80, flush=True)
-
-        predictions = test(model, X_test, y_test, device)
-        for i, p in enumerate(predictions):
-            if i == 0:
-                pred = p
-            else:
-                pred = np.concatenate((pred, p))
-
-        pred_labels = []
-        removed_inds = []
-        for i, p in enumerate(pred):
-            sample = X_test[i]
-            true_lbl = y_test[i]
-            max_prob = p.max(axis=-1)
-            lbl = temp_index_to_label[p.argmax(axis=-1)]
-            pred_labels.append(index_to_label[lbl])
-            if max_prob >= thresh:
-                X_train.append(sample)
-                y_train.append(lbl)
-                y_true.append(true_lbl)
-                removed_inds.append(i)
-                if true_lbl == lbl:
-                    correct_bootstrap["text"].append(sample)
-                    correct_bootstrap["true"].append(true_lbl)
-                    correct_bootstrap["pred"].append(lbl)
+            for i, sent in enumerate(X_train):
+                if y_train[i] == y_true[i]:
+                    correct_bootstrap["text"].append(sent)
+                    correct_bootstrap["true"].append(y_true[i])
+                    correct_bootstrap["pred"].append(y_train[i])
                     correct_bootstrap["match"].append(0)
                     correct_bootstrap["first_ep"].append(0)
                 else:
-                    wrong_bootstrap["text"].append(sample)
-                    wrong_bootstrap["true"].append(true_lbl)
-                    wrong_bootstrap["pred"].append(lbl)
+                    wrong_bootstrap["text"].append(sent)
+                    wrong_bootstrap["true"].append(y_true[i])
+                    wrong_bootstrap["pred"].append(y_train[i])
                     wrong_bootstrap["match"].append(0)
                     wrong_bootstrap["first_ep"].append(0)
 
-        removed_inds.sort(reverse=True)
-        for i in removed_inds:
-            del X_test[i]
-            del y_test[i]
+            print("Filtering completed..", flush=True)
+            print("Correct Samples in New training data:", len(correct_bootstrap["text"]), flush=True)
+            print("Wrong Samples in New training data:", len(wrong_bootstrap["text"]), flush=True)
 
-        # Resetting match and first_ep for all samples
-        assert len(correct_bootstrap["match"]) == len(correct_bootstrap["first_ep"])
-        assert len(wrong_bootstrap["match"]) == len(wrong_bootstrap["first_ep"])
+            for i, y in enumerate(sorted(list(set(y_train)))):
+                temp_label_to_index[y] = i
+                temp_index_to_label[i] = y
+            y_train = [temp_label_to_index[y] for y in y_train]
 
-        for i in range(len(correct_bootstrap["match"])):
-            correct_bootstrap["match"][i] = 0
-            correct_bootstrap["first_ep"][i] = 0
+            if not train_flag:
+                continue
 
-        for i in range(len(wrong_bootstrap["match"])):
-            wrong_bootstrap["match"][i] = 0
-            wrong_bootstrap["first_ep"][i] = 0
+            print("Training model..", flush=True)
+            model, correct_bootstrap, wrong_bootstrap = train_cls(X_train, y_train, device, correct_bootstrap,
+                                                                  wrong_bootstrap, label_dyn=True)
+            if plt_flag:
+                plt.figure()
+                plt.hist(correct_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
+                plt.xticks(bins)
+                plt.savefig(plot_dump_dir + "correct_it_" + str(it) + ".png")
+
+                plt.figure()
+                plt.hist(wrong_bootstrap["match"], color='blue', edgecolor='black', bins=bins)
+                plt.xticks(bins)
+                plt.savefig(plot_dump_dir + "wrong_it_" + str(it) + ".png")
+
+                plt.figure()
+                plt.hist(correct_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_five)
+                plt.xticks(bins_five)
+                plt.savefig(plot_dump_dir + "correct_it_first_ep_" + str(it) + ".png")
+
+                plt.figure()
+                plt.hist(wrong_bootstrap["first_ep"], color='blue', edgecolor='black', bins=bins_five)
+                plt.xticks(bins_five)
+                plt.savefig(plot_dump_dir + "wrong_it_first_ep_" + str(it) + ".png")
+
+            print("****************** CLASSIFICATION REPORT FOR All DOCUMENTS ********************", flush=True)
+            predictions = test(model, X_all, y_all_inds, device)
+            pred_inds = get_labelinds_from_probs(predictions)
+            pred_labels = []
+            for p in pred_inds:
+                pred_labels.append(index_to_label[temp_index_to_label[p]])
+            print(classification_report(y_all, pred_labels), flush=True)
+            print("*" * 80, flush=True)
+
+            if pred_dump_flag:
+                pickle.dump(pred_labels, open(data_path + "roberta_pred_labels_" + str(filter_flag) + ".pkl", "wb"))
+
+            if anal_flag and filter_flag not in [3, 4]:
+                print(
+                    "****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT PSEUDO ********************",
+                    flush=True)
+                predictions = test(model, X_train, y_train, device)
+                pred_inds = get_labelinds_from_probs(predictions)
+                pred_labels = []
+                for p in pred_inds:
+                    pred_labels.append(index_to_label[temp_index_to_label[p]])
+                y_train_strs = [index_to_label[temp_index_to_label[lbl]] for lbl in y_train]
+                print(classification_report(y_train_strs, pred_labels), flush=True)
+                print("*" * 80, flush=True)
+
+                print("****************** CLASSIFICATION REPORT FOR FIRST EP CORRECT DOCUMENTS WRT GT ********************",
+                      flush=True)
+                predictions = test(model, X_train, y_true, device)
+                pred_inds = get_labelinds_from_probs(predictions)
+                pred_labels = []
+                for p in pred_inds:
+                    pred_labels.append(index_to_label[temp_index_to_label[p]])
+                y_true_train_strs = [index_to_label[lbl] for lbl in y_true]
+                print(classification_report(y_true_train_strs, pred_labels), flush=True)
+                print("*" * 80, flush=True)
+
+                print(
+                    "****************** CLASSIFICATION REPORT FOR FIRST EP WRONG DOCUMENTS WRT PSEUDO ********************",
+                    flush=True)
+                predictions = test(model, non_train_data, non_train_labels, device)
+                pred_inds = get_labelinds_from_probs(predictions)
+                pred_labels = []
+                for p in pred_inds:
+                    pred_labels.append(index_to_label[temp_index_to_label[p]])
+                non_train_labels_strs = [index_to_label[lbl] for lbl in non_train_labels]
+                print(classification_report(non_train_labels_strs, pred_labels), flush=True)
+                print("*" * 80, flush=True)
+
+                print("****************** CLASSIFICATION REPORT FOR FIRST EP WRONG DOCUMENTS WRT GT ********************",
+                      flush=True)
+                predictions = test(model, non_train_data, true_non_train_labels, device)
+                pred_inds = get_labelinds_from_probs(predictions)
+                pred_labels = []
+                for p in pred_inds:
+                    pred_labels.append(index_to_label[temp_index_to_label[p]])
+                true_non_train_labels_strs = [index_to_label[lbl] for lbl in true_non_train_labels]
+                print(classification_report(true_non_train_labels_strs, pred_labels), flush=True)
+                print("*" * 80, flush=True)
+
+            if num_its <= 1:
+                break
+
+            print("****************** CLASSIFICATION REPORT FOR REST DOCUMENTS WRT GT ********************", flush=True)
+            predictions = test(model, X_test, y_test, device)
+            pred_inds = get_labelinds_from_probs(predictions)
+            pred_labels = []
+            for p in pred_inds:
+                pred_labels.append(index_to_label[temp_index_to_label[p]])
+            y_test_strs = [index_to_label[lbl] for lbl in y_test]
+            print(classification_report(y_test_strs, pred_labels), flush=True)
+            print("*" * 80, flush=True)
+
+            predictions = test(model, X_test, y_test, device)
+            for i, p in enumerate(predictions):
+                if i == 0:
+                    pred = p
+                else:
+                    pred = np.concatenate((pred, p))
+
+            pred_labels = []
+            removed_inds = []
+            for i, p in enumerate(pred):
+                sample = X_test[i]
+                true_lbl = y_test[i]
+                max_prob = p.max(axis=-1)
+                lbl = temp_index_to_label[p.argmax(axis=-1)]
+                pred_labels.append(index_to_label[lbl])
+                if max_prob >= thresh:
+                    X_train.append(sample)
+                    y_train.append(lbl)
+                    y_true.append(true_lbl)
+                    removed_inds.append(i)
+                    if true_lbl == lbl:
+                        correct_bootstrap["text"].append(sample)
+                        correct_bootstrap["true"].append(true_lbl)
+                        correct_bootstrap["pred"].append(lbl)
+                        correct_bootstrap["match"].append(0)
+                        correct_bootstrap["first_ep"].append(0)
+                    else:
+                        wrong_bootstrap["text"].append(sample)
+                        wrong_bootstrap["true"].append(true_lbl)
+                        wrong_bootstrap["pred"].append(lbl)
+                        wrong_bootstrap["match"].append(0)
+                        wrong_bootstrap["first_ep"].append(0)
+
+            removed_inds.sort(reverse=True)
+            for i in removed_inds:
+                del X_test[i]
+                del y_test[i]
+
+            # Resetting match and first_ep for all samples
+            assert len(correct_bootstrap["match"]) == len(correct_bootstrap["first_ep"])
+            assert len(wrong_bootstrap["match"]) == len(wrong_bootstrap["first_ep"])
+
+            for i in range(len(correct_bootstrap["match"])):
+                correct_bootstrap["match"][i] = 0
+                correct_bootstrap["first_ep"][i] = 0
+
+            for i in range(len(wrong_bootstrap["match"])):
+                wrong_bootstrap["match"][i] = 0
+                wrong_bootstrap["first_ep"][i] = 0
