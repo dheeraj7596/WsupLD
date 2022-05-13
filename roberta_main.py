@@ -188,7 +188,8 @@ if __name__ == "__main__":
         elif filter_flag == 7:
             print("O2U-Net started..", flush=True)
             X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = o2u(X_train, y_train,
-                                                                                                    y_true, device, it)
+                                                                                                    y_true, device,
+                                                                                                    dataset, it)
             y_train = [temp_index_to_label[y] for y in y_train]
             non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
 

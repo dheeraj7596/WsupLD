@@ -292,7 +292,7 @@ def second_stage(model, train_dataloader, device, num_labels):
     return sample_to_loss
 
 
-def o2u(X, y_pseudo, y_true, device, iteration=None):
+def o2u(X, y_pseudo, y_true, device, dataset_name, iteration=None):
     tokenizer = RobertaTokenizerFast.from_pretrained('roberta-base', do_lower_case=True)
     start = time.time()
     input_ids, attention_masks, labels, inds = tokenize(tokenizer, X, y_pseudo)
@@ -326,7 +326,7 @@ def o2u(X, y_pseudo, y_true, device, iteration=None):
     )
     sample_to_loss = second_stage(model, train_dataloader, device, num_labels)
     print("Finally", sample_to_loss, flush=True)
-    num = get_num(dataset, iteration)
+    num = get_num(dataset_name, iteration)
     selected_inds = []
     count = 0
     for i in sample_to_loss:
