@@ -249,7 +249,7 @@ def second_stage(model, train_dataloader, device, num_labels):
                     sample_to_loss[ind].append(loss_each[loop_ind])
                 except:
                     sample_to_loss[ind] = [loss_each[loop_ind]]
-            print("Adding to dict", sample_to_loss, flush=True)
+            # print("Adding to dict", sample_to_loss, flush=True)
             # Accumulate the training loss over all of the batches so that we can
             # calculate the average loss at the end. `loss` is a Tensor containing a
             # single value; the `.item()` function just returns the Python value
