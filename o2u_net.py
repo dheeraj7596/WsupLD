@@ -37,7 +37,7 @@ def format_time(elapsed):
     return str(datetime.timedelta(seconds=elapsed_rounded))
 
 
-def tokenize(tokenizer, sentences, labels):
+def o2u_tokenize(tokenizer, sentences, labels):
     temp = tokenizer(
         sentences,
         add_special_tokens=True,  # Add '[CLS]' and '[SEP]'
@@ -295,7 +295,7 @@ def second_stage(model, train_dataloader, device, num_labels):
 def o2u(X, y_pseudo, y_true, device, dataset_name, iteration=None):
     tokenizer = RobertaTokenizerFast.from_pretrained('roberta-base', do_lower_case=True)
     start = time.time()
-    input_ids, attention_masks, labels, inds = tokenize(tokenizer, X, y_pseudo)
+    input_ids, attention_masks, labels, inds = o2u_tokenize(tokenizer, X, y_pseudo)
     print("Time taken in tokenizing:", time.time() - start)
 
     # Combine the training inputs into a TensorDataset.
