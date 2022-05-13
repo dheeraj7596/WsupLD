@@ -6,6 +6,7 @@ from sklearn.metrics import classification_report
 import torch
 from util import *
 import matplotlib.pyplot as plt
+from o2u_net import o2u
 import copy
 
 if __name__ == "__main__":
@@ -184,6 +185,12 @@ if __name__ == "__main__":
             pickle.dump(wrong_list, open(data_path + "wrong_list_batch_epoch_filter.pkl", "wb"))
             pickle.dump(coverage_list, open(data_path + "coverage_list_batch_epoch_filter.pkl", "wb"))
             break
+        elif filter_flag == 7:
+            print("O2U-Net started..", flush=True)
+            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = o2u(X_train, y_train,
+                                                                                                    y_true, device, it)
+            y_train = [temp_index_to_label[y] for y in y_train]
+            non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
 
         print("******************AFTER FILTERING: classification report of pseudo-labels******************", flush=True)
         print(classification_report(y_true, y_train), flush=True)
