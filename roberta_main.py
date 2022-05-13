@@ -6,7 +6,6 @@ from sklearn.metrics import classification_report
 import torch
 from util import *
 import matplotlib.pyplot as plt
-from o2u_net import o2u
 import copy
 
 if __name__ == "__main__":
