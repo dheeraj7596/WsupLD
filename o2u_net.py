@@ -243,7 +243,7 @@ def second_stage(model, train_dataloader, device, num_labels):
             logits = outputs.logits
             loss_fct = CrossEntropyLoss(reduction='none')
             loss_each = loss_fct(logits.view(-1, num_labels), b_labels.view(-1)).detach().cpu().numpy()
-            print("Shape of loss_each", loss_each.shape, flush=True)
+            # print("Shape of loss_each", loss_each.shape, flush=True)
             for loop_ind, ind in enumerate(b_inds):
                 try:
                     sample_to_loss[ind].append(loss_each[loop_ind])
