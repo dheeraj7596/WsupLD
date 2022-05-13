@@ -2,7 +2,7 @@ from gpt2_train import *
 import pickle
 import json, sys
 import os
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, f1_score
 import torch
 from util import *
 import matplotlib.pyplot as plt
@@ -185,8 +185,14 @@ if __name__ == "__main__":
             pickle.dump(coverage_list, open(data_path + "coverage_list_batch_epoch_filter_gpt2.pkl", "wb"))
             break
         elif filter_flag == 7:
-            dump_probs(X_train, y_train, y_true, device, data_path)
-            break
+            # dump_probs(X_train, y_train, y_true, device, data_path)
+            # break
+            print("O2U-Net started..", flush=True)
+            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = o2u(X_train, y_train,
+                                                                                                    y_true, device,
+                                                                                                    dataset, it)
+            y_train = [temp_index_to_label[y] for y in y_train]
+            non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
 
         print("******************AFTER FILTERING: classification report of pseudo-labels******************", flush=True)
         print(classification_report(y_true, y_train), flush=True)
@@ -269,6 +275,8 @@ if __name__ == "__main__":
         for p in pred_inds:
             pred_labels.append(index_to_label[temp_index_to_label[p]])
         print(classification_report(y_all, pred_labels), flush=True)
+        print("Micro f1", f1_score(y_all, pred_labels, average='micro'), flush=True)
+        print("Macro f1", f1_score(y_all, pred_labels, average='macro'), flush=True)
         print("*" * 80, flush=True)
 
         if pred_dump_flag:
