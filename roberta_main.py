@@ -2,7 +2,7 @@ from roberta_train import *
 import pickle
 import json, sys
 import os
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, f1_score
 import torch
 from util import *
 import matplotlib.pyplot as plt
@@ -273,6 +273,8 @@ if __name__ == "__main__":
         for p in pred_inds:
             pred_labels.append(index_to_label[temp_index_to_label[p]])
         print(classification_report(y_all, pred_labels), flush=True)
+        print("Micro f1", f1_score(y_all, pred_labels, average='micro'), flush=True)
+        print("Macro f1", f1_score(y_all, pred_labels, average='macro'), flush=True)
         print("*" * 80, flush=True)
 
         if pred_dump_flag:
