@@ -244,11 +244,11 @@ def second_stage(model, train_dataloader, device, num_labels):
             loss_fct = CrossEntropyLoss(reduction='none')
             loss_each = loss_fct(logits.view(-1, num_labels), b_labels.view(-1)).detach().cpu().numpy()
             print("Shape of loss_each", loss_each.shape)
-            for ind in b_inds:
+            for loop_ind, ind in enumerate(b_inds):
                 try:
-                    sample_to_loss[ind].append(loss_each[ind][0])
+                    sample_to_loss[ind].append(loss_each[loop_ind][0])
                 except:
-                    sample_to_loss[ind] = [loss_each[ind][0]]
+                    sample_to_loss[ind] = [loss_each[loop_ind][0]]
             print("Adding to dict", sample_to_loss, flush=True)
             # Accumulate the training loss over all of the batches so that we can
             # calculate the average loss at the end. `loss` is a Tensor containing a
