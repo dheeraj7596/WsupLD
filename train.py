@@ -15,7 +15,7 @@ if __name__ == "__main__":
     data_path = base_path + dataset + "/"
     plot_dump_dir = data_path + "plots/no_filter/"
     os.makedirs(plot_dump_dir, exist_ok=True)
-    thresh = 0.6
+    thresh = 0
     use_gpu = int(sys.argv[1])
     gpu_id = int(sys.argv[2])
     dump_flag = False
