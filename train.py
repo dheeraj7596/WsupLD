@@ -193,6 +193,19 @@ if __name__ == "__main__":
                                                                                                     dataset, it)
             y_train = [temp_index_to_label[y] for y in y_train]
             non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
+        elif filter_flag == 8:
+            # probability num filter
+            print("Probability Filtering started..", flush=True)
+            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob = prob_num_filter(
+                X_train, y_train, y_true, device, dataset, it, percent_thresh)
+            y_train = [temp_index_to_label[y] for y in y_train]
+            non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
+            # probs = np.sort(probs)[::-1]
+            # plt.figure()
+            # plt.plot(probs)
+            # plt.axhline(cutoff_prob, color='r')
+            # plt.savefig(plot_dump_dir + "prob_filter_cutoff_prob_" + str(it) + ".png")
+            # pickle.dump(X_train, open(data_path + "X_train_prob_" + str(it) + ".pkl", "wb"))
 
         print("******************AFTER FILTERING: classification report of pseudo-labels******************", flush=True)
         print(classification_report(y_true, y_train), flush=True)
