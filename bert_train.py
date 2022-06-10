@@ -898,7 +898,7 @@ def prob_num_filter(X, y_pseudo, y_true, device, dataset_name, iteration, thresh
 
     first_ep_preds, first_ep_true_labels = evaluate(model, prediction_dataloader, device)
     probs = get_true_label_probs(first_ep_preds, y_pseudo)
-    train_data_inds = list(np.nonzero(probs >= thresh))
+    train_data_inds = list(np.nonzero(probs >= thresh)[0])
     cutoff_prob = thresh
 
     train_data = []
