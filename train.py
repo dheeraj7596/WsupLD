@@ -25,6 +25,7 @@ if __name__ == "__main__":
     plt_flag = int(sys.argv[5])
     filter_flag = int(sys.argv[4])
     percent_thresh = float(sys.argv[6])
+    batch_epoch = int(sys.argv[7])
     bins = [0, 0.25, 0.5, 0.75, 1]
     bins_five = [0, 1, 2, 3, 4, 5]
     num_its = 3
@@ -179,10 +180,10 @@ if __name__ == "__main__":
             # top50-epoch filter
             print("Top50-batch epoch Filtering started..", flush=True)
             correct_list, wrong_list, coverage_list = batch_epoch_filter(X_train, y_train, y_true, device,
-                                                                         percent_thresh, it)
-            pickle.dump(correct_list, open(data_path + "correct_list_batch_epoch_filter_bert.pkl", "wb"))
-            pickle.dump(wrong_list, open(data_path + "wrong_list_batch_epoch_filter_bert.pkl", "wb"))
-            pickle.dump(coverage_list, open(data_path + "coverage_list_batch_epoch_filter_bert.pkl", "wb"))
+                                                                         percent_thresh, batch_epoch, it)
+            # pickle.dump(correct_list, open(data_path + "correct_list_batch_epoch_filter_bert.pkl", "wb"))
+            # pickle.dump(wrong_list, open(data_path + "wrong_list_batch_epoch_filter_bert.pkl", "wb"))
+            # pickle.dump(coverage_list, open(data_path + "coverage_list_batch_epoch_filter_bert.pkl", "wb"))
             break
         elif filter_flag == 7:
             # dump_probs(X_train, y_train, y_true, device, data_path)

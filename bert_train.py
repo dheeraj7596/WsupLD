@@ -1580,7 +1580,7 @@ def compute_correct_wrong_coverage(model, prediction_dataloader, device, y_pseud
     return correct, wrong, coverage, correct_dic
 
 
-def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteration=None):
+def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, batch_epoch=40, iteration=None):
     correct_list = []
     wrong_list = []
     coverage_list = []
@@ -1692,7 +1692,7 @@ def batch_epoch_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, iteratio
         for step, batch in enumerate(train_dataloader):
             data_time.update(time.time() - end)
             # Progress update every 40 batches.
-            if step % 40 == 0 and not step == 0:
+            if step % batch_epoch == 0 and not step == 0:
                 # Calculate elapsed time in minutes.
                 elapsed = format_time(time.time() - t0)
 
