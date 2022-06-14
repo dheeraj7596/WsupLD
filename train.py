@@ -177,14 +177,18 @@ if __name__ == "__main__":
             y_train = [temp_index_to_label[y] for y in y_train]
             non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
         elif filter_flag == 6:
-            # top50-epoch filter
+            # top50-batch epoch filter
             print("Top50-batch epoch Filtering started..", flush=True)
-            correct_list, wrong_list, coverage_list = batch_epoch_filter(X_train, y_train, y_true, device,
-                                                                         percent_thresh, batch_epoch, it)
+            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = batch_epoch_inds_filter(
+                X_train, y_train, y_true, device, percent_thresh, batch_epoch, it)
+            y_train = [temp_index_to_label[y] for y in y_train]
+            non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
+            # correct_list, wrong_list, coverage_list = batch_epoch_filter(X_train, y_train, y_true, device,
+            #                                                              percent_thresh, batch_epoch, it)
             # pickle.dump(correct_list, open(data_path + "correct_list_batch_epoch_filter_bert.pkl", "wb"))
             # pickle.dump(wrong_list, open(data_path + "wrong_list_batch_epoch_filter_bert.pkl", "wb"))
             # pickle.dump(coverage_list, open(data_path + "coverage_list_batch_epoch_filter_bert.pkl", "wb"))
-            break
+            # break
         elif filter_flag == 7:
             # dump_probs(X_train, y_train, y_true, device, data_path)
             # break
