@@ -21,14 +21,14 @@ if __name__ == "__main__":
     dump_flag = False
     anal_flag = False
     train_flag = True
-    pred_dump_flag = True
+    pred_dump_flag = False
     plt_flag = int(sys.argv[5])
     filter_flag = int(sys.argv[4])
     percent_thresh = float(sys.argv[6])
     batch_epoch = int(sys.argv[7])
     bins = [0, 0.25, 0.5, 0.75, 1]
     bins_five = [0, 1, 2, 3, 4, 5]
-    num_its = 3
+    num_its = 1
     # use_gpu = 0
 
     seed_val = 19
