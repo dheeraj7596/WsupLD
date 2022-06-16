@@ -1652,7 +1652,7 @@ def batch_epoch_inds_filter(X, y_pseudo, y_true, device, percent_thresh=0.5, bat
     prediction_sampler = SequentialSampler(dataset)
     prediction_dataloader = DataLoader(dataset,
                                        sampler=prediction_sampler,
-                                       batch_size=batch_size,
+                                       batch_size=128,
                                        num_workers=16,
                                        pin_memory=True
                                        )
