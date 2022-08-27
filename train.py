@@ -28,7 +28,7 @@ if __name__ == "__main__":
     batch_epoch = None
     bins = [0, 0.25, 0.5, 0.75, 1]
     bins_five = [0, 1, 2, 3, 4, 5]
-    num_its = 1
+    num_its = 3
     # use_gpu = 0
 
     seed_val = 19
@@ -45,7 +45,6 @@ if __name__ == "__main__":
         device = torch.device("cpu")
 
     df = pickle.load(open(data_path + "df.pkl", "rb"))
-    df = df[:100]
     with open(data_path + "seedwords.json") as fp:
         label_term_dict = json.load(fp)
 

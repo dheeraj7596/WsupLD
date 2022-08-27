@@ -1322,7 +1322,7 @@ def mc_dropout_filter(X, y_pseudo, y_true, device, dataset_name, iteration, num=
                                        pin_memory=True
                                        )
 
-    variance_list = compute_mc_dropout(prediction_dataloader, y_pseudo, 10, model, device)
+    variance_list = compute_mc_dropout(prediction_dataloader, y_pseudo, 5, model, device)
     inds = list(np.argsort(variance_list)[::-1])
     if num is None:
         num = get_num(dataset_name, iteration)
