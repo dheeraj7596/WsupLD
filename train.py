@@ -45,6 +45,7 @@ if __name__ == "__main__":
         device = torch.device("cpu")
 
     df = pickle.load(open(data_path + "df.pkl", "rb"))
+    df = df[:100]
     with open(data_path + "seedwords.json") as fp:
         label_term_dict = json.load(fp)
 
@@ -215,6 +216,13 @@ if __name__ == "__main__":
             # MC Dropout
             print("MC Dropout started..", flush=True)
             X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = mc_dropout_filter(
+                X_train, y_train, y_true, device, dataset, it, batch_epoch)
+            y_train = [temp_index_to_label[y] for y in y_train]
+            non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
+        elif filter_flag == 10:
+            # MC Dropout
+            print("MC Dropout Entropy started..", flush=True)
+            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = mc_dropout_entropy_filter(
                 X_train, y_train, y_true, device, dataset, it, batch_epoch)
             y_train = [temp_index_to_label[y] for y in y_train]
             non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
