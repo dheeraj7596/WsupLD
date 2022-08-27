@@ -45,6 +45,7 @@ if __name__ == "__main__":
         device = torch.device("cpu")
 
     df = pickle.load(open(data_path + "df.pkl", "rb"))
+    df = df[:100]
     with open(data_path + "seedwords.json") as fp:
         label_term_dict = json.load(fp)
 
@@ -137,7 +138,7 @@ if __name__ == "__main__":
             # probability filter
             print("Probability Filtering started..", flush=True)
             X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels, probs, cutoff_prob = prob_filter(
-                X_train, y_train, y_true, device, dataset, it)
+                X_train, y_train, y_true, device, dataset, it, batch_epoch)
             y_train = [temp_index_to_label[y] for y in y_train]
             non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
             # probs = np.sort(probs)[::-1]
@@ -211,6 +212,13 @@ if __name__ == "__main__":
             # plt.axhline(cutoff_prob, color='r')
             # plt.savefig(plot_dump_dir + "prob_filter_cutoff_prob_" + str(it) + ".png")
             # pickle.dump(X_train, open(data_path + "X_train_prob_" + str(it) + ".pkl", "wb"))
+        elif filter_flag == 9:
+            # MC Dropout
+            print("MC Dropout started..", flush=True)
+            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = mc_dropout_filter(
+                X_train, y_train, y_true, device, dataset, it, batch_epoch)
+            y_train = [temp_index_to_label[y] for y in y_train]
+            non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
 
         print("******************AFTER FILTERING: classification report of pseudo-labels******************", flush=True)
         print(classification_report(y_true, y_train), flush=True)
