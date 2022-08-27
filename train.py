@@ -219,7 +219,7 @@ if __name__ == "__main__":
             y_train = [temp_index_to_label[y] for y in y_train]
             non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
         elif filter_flag == 10:
-            # MC Dropout
+            # MC Dropout Entropy
             print("MC Dropout Entropy started..", flush=True)
             X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = mc_dropout_entropy_filter(
                 X_train, y_train, y_true, device, dataset, it, batch_epoch)
