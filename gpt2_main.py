@@ -193,6 +193,13 @@ if __name__ == "__main__":
                                                                                                     dataset, it)
             y_train = [temp_index_to_label[y] for y in y_train]
             non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
+        elif filter_flag == 9:
+            # MC Dropout
+            print("MC Dropout started..", flush=True)
+            X_train, y_train, y_true, non_train_data, non_train_labels, true_non_train_labels = mc_dropout_filter(
+                X_train, y_train, y_true, device, dataset, it)
+            y_train = [temp_index_to_label[y] for y in y_train]
+            non_train_labels = [temp_index_to_label[y] for y in non_train_labels]
 
         print("******************AFTER FILTERING: classification report of pseudo-labels******************", flush=True)
         print(classification_report(y_true, y_train), flush=True)
