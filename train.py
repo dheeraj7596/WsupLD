@@ -45,7 +45,6 @@ if __name__ == "__main__":
         device = torch.device("cpu")
 
     df = pickle.load(open(data_path + "df.pkl", "rb"))
-    df = df[:100]
     with open(data_path + "seedwords.json") as fp:
         label_term_dict = json.load(fp)
 
