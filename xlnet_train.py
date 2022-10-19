@@ -939,7 +939,7 @@ def mc_dropout_filter(X, y_pseudo, y_true, device, dataset_name, iteration, num=
     # Combine the training inputs into a TensorDataset.
     dataset = TensorDataset(input_ids, attention_masks, labels)
 
-    batch_size = 16
+    batch_size = 32
     # Create the DataLoaders for our training and validation sets.
     # We'll take training samples in random order.
     start = time.time()
@@ -1151,7 +1151,7 @@ def mc_dropout_entropy_filter(X, y_pseudo, y_true, device, dataset_name, iterati
     # Combine the training inputs into a TensorDataset.
     dataset = TensorDataset(input_ids, attention_masks, labels)
 
-    batch_size = 16
+    batch_size = 32
     # Create the DataLoaders for our training and validation sets.
     # We'll take training samples in random order.
     start = time.time()
